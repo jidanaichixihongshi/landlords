@@ -12,6 +12,10 @@
 
 -compile(export_all).
 -include("common.hrl").
+-include("logger.hrl").
+
+test() ->
+	?INFO("~p~n",[test]).
 
 %% 去掉字符串空格
 -spec remove_string_black(L :: string()) -> string().
@@ -80,6 +84,9 @@ set_val(Key, Val, Table) ->
 
 del_val(Key, Table) ->
 	ets:delete(Table, Key).
+
+test() ->
+	?.
 
 %% -----------------------------------------------------------------------------
 %% internal function
