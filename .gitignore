@@ -1,0 +1,4 @@
+*.iml
+/ebin/
+/deps/
+/.idea/
