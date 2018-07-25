@@ -1,4 +1,13 @@
+%%%-------------------------------------------------------------------
+%%% @author Administrator
+%%% @copyright (C) 2018, <COMPANY>
+%%% @doc
+%%%
+%%% @end
+%%% Created : 23. 六月 2018 11:46
+%%%-------------------------------------------------------------------
 -module(landlords_sup).
+-auth("cw").
 
 -behaviour(supervisor).
 
@@ -16,16 +25,16 @@
 %% ===================================================================
 
 start_link() ->
-    supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %% ===================================================================
 %% Supervisor callbacks
 %% ===================================================================
 
 init([]) ->
-     io:format("start init modules... ~n",[]),
-    {ok, { {one_for_one, 5, 10}, [
-	?CHILD(mod_system_monitor,worker),
-    ?CHILD(mod_reloader,worker)
-	]} }.
+	io:format("start init modules... ~n", []),
+	{ok, {{one_for_one, 5, 10}, [
+		?CHILD(mod_system_monitor, worker),
+		?CHILD(mod_reloader, worker)
+	]}}.
 

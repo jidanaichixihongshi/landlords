@@ -7,7 +7,7 @@
 -module(mod_reloader).
 -author("Matthew Dempsky <matthew@mochimedia.com>").
 
--include_lib("kernel/include/file.hrl").
+-include_lib("file.hrl").
 
 -behaviour(gen_server).
 -export([start/0, start_link/0]).

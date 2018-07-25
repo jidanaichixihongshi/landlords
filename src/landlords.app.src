@@ -1,12 +1,12 @@
 {application, landlords,
- [
-  {description, ""},
-  {vsn, "1.0.0"},
-  {registered, []},
-  {applications, [
-                  kernel,
-                  stdlib
-                 ]},
-  {mod, { landlords_app, []}},
-  {env, [{http_port, 8081}]}
- ]}.
+	[
+		{description, ""},
+		{vsn, "1.0.0"},
+		{registered, []},
+		{applications, [
+			kernel,
+			stdlib
+		]},
+		{mod, {landlords_app, []}},
+		{env, [{http_port, 8081}]}
+	]}.

@@ -1,10 +1,20 @@
+%%%-------------------------------------------------------------------
+%%% @author Administrator
+%%% @copyright (C) 2018, <COMPANY>
+%%% @doc
+%%%
+%%% @end
+%%% Created : 23. 六月 2018 10:31
+%%%-------------------------------------------------------------------
 
 -module(landlords_http_handler).
+-auth("cw").
+
 -export([init/3]).
 -export([handle/2]).
 -export([terminate/3]).
 
--include("../include/logger.hrl").
+-include("logger.hrl").
 
 init(_Transport, Req, []) ->
 	io:format("cowboy server init ...~n",[]),

@@ -16,12 +16,12 @@
 -spec random(Min :: integer(), Max :: integer()) -> integer().
 random(Min,Max)->
 	Min2 = Min-1,
-	random:uniform(Max-Min2)+Min2.
+	rand:uniform(Max-Min2)+Min2.
 
 %% 从一个list中随机选择一个元素
 -spec select([term()]) -> term().
 select(List)->
-	RandId = random:uniform(length(List)),
+	RandId = rand:uniform(length(List)),
 	lists:nth(RandId, List).
 
 %% 从一个list中随机选择n个元素

@@ -4,14 +4,13 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 20. 六月 2018 11:36
+%%% Created : 23. 六月 2018 12:09
 %%%-------------------------------------------------------------------
 
--define(PRINTF(Format, Args), io:format(Format, Args)).
+%% 函数宏
+-define(IF(A,B,C), (case (A) of true -> (B); _ -> (C) end)).
 
-
-
-
-
+%% 固定参数
+-define(UNDEFINED, undefined).
 
 

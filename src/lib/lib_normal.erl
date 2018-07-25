@@ -11,7 +11,7 @@
 -auth("cw").
 
 -compile(export_all).
-
+-include("common.hrl").
 
 %% 去掉字符串空格
 -spec remove_string_black(L :: string()) -> string().
@@ -68,6 +68,18 @@ replace_elem(Num, List, [Elem|OldList], Key, NewElem) ->
 	replace_elem(Num-1, NewList, OldList, Key, NewElem).
 
 
+%% 从ets表获得指定键的值
+get_val(Key, Table) ->
+	case ets:lookup(Table, Key) of
+		[{Key, Value}] -> Value;
+		_ -> ?UNDEFINED
+	end.
+
+set_val(Key, Val, Table) ->
+	ets:insert(Table, {Key,Val}).
+
+del_val(Key, Table) ->
+	ets:delete(Table, Key).
 
 %% -----------------------------------------------------------------------------
 %% internal function
