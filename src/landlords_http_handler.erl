@@ -21,7 +21,7 @@ init(_Transport, Req, []) ->
 	{ok, Req, undefined}.
 
 handle(Req, State) ->
-	?DEBUG("************ ~p *************~n",[logtest]),
+	?PRINTF("************ ~p *************~n",[logtest]),
 	{ok, Req2} = cowboy_req:reply(200, [], <<"Hello World reloader !">>, Req),
 	{ok, Req2, State}.
 
