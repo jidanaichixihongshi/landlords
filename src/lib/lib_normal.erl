@@ -85,8 +85,6 @@ set_val(Key, Val, Table) ->
 del_val(Key, Table) ->
 	ets:delete(Table, Key).
 
-test() ->
-	?.
 
 %% -----------------------------------------------------------------------------
 %% internal function
