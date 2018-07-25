@@ -8,7 +8,7 @@
 %%%-------------------------------------------------------------------
 
 -define(PRINTF(Format, Args), io:format(Format, Args)).
-
+-define(PRINTF(Args), io:format(Args)).
 
 
 
