@@ -38,13 +38,14 @@ start_link(Ref, Socket, Transport, Opts) ->
 %% This function is never called. We only define it so that
 %% we can use the -behaviour(gen_server) attribute.
 
-init([Ref, Socket, Transport,Opts]) ->
-	?DEBUG("================== {~p, ~p, ~p, ~p} =================~n",[Ref,Socket,Transport,Opts]),
+init([Ref, Socket, Transport, Opts]) ->
+	?DEBUG("================== {~p, ~p, ~p, ~p} =================~n", [Ref, Socket, Transport, Opts]),
 	%%peername(Socket) -> {ok, {Address, Port}} | {error, posix()}
-	timer:send_interval(1000,timertick),
-	{ok,{Address,Port}} = inet:peername(Socket),
+	timer:send_interval(1000, timertick),
+	{ok, {Address, Port}} = inet:peername(Socket),
 	State = #state{
 		ref = Ref,
+		node = node(),
 		socket = Socket,
 		transport = Transport,
 		otp = Opts,
@@ -53,60 +54,61 @@ init([Ref, Socket, Transport,Opts]) ->
 	{ok, State, 0}.
 
 handle_call(_Request, _From, State) ->
-	?DEBUG("handle_call message ~p ~n",[_Request]),
+	?DEBUG("handle_call message ~p ~n", [_Request]),
 	{reply, ok, State}.
 
-handle_cast({chat,Msg}, State=#state{socket=Socket, transport=Transport}) ->
+handle_cast({chat, Msg}, State = #state{socket = Socket, transport = Transport}) ->
 %%	Transport:send(Socket,Msg),
-	?DEBUG("handle_cast message ~p ~n",[Msg]),
+	?DEBUG("handle_cast message ~p ~n", [Msg]),
 	{noreply, State}.
 
 %% timout function set opt parms
-handle_info(timeout, State=#state{ref=Ref, socket=Socket, transport=Transport}) ->
-	?DEBUG("------------------------------~n",[]),
-%%	ok = ranch:accept_ack(Ref),
-%%	ok = Transport:setopts(Socket, [{active, once}]),
+handle_info(timeout, State = #state{ref = Ref, socket = Socket, transport = Transport}) ->
+	?DEBUG("------------------------------1~n", []),
+	ok = ranch:accept_ack(Ref),
+	ok = Transport:setopts(Socket, [{active, once}]),
 	%game_socket_store:insert(self(),Socket),
 	{noreply, State};
 %% handle socket data
-handle_info({tcp, Socket, Data}, State=#state{socket=Socket, transport=Transport}) ->
-	?DEBUG("------------------------------ Transport: ~p~nData: ~p~n~n",[Transport,Data]),
-%%	Transport:setopts(Socket, [{active, once}]),
-%%	io:format("~p~n",[Data]),
-%%	lists:foreach(fun(Pid) ->
-%%		case Pid =:= self() of
-%%			false ->
-%%				gen_server:cast(Pid,{chat,Data});
-%%			true -> ok
-%%		end
-%%								end,
-%%		game_socket_store:lookall()),
+handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Transport}) ->
+	?DEBUG("------------------------------ Transport: ~p~nData: ~p~n~n", [Transport, Data]),
+	Transport:setopts(Socket, [{active, once}]),
+	io:format("~p~n", [Data]),
+	lists:foreach(
+		fun(Pid) ->
+			case Pid =:= self() of
+				false ->
+					gen_server:cast(Pid, {chat, Data});
+				true -> ok
+			end
+		end,
+		game_socket_store:lookall()),
 	{noreply, State, ?TIMEOUT};
-handle_info(timertick,State=#state{socket=Socket,transport=Transport})->
-	?DEBUG("------------------------------~n",[]),
-%%	Transport:send(Socket,<<1>>),
-	{noreply,State};
+handle_info(timertick, State = #state{socket = Socket, transport = Transport}) ->
+	?DEBUG("------------------------------2~n", []),
+	Transport:send(Socket,<<1>>),
+	{noreply, State};
 
 handle_info({tcp_closed, _Socket}, State) ->
-	?DEBUG("------------------------------~n",[]),
+	?DEBUG("------------------------------3~n", []),
 	{stop, normal, State};
 handle_info({tcp_error, _, Reason}, State) ->
-	?DEBUG("------------------------------~n",[]),
+	?DEBUG("------------------------------4~n", []),
 	{stop, Reason, State};
 handle_info(timeout, State) ->
-	?DEBUG("------------------------------~n",[]),
+	?DEBUG("------------------------------5~n", []),
 	{stop, normal, State};
 handle_info(_Info, State) ->
-	?DEBUG("------------------------------~n",[]),
+	?DEBUG("------------------------------6~n", []),
 	{stop, normal, State}.
 
 terminate(_Reason, _State) ->
-	?DEBUG("------------------------------~n",[]),
+	?DEBUG("------------------------------7~n", []),
 %%	game_socket_store:delete(self()),
 	ok.
 
 code_change(_OldVsn, State, _Extra) ->
-	?DEBUG("------------------------------~n",[]),
+	?DEBUG("------------------------------8~n", []),
 	{ok, State}.
 
 

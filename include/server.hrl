@@ -35,7 +35,8 @@
 %% 用户连接信息
 -record(state, {
 	ref,
-	socket,
+	node,							%% 链接节点
+	socket,						%% 链接套接字
 	transport,
 	otp,
 	ip,
