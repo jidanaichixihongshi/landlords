@@ -79,10 +79,8 @@ get_val(Key, Table) ->
 		[{Key, Value}] -> Value;
 		_ -> ?UNDEFINED
 	end.
-
 set_val(Key, Val, Table) ->
 	ets:insert(Table, {Key,Val}).
-
 del_val(Key, Table) ->
 	ets:delete(Table, Key).
 
@@ -97,6 +95,8 @@ get_mem(Module,Key) ->
 set_mem(Module,Key,Val) ->
 	OldMem = get_mem(Module,Key),
 	erlang:put({Module,Key},[Val|OldMem]).
+replace_mem(Module,Key,Val) ->
+	erlang:put({Module,Key},[Val]).
 del_mem(Module,Key) ->
 	erlang:erase({Module,Key}).
 

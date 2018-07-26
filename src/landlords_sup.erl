@@ -32,7 +32,6 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-	io:format("start init modules... ~n", []),
 	{ok, {{one_for_one, 5, 10}, [
 		?CHILD(mod_system_monitor, worker),
 		?CHILD(mod_reloader, worker)
