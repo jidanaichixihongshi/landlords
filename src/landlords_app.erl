@@ -54,7 +54,7 @@ create_ets() ->
 	create_ets(?ETS_LIST).
 
 create_ets([]) ->
-	?INFO("create ets ok ...~n");
+	?INFO("create ets ok ...~n",[]);
 create_ets([{Tab, Cfg} | EtsList]) ->
 	case ets:info(Tab) of
 		?UNDEFINED ->
