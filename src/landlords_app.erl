@@ -23,7 +23,8 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-	init(),
+	create_ets(),
+	%ping_node(?CENTER_NODE).
 	Sup = landlords_sup:start_link(),
 	{ok, _} = start_http_link(),
 	Sup.
@@ -31,12 +32,6 @@ start(_StartType, _StartArgs) ->
 stop(_State) ->
 	?INFO("stop landlords server!~n", []),
 	ok.
-
-%% 初始化
-init() ->
-	create_ets(),
-	landlords_config:create_config().
-%ping_node(?CENTER_NODE).
 
 %% http链接
 start_http_link() ->
