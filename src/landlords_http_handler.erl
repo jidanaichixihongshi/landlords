@@ -17,7 +17,7 @@
 -include("logger.hrl").
 
 init(_Transport, Req, []) ->
-	io:format("cowboy server init ...~n",[]),
+	?DEBUG("cowboy server init ...~n",[]),
 	{ok, Req, undefined}.
 
 handle(Req, State) ->

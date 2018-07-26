@@ -16,6 +16,7 @@
 
 -include("server.hrl").
 -include("common.hrl").
+-include("logger.hrl").
 
 %% ===================================================================
 %% Application callbacks
@@ -28,7 +29,7 @@ start(_StartType, _StartArgs) ->
 	Sup.
 
 stop(_State) ->
-	io:format("stop landlords server!~n", []),
+	?INFO("stop landlords server!~n", []),
 	ok.
 
 %% 初始化
@@ -39,7 +40,7 @@ init() ->
 
 %% http链接
 start_http_link() ->
-	io:format("cowboy start http link ...~n", []),
+	?INFO("cowboy start http link ...~n", []),
 	Routes = [
 		{'_', [
 			{"/", landlords_http_handler, []}
@@ -53,7 +54,7 @@ create_ets() ->
 	create_ets(?ETS_LIST).
 
 create_ets([]) ->
-	io:format("create ets ok ...~n");
+	?INFO("create ets ok ...~n");
 create_ets([{Tab, Cfg} | EtsList]) ->
 	case ets:info(Tab) of
 		?UNDEFINED ->
@@ -69,7 +70,7 @@ ping_node(CenterNode) ->
 		pong ->
 			ok;
 		pang ->
-			io:format("ping loop: Node:~p~n", [CenterNode]),
+			?INFO("ping loop: Node:~p~n", [CenterNode]),
 			timer:sleep(1000),
 			ping_node(CenterNode)
 	end.

@@ -29,7 +29,7 @@ create_config() ->
 	load_config(Data).
 
 load_config([]) ->
-	?PRINTF("load config ok ...~n");
+	?INFO("load config ok ...~n");
 load_config([ Parameter | Data]) ->
 	{_Type, SingleData} = Parameter,
 	lists:foreach(
