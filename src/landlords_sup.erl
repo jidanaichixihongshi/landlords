@@ -12,7 +12,7 @@
 -behaviour(supervisor).
 
 %% API
--export([start_link/0]).
+-export([start_link/1]).
 
 %% Supervisor callbacks
 -export([init/1]).
@@ -24,15 +24,16 @@
 %% API functions
 %% ===================================================================
 
-start_link() ->
-	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+start_link([Port,ListenNum]) ->
+	supervisor:start_link({local, ?MODULE}, ?MODULE, [Port,ListenNum]).
 
 %% ===================================================================
 %% Supervisor callbacks
 %% ===================================================================
 
-init([]) ->
+init([Port,ListenNum]) ->
 	{ok, {{one_for_one, 5, 10}, [
+		ranch:child_spec(landlords_server, ListenNum, ranch_tcp, [{port, Port}], landlords_server, []),
 		?CHILD(mod_system_monitor, worker),
 		?CHILD(mod_reloader, worker)
 	]}}.

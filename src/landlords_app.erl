@@ -25,9 +25,11 @@
 start(_StartType, _StartArgs) ->
 	create_ets(),
 	%ping_node(?CENTER_NODE).
-	Sup = landlords_sup:start_link(),
+
 	{ok, _} = start_http_link(),
-	Sup.
+	{ok, Tcp_Port} = application:get_env(landlords, tcp_port),
+	{ok, ListenNum} = application:get_env(landlords, listen_num),
+	landlords_sup:start_link([Tcp_Port, ListenNum]).
 
 stop(_State) ->
 	?INFO("stop landlords server!~n", []),
@@ -42,8 +44,8 @@ start_http_link() ->
 		]}
 	],
 	Dispatch = cowboy_router:compile(Routes),
-	{ok, Port} = application:get_env(http_port),
-	cowboy:start_http(http, 100, [{port, Port}], [{env, [{dispatch, Dispatch}]}]).
+	{ok, Http_Port} = application:get_env(landlords,http_port),
+	cowboy:start_http(http, 100, [{port, Http_Port}], [{env, [{dispatch, Dispatch}]}]).
 
 create_ets() ->
 	create_ets(?ETS_LIST).

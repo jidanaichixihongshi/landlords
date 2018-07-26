@@ -32,7 +32,16 @@
 	{public_storage_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY]}
 ]).
 
+%% 用户连接信息
+-record(state, {
+	ref,
+	socket,
+	transport,
+	otp,
+	ip,
+	port}).
 
+-define(TIMEOUT, 50000).
 
 
 
