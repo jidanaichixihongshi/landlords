@@ -12,10 +12,6 @@
 
 -compile(export_all).
 -include("common.hrl").
--include("logger.hrl").
-
-test() ->
-	?INFO("~p~n",[test]).
 
 %% 去掉字符串空格
 -spec remove_string_black(L :: string()) -> string().
@@ -29,6 +25,10 @@ remove_string_loop([I|L],LS) ->
 		_ -> remove_string_loop(L,[I|LS])
 	end.
 
+
+%% -----------------------------------------------------------------------------
+%% 列表操作
+%% -----------------------------------------------------------------------------
 %% 获取元组列表中对应k的v
 get_v_by_k(K, L) ->
 	get_v_by_k(K, L, undefined).
@@ -48,7 +48,6 @@ list_duplicate([H|L], L1) ->
 		true -> list_duplicate(L, L1);
 		false -> list_duplicate(L, [H|L1])
 	end.
-
 
 %%替换列表指定位置的元素
 %%eg: replace([a,b,c,d], 2, g) -> [a,g,c,d]
@@ -71,8 +70,10 @@ replace_elem(Num, List, [Elem|OldList], Key, NewElem) ->
 		end,
 	replace_elem(Num-1, NewList, OldList, Key, NewElem).
 
-
-%% 从ets表获得指定键的值
+%% -----------------------------------------------------------------------------
+%% 存储操作
+%% -----------------------------------------------------------------------------
+%% ets表数据操作
 get_val(Key, Table) ->
 	case ets:lookup(Table, Key) of
 		[{Key, Value}] -> Value;
@@ -84,6 +85,25 @@ set_val(Key, Val, Table) ->
 
 del_val(Key, Table) ->
 	ets:delete(Table, Key).
+
+%% 内存数据操作
+get_mem(Module,Key) ->
+	case erlang:get({Module,Key}) of
+		Val when is_list(Val) ->
+			Val;
+		_ ->
+			[]
+	end.
+set_mem(Module,Key,Val) ->
+	OldMem = get_mem(Module,Key),
+	erlang:put({Module,Key},[Val|OldMem]).
+del_mem(Module,Key) ->
+	erlang:erase({Module,Key}).
+
+%% -----------------------------------------------------------------------------
+%% map操作
+%% -----------------------------------------------------------------------------
+
 
 
 %% -----------------------------------------------------------------------------
