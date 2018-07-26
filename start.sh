@@ -5,7 +5,7 @@ NODE="landlords"
 NODENAME="$NODE@$localip"
 
 erl -pa ebin deps/*/ebin\
-        -config config/sys.config \
+		-config config/sys.config \
 		-name $NODENAME \
 		-setcookie landlords_server \
 		-s landlords
