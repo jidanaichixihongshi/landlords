@@ -41,7 +41,7 @@ start_link(Ref, Socket, Transport, Opts) ->
 init([Ref, Socket, Transport, Opts]) ->
 	?DEBUG("================== {~p, ~p, ~p, ~p} =================~n", [Ref, Socket, Transport, Opts]),
 	%%peername(Socket) -> {ok, {Address, Port}} | {error, posix()}
-	timer:send_interval(1000, timertick),
+	timer:send_interval(?HEART_BREAK_TIME, timertick),
 	{ok, {Address, Port}} = inet:peername(Socket),
 	State = #state{
 		ref = Ref,
@@ -58,7 +58,7 @@ handle_call(_Request, _From, State) ->
 	{reply, ok, State}.
 
 handle_cast({chat, Msg}, State = #state{socket = Socket, transport = Transport}) ->
-%%	Transport:send(Socket,Msg),
+	Transport:send(Socket,Msg),
 	?DEBUG("handle_cast message ~p ~n", [Msg]),
 	{noreply, State}.
 
@@ -85,7 +85,7 @@ handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Tra
 	{noreply, State, ?TIMEOUT};
 handle_info(timertick, State = #state{socket = Socket, transport = Transport}) ->
 	?DEBUG("------------------------------2~n", []),
-	Transport:send(Socket, <<1>>),
+	Transport:send(Socket, "test test"),
 	{noreply, State};
 
 handle_info({tcp_closed, _Socket}, State) ->
@@ -101,9 +101,12 @@ handle_info(_Info, State) ->
 	?DEBUG("------------------------------6~n", []),
 	{stop, normal, State}.
 
-terminate(_Reason, _State) ->
-	?DEBUG("------------------------------7~n", []),
-%%	game_socket_store:delete(self()),
+terminate(Reason, State) ->
+	Socket = State#state.socket,
+	?WARNING("========================================~n
+				socket ~p terminate, reason: ~n
+				========================================~n", [Socket, Reason]),
+	lib_normal:del_mem(?MODULE, Socket),
 	ok.
 
 code_change(_OldVsn, State, _Extra) ->
