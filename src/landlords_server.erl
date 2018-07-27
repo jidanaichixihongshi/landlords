@@ -103,9 +103,9 @@ handle_info(_Info, State) ->
 
 terminate(Reason, State) ->
 	Socket = State#state.socket,
-	?WARNING("========================================~n
+	?WARNING("======================================== ~n
 				socket ~p terminate, reason: ~n
-				========================================~n", [Socket, Reason]),
+				======================================== ~n", [Socket, Reason]),
 	lib_normal:del_mem(?MODULE, Socket),
 	ok.
 

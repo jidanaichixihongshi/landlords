@@ -19,7 +19,7 @@
 	{keepalive, true},
 	{exit_on_close, true}]).
 
--define(HEART_BREAK_TIME, 10000).                              %% 心跳间隔
+-define(HEART_BREAK_TIME, 15000).                              %% 心跳间隔
 -define(TIMEOUT, 50000).
 
 
