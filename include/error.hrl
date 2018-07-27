@@ -9,5 +9,5 @@
 
 -define(ERROR_0, 0).					%% 成功
 
-
+-define(ERROR_101, 101).					%% 数据错误
 

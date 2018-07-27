@@ -67,13 +67,12 @@ handle_info(timeout, State = #state{ref = Ref, socket = Socket, transport = Tran
 	?DEBUG("------------------------------1~n", []),
 	ok = ranch:accept_ack(Ref),
 	ok = Transport:setopts(Socket, [{active, once}]),
-	%game_socket_store:insert(self(),Socket),
+	lib_normal:set_mem(?MODULE, Socket, self()),
 	{noreply, State};
 %% handle socket data
 handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Transport}) ->
 	?DEBUG("------------------------------ Transport: ~p~nData: ~p~n~n", [Transport, Data]),
 	Transport:setopts(Socket, [{active, once}]),
-	io:format("~p~n", [Data]),
 	lists:foreach(
 		fun(Pid) ->
 			case Pid =:= self() of
@@ -82,11 +81,11 @@ handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Tra
 				true -> ok
 			end
 		end,
-		game_socket_store:lookall()),
+		lib_normal:get_mem(?MODULE,Socket)),
 	{noreply, State, ?TIMEOUT};
 handle_info(timertick, State = #state{socket = Socket, transport = Transport}) ->
 	?DEBUG("------------------------------2~n", []),
-	Transport:send(Socket,<<1>>),
+	Transport:send(Socket, <<1>>),
 	{noreply, State};
 
 handle_info({tcp_closed, _Socket}, State) ->
