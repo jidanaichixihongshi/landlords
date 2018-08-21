@@ -17,7 +17,7 @@
 
 %% 生成相应的erl和hrl文件
 start() ->
-	protobuffs_compile:scan_file(?PROTO_CONFIG).
+	protobuffs_compile:generate_source(?PROTO_CONFIG).
 
 
 
