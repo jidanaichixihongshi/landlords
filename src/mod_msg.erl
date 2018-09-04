@@ -20,7 +20,7 @@ packet(_Msg) ->
 	error.
 
 packet_msg({Type, _, _, _} = Msg) ->
-	EMsg = lib_proto:encode(Msg),
+	EMsg = mod_proto:encode(Msg),
 	{ok, lib_change:to_binary([lib_change:to_binary(Type), EMsg])}.
 
 %% 解包客户端消息
@@ -30,7 +30,7 @@ unpacket(_Msg) ->
 	error.
 
 unpacket_msg([BinType, Msg]) ->
-	{ok, lib_proto:decode(lib_change:to_list(BinType), Msg)}.
+	{ok, mod_proto:decode(lib_change:to_list(BinType), Msg)}.
 
 
 %% -----------------------------------------------------------------------------
