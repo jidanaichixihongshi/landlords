@@ -53,7 +53,7 @@ handle_cast(Request, State) ->
 
 handle_info(heartbeat, State = #state{socket = Socket}) ->
 	io:format("------------------------------heartbeat~n", []),
-	HeartMsg = <<"101">>,
+	HeartMsg = mod_msg:packet_heart(),
 	gen_tcp:send(Socket, HeartMsg),
 	{noreply, State};
 

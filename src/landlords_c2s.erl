@@ -75,8 +75,8 @@ handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Tra
 	%% 要不要把消息存进内存呢？
 	try
 		{ok, Msg} = mod_msg:unpacket(Data),
-		%% 启动钩子
-		ok
+		?INFO("RECEIVE MESSAGE ===>>> :: ~p~n", [Msg]),
+		mod_c2s_handle:handle_c2s_msg(Msg)
 	catch
 		_ ->
 			erlang:send_after(500, self(), {error, ?ERROR_101})
