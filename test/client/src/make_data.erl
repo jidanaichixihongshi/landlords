@@ -4,10 +4,21 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 25. 六月 2018 17:32
+%%% Created : 25. 六月 2018 18:14
 %%%-------------------------------------------------------------------
 
--define(ERROR_0, 0).					%% 成功
+-module(make_data).
+-auth("cw").
 
--define(ERROR_101, 101).					%% 数据错格式误
+-include("common.hrl").
+
+-export([
+	start/0]).
+
+%% 生成相应的erl和hrl文件
+start() ->
+	protobuffs_compile:generate_source(?PROTO_CONFIG).
+
+
+
 

@@ -6,9 +6,9 @@
 %%% @end
 %%% Created : 23. 六月 2018 13:56
 %%%-------------------------------------------------------------------
+-include("error.hrl").
 
 -define(CONFIG_FILE_DIR, "config/sys.config").                %% 配置文件
-
 
 -define(TCP_OPTIONS, [binary,
 	{packet, 0},
@@ -19,7 +19,7 @@
 	{keepalive, true},
 	{exit_on_close, true}]).
 
--define(HEART_BREAK_TIME, 15000).                              %% 心跳间隔
+-define(HIBERNATE_TIMEOUT, 30000).														%% 休眠
 -define(TIMEOUT, 50000).
 
 

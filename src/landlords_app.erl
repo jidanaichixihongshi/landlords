@@ -44,14 +44,14 @@ start_http_link() ->
 		]}
 	],
 	Dispatch = cowboy_router:compile(Routes),
-	{ok, Http_Port} = application:get_env(landlords,http_port),
+	{ok, Http_Port} = application:get_env(landlords, http_port),
 	cowboy:start_http(http, 100, [{port, Http_Port}], [{env, [{dispatch, Dispatch}]}]).
 
 create_ets() ->
 	create_ets(?ETS_LIST).
 
 create_ets([]) ->
-	?INFO("create ets ok ...~n",[]);
+	?INFO("create ets ok ...~n", []);
 create_ets([{Tab, Cfg} | EtsList]) ->
 	case ets:info(Tab) of
 		?UNDEFINED ->

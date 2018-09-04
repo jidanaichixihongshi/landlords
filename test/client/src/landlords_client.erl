@@ -1,16 +1,4 @@
-%%%-------------------------------------------------------------------
-%%% @author Administrator
-%%% @copyright (C) 2018, <COMPANY>
-%%% @doc
-%%%
-%%% @end
-%%% Created : 23. 六月 2018 11:14
-%%%-------------------------------------------------------------------
-
-%% ============================================
-%% 先启动
-%% ============================================
--module(landlords).
+-module(landlords_client).
 -auth("cw").
 
 -export([
@@ -21,18 +9,12 @@ start() ->
 	Apps = [
 		compiler,
 		syntax_tools,
-		goldrush,
-		lager,
-		crypto,
 		asn1,
+		crypto,
 		public_key,
 		ssl,
-		ranch,
 		protobuffs,
-		eredis,
-		cowlib,
-		cowboy,
-		landlords],
+		landlords_client],
 	start_app(Apps, permanent).
 
 stop() ->
@@ -55,5 +37,9 @@ start_app([App | Apps], Type) ->
 
 exit_or_halt(Reason) ->
 	halt(string:substr(lists:flatten(Reason), 1, 199)).
+
+
+
+
 
 

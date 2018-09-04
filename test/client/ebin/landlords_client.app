@@ -1,0 +1,10 @@
+{application,landlords_client,
+             [{description,[]},
+              {vsn,"1"},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {mod,{landlords_client_app,[]}},
+              {env,[]},
+              {modules,[landlords_client,landlords_client_app,
+                        landlords_client_sup,make_data,mod_landlords_client,
+                        protobuf_pb]}]}.

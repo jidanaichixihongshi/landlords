@@ -24,17 +24,24 @@
 %% API functions
 %% ===================================================================
 
-start_link([Port,ListenNum]) ->
-	supervisor:start_link({local, ?MODULE}, ?MODULE, [Port,ListenNum]).
+start_link([Port, ListenNum]) ->
+	supervisor:start_link({local, ?MODULE}, ?MODULE, [Port, ListenNum]).
 
 %% ===================================================================
 %% Supervisor callbacks
 %% ===================================================================
 
-init([Port,ListenNum]) ->
+init([Port, ListenNum]) ->
+	{ok, Redis} = application:get_env(landlords, redis),
+	PoolSpecs =
+		lists:map(
+			fun({Name, PoolArgs, WorkerArgs}) ->
+				poolboy:child_spec(Name, PoolArgs, WorkerArgs)
+			end, Redis),
+
 	{ok, {{one_for_one, 5, 10}, [
-		ranch:child_spec(landlords_server, ListenNum, ranch_tcp, [{port, Port}], landlords_server, []),
+		ranch:child_spec(landlords_c2s, ListenNum, ranch_tcp, [{port, Port}], landlords_c2s, []),
 		?CHILD(mod_system_monitor, worker),
 		?CHILD(mod_reloader, worker)
-	]}}.
+	] ++ PoolSpecs}}.
 

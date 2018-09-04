@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 23. 六月 2018 11:56
 %%%-------------------------------------------------------------------
--module(landlords_server).
+-module(landlords_c2s).
 -auth("cw").
 
 -behaviour(gen_server).
@@ -41,7 +41,6 @@ start_link(Ref, Socket, Transport, Opts) ->
 init([Ref, Socket, Transport, Opts]) ->
 	?DEBUG("================== {~p, ~p, ~p, ~p} =================~n", [Ref, Socket, Transport, Opts]),
 	%%peername(Socket) -> {ok, {Address, Port}} | {error, posix()}
-	timer:send_interval(?HEART_BREAK_TIME, timertick),
 	{ok, {Address, Port}} = inet:peername(Socket),
 	State = #state{
 		ref = Ref,
@@ -55,39 +54,38 @@ init([Ref, Socket, Transport, Opts]) ->
 
 handle_call(_Request, _From, State) ->
 	?DEBUG("handle_call message ~p ~n", [_Request]),
-	{reply, ok, State}.
+	{reply, ok, State, ?HIBERNATE_TIMEOUT}.
 
 handle_cast({chat, Msg}, State = #state{socket = Socket, transport = Transport}) ->
-	Transport:send(Socket,Msg),
+	Transport:send(Socket, Msg),
 	?DEBUG("handle_cast message ~p ~n", [Msg]),
-	{noreply, State}.
+	{noreply, State, ?HIBERNATE_TIMEOUT}.
 
 %% timout function set opt parms
 handle_info(timeout, State = #state{ref = Ref, socket = Socket, transport = Transport}) ->
 	?DEBUG("------------------------------1~n", []),
 	ok = ranch:accept_ack(Ref),
 	ok = Transport:setopts(Socket, [{active, once}]),
-	lib_normal:set_mem(?MODULE, Socket, self()),
-	{noreply, State};
+%%	lib_normal:set_mem(?MODULE, Socket, self()),
+	{noreply, State, ?HIBERNATE_TIMEOUT};
 %% handle socket data
 handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Transport}) ->
-	?DEBUG("------------------------------ Transport: ~p~nData: ~p~n~n", [Transport, Data]),
+	?DEBUG("receive tcp data ::: ~p~n", [Data]),
 	Transport:setopts(Socket, [{active, once}]),
-	lists:foreach(
-		fun(Pid) ->
-			case Pid =:= self() of
-				false ->
-					gen_server:cast(Pid, {chat, Data});
-				true -> ok
-			end
-		end,
-		lib_normal:get_mem(?MODULE,Socket)),
-	{noreply, State, ?TIMEOUT};
-handle_info(timertick, State = #state{socket = Socket, transport = Transport}) ->
-	?DEBUG("------------------------------2~n", []),
-	Transport:send(Socket, "test test"),
-	{noreply, State};
-
+	%% 要不要把消息存进内存呢？
+	try
+		{ok, Msg} = lib_msg:unpacket(Data),
+		%% 启动钩子
+		ok
+	catch
+		_ ->
+			erlang:send_after(500, self(), {error, ?ERROR_101})
+	end,
+	{noreply, State, ?HIBERNATE_TIMEOUT};
+%% 消息错误，关闭socket
+handle_info({error, Reason}, State) ->
+	lib_msg:produce_error_msg(Reason),
+	{stop, {error, Reason}, State};
 handle_info({tcp_closed, _Socket}, State) ->
 	?DEBUG("------------------------------3~n", []),
 	{stop, normal, State};
@@ -104,8 +102,8 @@ handle_info(_Info, State) ->
 terminate(Reason, State) ->
 	Socket = State#state.socket,
 	?WARNING("======================================== ~n
-				socket ~p terminate, reason: ~n
-				======================================== ~n", [Socket, Reason]),
+		socket ~p terminate, reason: ~n
+		======================================== ~n", [Socket, Reason]),
 	lib_normal:del_mem(?MODULE, Socket),
 	ok.
 

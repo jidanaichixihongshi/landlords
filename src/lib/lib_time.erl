@@ -31,16 +31,11 @@ to_international_time(TimeStamp) ->
 	calendar:gregorian_seconds_to_datetime(SecTimeStamp +
 		calendar:datetime_to_gregorian_seconds({{1970,1,1}, {0,0,0}})).
 
-%% 时间戳转换成本地当前时间
--spec to_local_time(integer()) -> tuple().
-to_local_time(TimeStamp) ->
-	{{Y,M,D},{H,Min,S}} = to_international_time(TimeStamp),
-	case (H + 8) >= 24 of
-		true ->
-			{{Y,M,D + 1},{H - 16,Min,S}};
-		_ ->
-			{{Y,M,D},{H + 8,Min,S}}
-	end.
+%% 时间戳转换成北京时间
+-spec to_bj_time(integer()) -> tuple().
+to_bj_time(Timestamp) ->
+	BJTimestamp = Timestamp + 8 * 3600,
+	to_international_time(BJTimestamp).
 
 %% 判断是不是同一天
 -spec is_same_day(integer(), integer) -> boolean().
