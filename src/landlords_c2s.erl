@@ -74,7 +74,7 @@ handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Tra
 	Transport:setopts(Socket, [{active, once}]),
 	%% 要不要把消息存进内存呢？
 	try
-		{ok, Msg} = lib_msg:unpacket(Data),
+		{ok, Msg} = mod_msg:unpacket(Data),
 		%% 启动钩子
 		ok
 	catch
@@ -84,7 +84,7 @@ handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Tra
 	{noreply, State, ?HIBERNATE_TIMEOUT};
 %% 消息错误，关闭socket
 handle_info({error, Reason}, State) ->
-	lib_msg:produce_error_msg(Reason),
+	mod_msg:produce_error_msg(Reason),
 	{stop, {error, Reason}, State};
 handle_info({tcp_closed, _Socket}, State) ->
 	?DEBUG("------------------------------3~n", []),

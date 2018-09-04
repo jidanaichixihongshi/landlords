@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 29. 六月 2018 13:33
 %%%-------------------------------------------------------------------
--module(lib_proto).
+-module(mod_proto).
 -auth("cw").
 
 -export([encode/1, decode/2]).

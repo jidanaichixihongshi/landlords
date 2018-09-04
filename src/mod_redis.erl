@@ -7,7 +7,7 @@
 %%% Created : 29. 八月 2018 11:34
 %%%-------------------------------------------------------------------
 
--module(lib_redis).
+-module(mod_redis).
 
 -include("logger.hrl").
 %% API
