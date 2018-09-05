@@ -56,36 +56,45 @@ handle_call(_Request, _From, State) ->
 	?DEBUG("handle_call message ~p ~n", [_Request]),
 	{reply, ok, State, ?HIBERNATE_TIMEOUT}.
 
-handle_cast({chat, Msg}, State = #state{socket = Socket, transport = Transport}) ->
-	Transport:send(Socket, Msg),
-	?DEBUG("handle_cast message ~p ~n", [Msg]),
+handle_cast({send, Msg}, State = #state{socket = Socket, transport = Transport}) ->
+	?INFO("send tcp msg ::: ~p~n", [Msg]),
+	try
+		{ok, SData} = mod_msg:packet(Msg),
+		Transport:send(Socket, SData)
+	catch
+		Reason ->
+			?WARNING("packet msg error : ~p~n", [Reason])
+	end,
 	{noreply, State, ?HIBERNATE_TIMEOUT}.
+
+
+%% handle socket data
+handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Transport}) ->
+	Transport:setopts(Socket, [{active, once}]),
+	%% 要不要把消息存进内存呢？
+	try
+		Msg = mod_msg:unpacket(Data),
+		?INFO("receive tcp msg ::: ~p~n", [Msg]),
+		mod_c2s_handle:handle_c2s_msg(Msg)
+	catch
+		Reason ->
+			erlang:send_after(500, self(), Reason)
+	end,
+	{noreply, State, ?HIBERNATE_TIMEOUT};
 
 %% timout function set opt parms
 handle_info(timeout, State = #state{ref = Ref, socket = Socket, transport = Transport}) ->
 	?DEBUG("------------------------------1~n", []),
 	ok = ranch:accept_ack(Ref),
 	ok = Transport:setopts(Socket, [{active, once}]),
-%%	lib_normal:set_mem(?MODULE, Socket, self()),
-	{noreply, State, ?HIBERNATE_TIMEOUT};
-%% handle socket data
-handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Transport}) ->
-	?DEBUG("receive tcp data ::: ~p~n", [Data]),
-	Transport:setopts(Socket, [{active, once}]),
-	%% 要不要把消息存进内存呢？
-	try
-		{ok, Msg} = mod_msg:unpacket(Data),
-		?INFO("RECEIVE MESSAGE ===>>> :: ~p~n", [Msg]),
-		mod_c2s_handle:handle_c2s_msg(Msg)
-	catch
-		_ ->
-			erlang:send_after(500, self(), {error, ?ERROR_101})
-	end,
+	%%	lib_normal:set_mem(?MODULE, Socket, self()),
 	{noreply, State, ?HIBERNATE_TIMEOUT};
 %% 消息错误，关闭socket
-handle_info({error, Reason}, State) ->
-	mod_msg:produce_error_msg(Reason),
-	{stop, {error, Reason}, State};
+handle_info({error, Reason}, State = #state{socket = Socket, transport = Transport}) ->
+	Msg = mod_msg:produce_error_msg(error,Reason),
+	self() ! {send, Msg},
+	erlang:send_after(1500, self(), {tcp_error, Reason, Socket}),
+	{noreply, State, ?HIBERNATE_TIMEOUT};
 handle_info({tcp_closed, _Socket}, State) ->
 	?DEBUG("------------------------------3~n", []),
 	{stop, normal, State};

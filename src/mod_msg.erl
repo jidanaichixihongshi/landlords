@@ -9,34 +9,48 @@
 -module(mod_msg).
 -auth("cw").
 
+-include("error.hrl").
+
 -export([
 	packet/1,
-	unpacket/1]).
+	unpacket/1,
+	produce_error_msg/2]).
 
+%% -----------------------------------------------------------------------------------------
+%% 组装消息
+%% -----------------------------------------------------------------------------------------
+produce_error_msg(Mid, Error_num) ->
+	ok
+.
+
+
+%% ------------------------------------------------------------------------------------------
+%% 消息包编解码
+%% ------------------------------------------------------------------------------------------
 %% 打包客户端消息
 packet(Msg) when is_tuple(Msg) ->
 	packet_msg(Msg);
-packet(_Msg) ->
-	error.
+packet(Msg) ->
+	throw(error, Msg).
 
 packet_msg({Type, _, _, _} = Msg) ->
 	EMsg = mod_proto:encode(Msg),
-	{ok, lib_change:to_binary([lib_change:to_binary(Type), EMsg])}.
+	{ok, <<Type:16, EMsg/binary>>}.
 
 %% 解包客户端消息
-unpacket(Msg) when is_binary(Msg) ->
-	unpacket_msg(lib_change:to_list(Msg));
-unpacket(_Msg) ->
-	error.
-
-unpacket_msg([BinType, Msg]) ->
-	{ok, mod_proto:decode(lib_change:to_list(BinType), Msg)}.
+unpacket(Data) when is_binary(Data) ->
+	<<_Type:16, BinMsg/binary>> = Data,
+	unpacket_msg(BinMsg);
+unpacket(_Data) ->
+	throw({error, ?ERROR_101}).
 
 
 %% -----------------------------------------------------------------------------
 %% internal function
 %% -----------------------------------------------------------------------------
 
+unpacket_msg(BinMsg) ->
+	protobuf_pb:decode(BinMsg).
 
 
 

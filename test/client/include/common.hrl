@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 20. 六月 2018 17:11
 %%%-------------------------------------------------------------------
-
+-include("protobuf_pb.hrl").
 -define(PROTO_CONFIG, "../../config/protobuf.proto").
 
 -define(TCP_OPTIONS, [
