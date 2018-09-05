@@ -38,7 +38,10 @@ unpacket_msg([BinType, Msg]) ->
 %% 生成心跳消息
 packet_heart() ->
 	Heart = #heartbeat{mt = 101, mid = 15329642, data = ""},
-	list_to_binary([101,12369,Heart]).
+	io:format("Heart: ~p~n",[Heart]),
+	EHeart = list_to_binary(protobuf_pb:encode_heartbeat(Heart)),
+	io:format("EHeart: ~p~n",[EHeart]),
+	<<101:16,EHeart/binary>>.
 
 %% -----------------------------------------------------------------------------
 %% internal function
