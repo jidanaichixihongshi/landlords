@@ -86,7 +86,7 @@ handle_info(Info, State) ->
 %% ==================================================================================
 terminate(Reason, State) ->
 	?INFO("stop proxy Reason:~p", [Reason]),
-	landlords_redis:del_proxy(State#proxy_state.uid):
+	landlords_redis:del_proxy(State#proxy_state.uid),
 	ok.
 
 %% ==================================================================================
@@ -128,7 +128,7 @@ register_client(Client, State) when Client#proxy_client.pid /= undefined ->
 						if
 							Cli#proxy_client.device == Client#proxy_client.device ->
 								Acc;
-							_ ->
+							true ->
 								[Cli | Acc]
 						end
 					end, [], State#proxy_state.client),
@@ -146,7 +146,7 @@ register_client(Client, State) ->
 				if
 					Cli#proxy_client.device == Client#proxy_client.device ->
 						Acc;
-					_ ->
+					true ->
 						[Cli | Acc]
 				end
 			end, [], State#proxy_state.client),
