@@ -8,7 +8,6 @@
 %%%-------------------------------------------------------------------
 
 -include("common.hrl").
--include("proxy.hrl").
 -include("error.hrl").
 
 
