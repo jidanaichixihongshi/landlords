@@ -28,9 +28,9 @@
 -define(DATA_OVERTIME, 3000).																	%% 消息延时
 
 %% 消息标志位，控制消息走向
--define(SIGN1, 0).					%% 节点消息
+-define(SIGN0, 0).					%% 节点消息
 -define(SIGN1, 1).					%% c2s消息
--define(SIGN1, 2).					%% s2c消息
+-define(SIGN2, 2).					%% s2c消息
 
 
 -define(PUBLIC_STORAGE_ETS, public_storage_ets).              %% 公共临时存储ETS
