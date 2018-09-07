@@ -33,9 +33,10 @@ start_link(Args) ->
 init(Args) ->
 	erlang:process_flag(trap_exit, true),
 	State = Args#proxy_state{node = node(), pid = self()},
+	Uid = Args#proxy_state.uid,
 	case register_proxy(State) of
 		{ok, NewState} ->
-			?DEBUG("start proxy, uid : ~p~n", [Args#proxy_state.uid]),
+			?DEBUG("start proxy, uid : ~p~n", [Uid]),
 			{ok, NewState, ?HIBERNATE_TIMEOUT};
 		{error, Reason} ->
 			?ERROR("start proxy error Uid:~p Reason:~p", [Uid, Reason]),
