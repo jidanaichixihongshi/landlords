@@ -136,7 +136,7 @@ register_client(Client, State) when Client#proxy_client.pid /= undefined ->
 			NewClientL = [Client | CliL],
 			landlords_ets:update_proxy(State#proxy_state.uid, {#proxy_state.client, NewClientL}),
 			State#proxy_state{client = NewClientL};
-		_ ->
+		_Error ->
 			?DEBUG("fail update client , pid ~p unalive!~n", [Client#proxy_state.pid]),
 			State
 	end;

@@ -40,7 +40,8 @@
 	hmget_redis/3,
 	hdel_redis/2,
 
-	q_asyn/2]).
+	q_asyn/2,
+	transaction/2]).
 
 
 -define(TIMEOUT, 5000).
@@ -207,15 +208,6 @@ q0(PoolName, Command, Timeout) ->
 			eredis:q(Worker, Command, Timeout)
 		end).
 
-qp(PoolName, Pipeline) ->
-	qp(PoolName, Pipeline, ?TIMEOUT).
-qp(PoolName, Pipeline, Timeout) ->
-	poolboy:transaction(PoolName,
-		fun(Worker) ->
-			eredis:qp(Worker, Pipeline, Timeout)
-		end).
-
-
 q_asyn(PoolName, Command) ->
 	q_asyn(PoolName, Command, ?TIMEOUT, 1).
 q_asyn(PoolName, Command, Timeout) ->
@@ -235,14 +227,6 @@ q_asyn(PoolName, Command, Timeout, Times) ->
 			_ -> throw({Type, Reason})
 		end
 	end.
-
-q0_asyn(PoolName, Command) ->
-	q_asyn(PoolName, Command, ?TIMEOUT).
-q0_asyn(PoolName, Command, _Timeout) ->
-	poolboy:transaction(PoolName,
-		fun(Worker) ->
-			eredis:q_noreply(Worker, Command)
-		end).
 
 transaction(PoolName, Fun) when is_function(Fun) ->
 	F = fun(C) ->

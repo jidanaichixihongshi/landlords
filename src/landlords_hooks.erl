@@ -17,9 +17,7 @@
 -export([
 	start_link/0,
 	add/1,
-	add/5,
 	delete/1,
-	delete/5,
 	delete_all_hooks/0,
 	run/2,
 	run/3
@@ -42,27 +40,23 @@ start_link() ->
 	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
 
 add({Hook, Function, Seq}) when is_function(Function) ->
-	add(Hook, global, undefined, Function, Seq);
+	add({Hook, global, undefined, Function, Seq});
 add({Hook, Node, Function, Seq}) when is_function(Function) ->
-	add(Hook, Node, undefined, Function, Seq);
+	add({Hook, Node, undefined, Function, Seq});
 add({Hook, Module, Function, Seq}) ->
-	add(Hook, global, Module, Function, Seq).
-
--spec add(atom(), binary() | global, atom(), atom() | fun(), number()) -> ok.
-add(Hook, Node, Module, Function, Seq) ->
+	add({Hook, global, Module, Function, Seq});
+add({Hook, Node, Module, Function, Seq}) ->
 	gen_server:call(landlords_hooks, {add, Hook, Node, Module, Function, Seq}).
 
 
 %% @doc See del/4.
 delete({Hook, Function, Seq}) when is_function(Function) ->
-	delete(Hook, global, undefined, Function, Seq);
+	delete({Hook, global, undefined, Function, Seq});
 delete({Hook, Node, Function, Seq}) when is_function(Function) ->
-	delete(Hook, Node, undefined, Function, Seq);
+	delete({Hook, Node, undefined, Function, Seq});
 delete({Hook, Module, Function, Seq}) ->
-	delete(Hook, global, Module, Function, Seq).
-
--spec delete(atom(), binary() | global, atom(), atom() | fun(), number()) -> ok.
-delete(Hook, Node, Module, Function, Seq) ->
+	delete({Hook, global, Module, Function, Seq});
+delete({Hook, Node, Module, Function, Seq}) ->
 	gen_server:call(landlords_hooks, {delete, Hook, Node, Module, Function, Seq}).
 
 
@@ -91,7 +85,7 @@ run(Hook, Node, Args) ->
 %%%----------------------------------------------------------------------
 init([]) ->
 	ets:new(hooks, [named_table, {read_concurrency, true}]),
-	send_after(2000, self(), register_hooks),
+	erlang:send_after(2000, self(), register_hooks),
 	{ok, #hooks_state{}}.
 
 
@@ -215,6 +209,8 @@ handle_add(Hook, Node, El) ->
 			ok
 	end.
 
+-type local_hook() :: { Seq :: integer(), Module :: atom(), Function :: atom()}.
+-type distributed_hook() :: { Seq :: integer(), Node :: atom(), Module :: atom(), Function :: atom()}.
 -spec handle_delete(atom(), atom(), local_hook() | distributed_hook()) -> ok.
 %% in-memory storage operation: Handle deleting hook from ETS table
 handle_delete(Hook, Node, El) ->
@@ -227,7 +223,8 @@ handle_delete(Hook, Node, El) ->
 			ok
 	end.
 
-
+get_stacktrace() ->
+	[{Mod, Fun, Loc, Args} || {Mod, Fun, Args, Loc} <- erlang:get_stacktrace()].
 
 
 

@@ -33,8 +33,6 @@ handle_c2s_msg(Msg, State) when is_record(Msg, heartbeat) ->
 %% -------------------------------------------------------------------------
 handle_c2s_msg(Msg, State) when is_record(Msg, logonrequest) ->
 	case handle_msg(logonrequest, Msg, Msg#logonrequest.timestamp, State) of
-		{error, State} ->
-			{ok, State};
 		{true, State} ->
 			%% 登录验证成功，把链接注册到proxy
 			Data = Msg#logonrequest.data,
@@ -66,7 +64,9 @@ handle_c2s_msg(Msg, State) when is_record(Msg, logonrequest) ->
 				pid = self(),
 				node = node(),
 				user_data = UserData},
-			{ok, NewState}
+			{ok, NewState};
+		_ ->
+			throw(error)
 	end.
 
 

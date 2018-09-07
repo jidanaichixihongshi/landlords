@@ -39,7 +39,6 @@ start_link(Ref, Socket, Transport, Opts) ->
 %% we can use the -behaviour(gen_server) attribute.
 
 init([Ref, Socket, Transport, Opts]) ->
-	?DEBUG("================== {~p, ~p, ~p, ~p} =================~n", [Ref, Socket, Transport, Opts]),
 	%%peername(Socket) -> {ok, {Address, Port}} | {error, posix()}
 	{ok, {Address, Port}} = inet:peername(Socket),
 	State = #client_state{
@@ -77,12 +76,8 @@ handle_info({tcp, Socket, Data}, State) ->
 	try
 		Msg = mod_msg:unpacket(Data),
 		?INFO("receive tcp msg ::: ~p~n", [Msg]),
-		case mod_c2s_handle:handle_c2s_msg(Msg, State) of
-			{ok, NewState} ->
-				{noreply, NewState, ?HIBERNATE_TIMEOUT};
-			{error, Reason} ->
-				{stop, {error, Reason}, State}
-		end
+		{ok, NewState} = mod_c2s_handle:handle_c2s_msg(Msg, State),
+		{noreply, NewState, ?HIBERNATE_TIMEOUT}
 	catch
 		Reason ->
 			erlang:send_after(500, self(), Reason),
