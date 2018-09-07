@@ -6,7 +6,11 @@
 %%% @end
 %%% Created : 23. 六月 2018 13:56
 %%%-------------------------------------------------------------------
+
+-include("common.hrl").
+-include("proxy.hrl").
 -include("error.hrl").
+
 
 -define(CONFIG_FILE_DIR, "config/sys.config").                %% 配置文件
 
@@ -19,55 +23,77 @@
 	{keepalive, true},
 	{exit_on_close, true}]).
 
--define(HIBERNATE_TIMEOUT, 30000).														%% 休眠
+-define(HIBERNATE_TIMEOUT, 30000).                            %% 休眠
 -define(TIMEOUT, 50000).
+-define(DATA_OVERTIME, 3000).																	%% 消息延时
+
+%% 消息标志位，控制消息走向
+-define(SIGN1, 0).					%% 节点消息
+-define(SIGN1, 1).					%% c2s消息
+-define(SIGN1, 2).					%% s2c消息
 
 
--define(CONFIG_PARAMETER_ETS, config_parameter_ets).          %% 配置参数ETS
 -define(PUBLIC_STORAGE_ETS, public_storage_ets).              %% 公共临时存储ETS
+-define(PROXY_STATE_ETS, proxy_state_ets).                    %% 代理进程存储ETS
 
 -define(ETS_READ_CONCURRENCY, {read_concurrency, true}).      %% 并发读
 -define(ETS_WRITE_CONCURRENCY, {write_concurrency, true}).    %% 并发写
 
 %% ETS表配置
 -define(ETS_LIST, [
-	{config_parameter_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY]},
-	{public_storage_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY]}
+	{public_storage_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY]},
+
+	%% proxy存储表
+	{proxy_state_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY, {keypos, #proxy_state.uid}]}
 ]).
 
 
 %% 用户状态
--define(STATUS_ONLINE, 0).    		%% 在线
--define(STATUS_OFFLINE, 1).    		%% 离线
--define(STATUS_LOGGING, 1).    		%% 正在登陆
--define(STATUS_REGISTERING, 1).   %% 正在注册
+-define(STATUS_ONLINE, 0).        	%% 在线
+-define(STATUS_OFFLINE, 1).        	%% 离线
+-define(STATUS_LOGGING, 1).        	%% 正在登陆
+-define(STATUS_REGISTERING, 1).   	%% 正在注册
+
+%% 用户状态
+-define(ONLINE, online).		%% 在线状态
+-define(OFFLINE, offline).	%% 离线状态
+-define(LOGGING, logging).	%% 正在登陆
+-define(REGISTERING, register).	%% 正在注册
 
 %% 用户数据
 -record(user_data, {
-	uid,											%% 用户id（唯一性）
-	nickname	:: <<>>,				%% 昵称
-	level,										%% 用户等级
-	version		:: <<>>,				%% 客户端版本
-	device_id	:: <<>>,				%% 设备id
-	location	:: <<>>,				%% 登录地点
-	login_time,								%% 登录时间
-	phone 										%% 电话
+	uid,                      %% 用户id（唯一性）
+	nickname :: <<>>,        	%% 昵称
+	level,                    %% 用户等级
+	version :: <<>>,        	%% 客户端版本
+	device :: <<>>,						%% 客户端类型
+	device_id :: <<>>,        %% 设备id
+	token :: <<>>,
+	location :: <<>>,       	%% 登录地点
+	login_time,               %% 登录时间
+	phone                    	%% 电话
 }).
 
 %% 用户连接信息
--record(state, {
-	uid,							%% 用户id（唯一性）
-	status,						%% 用户状态(online | offline | logging | registering)
-	pid,							%% 用户进程
-	node, 						%% 链接节点
-	socket,           %% 连接套接字
+-record(client_state, {
+	uid,              	%% 用户id（唯一性）
+	proxy,							%% 代理进程
+	status,            	%% 用户状态(online | offline | logging | registering)
+	pid,              	%% 用户进程
+	node,            		%% 链接节点
+	socket,           	%% 连接套接字
 	ref,
-	ip,								%% 连接ip
-	port,							%% 连接端口
+	ip,                	%% 连接ip
+	port,              	%% 连接端口
 	transport,
 	otp,
-	user_data = #user_data{}	%% 用户详细信息
+	last_recv_time,
+	user_data = #user_data{}  %% 用户详细信息
 }).
+
+
+
+
 
 
 

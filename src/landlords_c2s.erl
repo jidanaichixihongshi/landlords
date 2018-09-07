@@ -42,7 +42,8 @@ init([Ref, Socket, Transport, Opts]) ->
 	?DEBUG("================== {~p, ~p, ~p, ~p} =================~n", [Ref, Socket, Transport, Opts]),
 	%%peername(Socket) -> {ok, {Address, Port}} | {error, posix()}
 	{ok, {Address, Port}} = inet:peername(Socket),
-	State = #state{
+	State = #client_state{
+		status = ?LOGGING,
 		ref = Ref,
 		node = node(),
 		socket = Socket,
@@ -56,7 +57,7 @@ handle_call(_Request, _From, State) ->
 	?DEBUG("handle_call message ~p ~n", [_Request]),
 	{reply, ok, State, ?HIBERNATE_TIMEOUT}.
 
-handle_cast({send, Msg}, State = #state{socket = Socket, transport = Transport}) ->
+handle_cast({send, Msg}, State = #client_state{socket = Socket, transport = Transport}) ->
 	?INFO("send tcp msg ::: ~p~n", [Msg]),
 	try
 		{ok, SData} = mod_msg:packet(Msg),
@@ -69,50 +70,61 @@ handle_cast({send, Msg}, State = #state{socket = Socket, transport = Transport})
 
 
 %% handle socket data
-handle_info({tcp, Socket, Data}, State = #state{socket = Socket, transport = Transport}) ->
+handle_info({tcp, Socket, Data}, State) ->
+	Transport = State#client_state.transport,
 	Transport:setopts(Socket, [{active, once}]),
 	%% 要不要把消息存进内存呢？
 	try
 		Msg = mod_msg:unpacket(Data),
 		?INFO("receive tcp msg ::: ~p~n", [Msg]),
-		mod_c2s_handle:handle_c2s_msg(Msg)
+		case mod_c2s_handle:handle_c2s_msg(Msg, State) of
+			{ok, NewState} ->
+				{noreply, NewState, ?HIBERNATE_TIMEOUT};
+			{error, Reason} ->
+				{stop, {error, Reason}, State}
+		end
 	catch
 		Reason ->
-			erlang:send_after(500, self(), Reason)
-	end,
-	{noreply, State, ?HIBERNATE_TIMEOUT};
+			erlang:send_after(500, self(), Reason),
+			{noreply, State, ?HIBERNATE_TIMEOUT}
+	after
+		erlang:send_after(500, self(), {error, ?ERROR_102}),
+		{noreply, State, ?HIBERNATE_TIMEOUT}
+	end;
 
 %% timout function set opt parms
-handle_info(timeout, State = #state{ref = Ref, socket = Socket, transport = Transport}) ->
+handle_info(timeout, #client_state{ref = Ref, socket = Socket, transport = Transport} = State) ->
 	?DEBUG("------------------------------1~n", []),
 	ok = ranch:accept_ack(Ref),
 	ok = Transport:setopts(Socket, [{active, once}]),
 	%%	lib_normal:set_mem(?MODULE, Socket, self()),
 	{noreply, State, ?HIBERNATE_TIMEOUT};
 %% 消息错误，关闭socket
-handle_info({error, Reason}, State = #state{socket = Socket, transport = Transport}) ->
-	Msg = mod_msg:produce_error_msg(error,Reason),
+handle_info({error, Reason}, #client_state{socket = Socket, transport = _Transport} = State) ->
+	Msg = mod_msg:produce_error_msg(error, Reason),
 	self() ! {send, Msg},
 	erlang:send_after(1500, self(), {tcp_error, Reason, Socket}),
 	{noreply, State, ?HIBERNATE_TIMEOUT};
 handle_info({tcp_closed, _Socket}, State) ->
-	?DEBUG("------------------------------3~n", []),
 	{stop, normal, State};
 handle_info({tcp_error, _, Reason}, State) ->
-	?DEBUG("------------------------------4~n", []),
 	{stop, Reason, State};
 handle_info(timeout, State) ->
-	?DEBUG("------------------------------5~n", []),
 	{stop, normal, State};
 handle_info(_Info, State) ->
-	?DEBUG("------------------------------6~n", []),
 	{stop, normal, State}.
 
 terminate(Reason, State) ->
-	Socket = State#state.socket,
+	#client_state{uid = Uid, proxy = ProxyPid, socket = Socket} = State,
 	?WARNING("======================================== ~n
-		socket ~p terminate, reason: ~n
+		socket ~p terminate, reason: ~p~n
 		======================================== ~n", [Socket, Reason]),
+	case is_pid(ProxyPid) andalso mod_proc:is_proc_alive(ProxyPid) of
+		true ->
+			mod_proxy:unregister_client(ProxyPid, Uid);
+		_ ->
+			ok
+	end,
 	lib_normal:del_mem(?MODULE, Socket),
 	ok.
 

@@ -19,35 +19,43 @@
 %% 打包客户端消息
 packet(Msg) when is_tuple(Msg) ->
 	packet_msg(Msg);
-packet(_Msg) ->
-	error.
+packet(Msg) ->
+	{error,Msg}.
 
-packet_msg({Type, _, _, _} = Msg) ->
+packet_msg({Type, _, _, _,_} = Msg) ->
 	EMsg = mod_proto:encode(Msg),
-	{ok, lib_change:to_binary([lib_change:to_binary(Type), EMsg])}.
+	{ok, <<Type:16, EMsg/binary>>};
+packet_msg(Msg) ->
+	{error, Msg}.
 
-%% 解包客户端消息
-unpacket(Msg) when is_binary(Msg) ->
-	unpacket_msg(lib_change:to_list(Msg));
-unpacket(_Msg) ->
+
+%% 解包服务器消息
+unpacket(Data) when is_binary(Data) ->
+	<<H:16, BinMsg/binary>> = Data,
+	unpacket_msg(H, BinMsg);
+unpacket(_Data) ->
 	error.
 
-unpacket_msg([BinType, Msg]) ->
-	{ok, mod_proto:decode(lib_change:to_list(BinType), Msg)}.
+unpacket_msg(H, BinMsg) ->
+	Type = get_decode_type(H),
+	Msg = protobuf_pb:decode(Type, BinMsg),
+	{Type, Msg}.
+
 
 %% 生成心跳消息
 packet_heart() ->
-	Heart = #heartbeat{mt = 101, mid = 15329642, data = ""},
-	io:format("Heart: ~p~n",[Heart]),
+	Heart = #heartbeat{mt = 101, mid = 15329642, sig = 1,  data = ""},
+	io:format("Heart: ~p~n", [Heart]),
 	EHeart = list_to_binary(protobuf_pb:encode_heartbeat(Heart)),
-	io:format("EHeart: ~p~n",[EHeart]),
-	<<101:16,EHeart/binary>>.
+	io:format("EHeart: ~p~n", [EHeart]),
+	<<101:16, EHeart/binary>>.
 
 %% -----------------------------------------------------------------------------
 %% internal function
 %% -----------------------------------------------------------------------------
 
-
+get_decode_type(110) -> logonrequest;
+get_decode_type(101) -> heartbeat.
 
 
 

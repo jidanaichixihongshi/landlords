@@ -41,6 +41,8 @@ init([Port, ListenNum]) ->
 
 	{ok, {{one_for_one, 5, 10}, [
 		ranch:child_spec(landlords_c2s, ListenNum, ranch_tcp, [{port, Port}], landlords_c2s, []),
+		?CHILD(landlords_proxy_sup, supervisor),
+		?CHILD(landlords_hooks, worker),
 		?CHILD(mod_system_monitor, worker),
 		?CHILD(mod_reloader, worker)
 	] ++ PoolSpecs}}.

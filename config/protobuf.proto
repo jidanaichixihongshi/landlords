@@ -5,21 +5,24 @@
 %% 用户登录相关
 %% 用户登录请求消息
 message UserData {
-  optional string username = 1;         %% none/用户名，使用用户名登录可填
-  optional int64 phone = 2;             %% none/手机号，使用手机号登陆可填
-  required string token = 3;
-  required int32 device_type = 4;       %% 登录方式，1-安卓/2-ios/3-web
-  optional int32 device_id = 5;         %% 设备id
+  optional string nickname = 1;         %% none/用户昵称
+  optional string uid = 2;              %% uid，使用uid登录可填
+  optional int64 phone = 3;             %% none/手机号，使用手机号登陆可填
+  required string token = 4;
+  required int32 device = 5;            %% 登录方式，1-安卓/2-ios/3-web
+  optional int32 device_id = 6;         %% 设备id
 
-  required string version = 6;          %% 客户端版本
-  required string app_id = 7;           %% 程序软件编号
-  required int64 timestamp = 8;         %% 时间戳，消息产生的时间
+  required string version = 7;          %% 客户端版本
+  required string app_id = 8            %% 程序软件编号
+
 }
 
 message LogonRequest {
   required int32 mt = 1;              %% 消息类型编号
   required int32 mid = 2;             %% 消息id
-  repeated UserData data = 3;
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  repeated UserData data = 5;
 }
 
 
@@ -34,7 +37,9 @@ message LogonRequest {
 message HeartBeat {
   required int32 mt = 1;              %% 消息类型编号
   required int32 mid = 2;             %% 消息id
-  optional string data = 3;
+    required int32 sig = 3;             %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  optional string data = 5;
 }
 
 

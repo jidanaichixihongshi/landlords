@@ -31,16 +31,18 @@ produce_error_msg(Mid, Error_num) ->
 packet(Msg) when is_tuple(Msg) ->
 	packet_msg(Msg);
 packet(Msg) ->
-	throw(error, Msg).
+	{error, Msg}.
 
-packet_msg({Type, _, _, _} = Msg) ->
+packet_msg({Type, _, _, _, _, _} = Msg) ->
 	EMsg = mod_proto:encode(Msg),
-	{ok, <<Type:16, EMsg/binary>>}.
+	{ok, <<Type:16, EMsg/binary>>};
+packet_msg(Msg) ->
+	{error, Msg}.
 
 %% 解包客户端消息
 unpacket(Data) when is_binary(Data) ->
-	<<_Type:16, BinMsg/binary>> = Data,
-	unpacket_msg(BinMsg);
+	<<H:16, BinMsg/binary>> = Data,
+	mod_proto:decode(H, BinMsg);
 unpacket(_Data) ->
 	throw({error, ?ERROR_101}).
 
@@ -49,8 +51,7 @@ unpacket(_Data) ->
 %% internal function
 %% -----------------------------------------------------------------------------
 
-unpacket_msg(BinMsg) ->
-	protobuf_pb:decode(BinMsg).
+
 
 
 

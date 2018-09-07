@@ -4,10 +4,15 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 25. 六月 2018 17:32
+%%% Created : 19. 六月 2018 19:09
 %%%-------------------------------------------------------------------
 
--define(ERROR_0, 0).					%% 成功
+%% 数据库名称
+-define(POOL_REDIS, pool_redis_userinfo).
 
--define(ERROR_101, 101).					%% 数据错格式误
--define(ERROR_102, 102).					%% 数据请求超时
+%% 键
+-define(USER_PROXY_REDIS, "user_proxy_redis_").
+
+
+
+

@@ -23,17 +23,26 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-	create_ets(),
-	%ping_node(?CENTER_NODE).
-
+	create_ets(?ETS_LIST),
 	{ok, _} = start_http_link(),
 	{ok, Tcp_Port} = application:get_env(landlords, tcp_port),
 	{ok, ListenNum} = application:get_env(landlords, listen_num),
-	landlords_sup:start_link([Tcp_Port, ListenNum]).
+	{ok, CenterNode} = application:get_env(landlords, center_node),
+	{ok, Pid} = landlords_sup:start_link([Tcp_Port, ListenNum]),
+	connect_node(CenterNode),
+	{ok, Pid}.
 
 stop(_State) ->
-	?INFO("stop landlords server!~n", []),
-	ok.
+	?INFO("**** stop landlords server! ****~n", []),
+	try
+		disconnect_node()
+	catch
+		Error ->
+			?ERROR("STOP ERROR: ~p~n", [Error])
+	after
+		?INFO("stop node ok: ~p~n", [node()]),
+		init:stop()
+	end.
 
 %% http链接
 start_http_link() ->
@@ -47,9 +56,7 @@ start_http_link() ->
 	{ok, Http_Port} = application:get_env(landlords, http_port),
 	cowboy:start_http(http, 100, [{port, Http_Port}], [{env, [{dispatch, Dispatch}]}]).
 
-create_ets() ->
-	create_ets(?ETS_LIST).
-
+%% 初始化ets表
 create_ets([]) ->
 	?INFO("create ets ok ...~n", []);
 create_ets([{Tab, Cfg} | EtsList]) ->
@@ -61,16 +68,25 @@ create_ets([{Tab, Cfg} | EtsList]) ->
 			create_ets(EtsList)
 	end.
 
-
-ping_node(CenterNode) ->
+connect_node(CenterNode) ->
 	case net_adm:ping(CenterNode) of
 		pong ->
+			timer:sleep(500),
+			?INFO("ping center node ok", []),
 			ok;
 		pang ->
-			?INFO("ping loop: Node:~p~n", [CenterNode]),
+			?WARNING("ping node pang, Node:~p~n", [CenterNode]),
 			timer:sleep(1000),
-			ping_node(CenterNode)
+			connect_node(CenterNode)
 	end.
+
+disconnect_node() ->
+	lists:foreach(
+		fun(Node) ->
+			?DEBUG("disconnect node:~p", [Node]),
+			erlang:disconnect_node(Node)
+		end, nodes()).
+
 
 
 

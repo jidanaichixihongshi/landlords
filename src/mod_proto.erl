@@ -9,7 +9,11 @@
 -module(mod_proto).
 -auth("cw").
 
--export([encode/1, decode/2]).
+-include("error.hrl").
+
+-export([
+	encode/1,
+	decode/2]).
 
 %% 编码
 encode(Msg) when is_tuple(Msg) ->
@@ -18,20 +22,18 @@ encode(_Msg) ->
 	throw(error).
 
 %% 解码
-decode(Type, Msg) when is_binary(Msg) ->
-	protobuf_pb:decode(Type, Msg);
-decode(Type, Msg) when is_list(Msg) ->
-	BinMsg = lib_change:to_binary(Msg),
-	decode(Type, BinMsg);
+decode(H, BinMsg) when is_binary(BinMsg) ->
+	Type = get_decode_type(H),
+	protobuf_pb:decode(Type, BinMsg);
 decode(_Type, _Msg) ->
-	throw(error).
+	throw({error, ?ERROR_101}).
 
 
 %% -----------------------------------------------------------------------------
 %% internal function
 %% -----------------------------------------------------------------------------
-
-
+get_decode_type(110) -> logonrequest;
+get_decode_type(101) -> heartbeat.
 
 
 

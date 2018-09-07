@@ -19,7 +19,6 @@
 	keys_redis/2,
 	del_redis/2,
 
-
 	set_redis/3,
 	get_redis/2,
 	mset_redis/2,
@@ -36,6 +35,10 @@
 	llen_redis/2,
 
 	zadd_redis/3,
+
+	hmset_redis/3,
+	hmget_redis/3,
+	hdel_redis/2,
 
 	q_asyn/2]).
 
@@ -93,7 +96,7 @@ mset_redis(PoolName, Values) when is_list(Values) ->
 			end, [], Values),
 	q(PoolName, ["MSET" | NewValues]);
 mset_redis(PoolName, Values) ->
-	mget_redis(PoolName, lib_change:to_list(Values)).
+	mset_redis(PoolName, lib_change:to_list(Values)).
 
 mget_redis(PoolName, Keys) when is_list(Keys) ->
 	q(PoolName, ["MGET" | Keys]);
@@ -148,7 +151,29 @@ zadd_redis(PoolName, Key, Values) ->
 	zadd_redis(PoolName, Key, lib_change:to_list(Values)).
 
 
+%% -------------------------------------------------------------------------
+%% redis 哈希操作
+%% -------------------------------------------------------------------------
+%% Values :: [{K1,V1},{K2,V2}.{K3,V3},... ...]
+hmset_redis(PoolName, Key, Values) when is_list(Values) ->
+	NewValues =
+		lists:foldl(
+			fun({K, V}, Acc) -> [V, K | Acc];
+				(A, Acc) -> [A | Acc]
+			end, [], Values),
+	RevNewValues = lists:reverse(NewValues),
+	q(PoolName, ["HMSET", Key | RevNewValues]);
+hmset_redis(PoolName, Key, Values) ->
+	hmset_redis(PoolName, Key, lib_change:to_list(Values)).
 
+hmget_redis(PoolName, HKey, Keys) when is_list(Keys) ->
+	q(PoolName, ["HMGET", HKey | Keys]);
+hmget_redis(PoolName, HKey, Keys) ->
+	hmget_redis(PoolName, HKey, lib_change:to_list(Keys)).
+
+
+hdel_redis(PoolName, Key) ->
+	q(PoolName, ["HDEL", Key]).
 
 %% ------------------------------------------------------------------------
 %% internal api
