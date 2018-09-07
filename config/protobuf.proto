@@ -13,7 +13,7 @@ message UserData {
   optional int32 device_id = 6;         %% 设备id
 
   required string version = 7;          %% 客户端版本
-  required string app_id = 8            %% 程序软件编号
+  required string app_id = 8;           %% 程序软件编号
 
 }
 
