@@ -85,9 +85,12 @@ run(Hook, Node, Args) ->
 %%%----------------------------------------------------------------------
 init([]) ->
 	ets:new(hooks, [named_table, {read_concurrency, true}]),
-	erlang:send_after(2000, self(), register_hooks),
+	spawn(fun() -> register_hooks() end),
 	{ok, #hooks_state{}}.
 
+register_hooks() ->
+	lib_time:sleep(2000),
+	lists:foreach(fun(Hooks) -> add(Hooks) end, ?HOOKS_LIST).
 
 handle_call({add, Hook, Node, Module, Function, Seq}, _From, State) ->
 	HookFormat = {Seq, Module, Function},
@@ -117,9 +120,6 @@ handle_cast(Msg, State) ->
 	?DEBUG("unrecognized msg type: ~p~n", [Msg]),
 	{noreply, State}.
 
-handle_info(register_hooks, State) ->
-	lists:foreach(fun(Hooks) -> add(Hooks) end, ?HOOKS_LIST),
-	{noreply, State};
 handle_info(Info, State) ->
 	?DEBUG("unrecognized msg type: ~p~n", [Info]),
 	{noreply, State}.
