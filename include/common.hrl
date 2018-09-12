@@ -12,8 +12,11 @@
 
 %% 固定参数
 -define(UNDEFINED, undefined).
-
 -define(LOCALNODE, node()).
+
+
+-define(UID_HASH_RANGE, 10000000).      %% 和uid相关的hash值取值范围
+
 
 %% 钩子注册
 -define(HOOKS_LIST, [

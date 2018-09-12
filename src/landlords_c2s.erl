@@ -80,11 +80,8 @@ handle_info({tcp, Socket, Data}, State) ->
 		{noreply, NewState, ?HIBERNATE_TIMEOUT}
 	catch
 		Reason ->
-			erlang:send_after(500, self(), Reason),
+			erlang:send_after(500, self(), {error, Reason}),
 			{noreply, State, ?HIBERNATE_TIMEOUT}
-	after
-		erlang:send_after(500, self(), {error, ?ERROR_102}),
-		{noreply, State, ?HIBERNATE_TIMEOUT}
 	end;
 
 %% timout function set opt parms
