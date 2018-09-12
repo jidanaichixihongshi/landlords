@@ -9,12 +9,24 @@
 -module(mod_msg).
 -auth("cw").
 
+-include("common.hrl").
 -include("error.hrl").
 
 -export([
+	produce_mid/1,
 	packet/1,
 	unpacket/1,
 	produce_error_msg/2]).
+
+
+%% "hash(Uid)_mstimestamp()"
+produce_mid(Uid) when is_integer(Uid) ->
+	HashV = lib_random:get_hash(Uid, ?UID_HASH_RANGE),
+	MsTimesstamp = lib_time:get_mstimestamp(),
+	lib_change:to_list(HashV) ++ "_" ++ lib_change:to_list(MsTimesstamp);
+produce_mid(_) ->
+	false.
+
 
 %% -----------------------------------------------------------------------------------------
 %% 组装消息
