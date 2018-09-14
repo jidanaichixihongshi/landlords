@@ -28,13 +28,13 @@ init(_Args) ->
 	case gen_tcp:connect(IP, Port, ?TCP_OPTIONS) of
 		{ok, Socket} ->
 			io:format("----------------connect success~n", []),
-			erlang:register(landlords_client, self()),
 			timer:send_interval(?HEART_BREAK_TIME, heartbeat),
 			State = #state{
 				ip = IP,
 				port = Port,
 				socket = Socket,
 				status = connect},
+			io:format("----------------init success~n", []),
 			{ok, State};
 		{error, Reason} ->
 			io:format("-------------connect error~n", []),
@@ -50,10 +50,8 @@ handle_cast(Request, State) ->
 	{noreply, State}.
 
 
-handle_info(heartbeat, State = #state{socket = Socket}) ->
-	io:format("------------------------------heartbeat~n", []),
-	HeartMsg = mod_msg:packet_heart(),
-	gen_tcp:send(Socket, HeartMsg),
+handle_info(heartbeat, State) ->
+	msg:heartbeat(),
 	{noreply, State};
 handle_info({send_msg, Msg}, State = #state{socket = Socket}) ->
 	case mod_msg:packet(Msg) of
@@ -83,12 +81,10 @@ terminate(Reason, State) ->
 	io:format("======================================== ~n
 		socket ~p terminate, reason: ~p ~n
 	======================================== ~n", [Socket, Reason]),
-	erlang:unregister(landlords_client),
 	gen_tcp:close(Socket),
 	ok.
 
 code_change(_OldVsn, State, _Extra) ->
-	io:format("------------------------------8~n", []),
 	{ok, State}.
 
 

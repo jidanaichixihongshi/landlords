@@ -13,8 +13,7 @@
 
 -export([
 	packet/1,
-	unpacket/1,
-	packet_heart/0]).
+	unpacket/1]).
 
 %% 打包客户端消息
 packet(Msg) when is_tuple(Msg) ->
@@ -22,11 +21,11 @@ packet(Msg) when is_tuple(Msg) ->
 packet(Msg) ->
 	{error,Msg}.
 
-packet_msg({Type, _, _, _,_} = Msg) ->
-	EMsg = mod_proto:encode(Msg),
-	{ok, <<Type:16, EMsg/binary>>};
 packet_msg(Msg) ->
-	{error, Msg}.
+	Type = element(2, Msg),
+	EMsg = list_to_binary(protobuf_pb:encode(Msg)),
+	io:format("Type: ~p, Emsg: ~p~n",[Type,EMsg]),
+	{ok, <<Type:16, EMsg/binary>>}.
 
 
 %% 解包服务器消息
@@ -42,21 +41,16 @@ unpacket_msg(H, BinMsg) ->
 	{Type, Msg}.
 
 
-%% 生成心跳消息
-packet_heart() ->
-	Heart = #heartbeat{mt = 101, mid = 15329642, sig = 1,  data = ""},
-	io:format("Heart: ~p~n", [Heart]),
-	EHeart = list_to_binary(protobuf_pb:encode_heartbeat(Heart)),
-	io:format("EHeart: ~p~n", [EHeart]),
-	<<101:16, EHeart/binary>>.
-
 %% -----------------------------------------------------------------------------
 %% internal function
 %% -----------------------------------------------------------------------------
 
-get_decode_type(110) -> logonrequest;
-get_decode_type(101) -> heartbeat.
 
+
+get_decode_type(104) -> logonsuccess;
+get_decode_type(103) -> requestlogonack;
+get_decode_type(102) -> requestlogin;
+get_decode_type(101) -> heartbeat.
 
 
 

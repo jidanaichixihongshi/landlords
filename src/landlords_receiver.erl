@@ -44,8 +44,6 @@ start_link(Ref, Socket, Transport, Opts) ->
 %% gen_server.
 %% This function is never called. We only define it so that
 %% we can use the -behaviour(gen_server) attribute.
-init([]) ->
-	{ok, undefined};
 init([Ref, Socket, Transport, Opts]) ->
 	erlang:process_flag(trap_exit, true),
 	{ok, Pid} = landlords_c2s:start_link({ranch_tcp, Socket, self()}, []),
@@ -57,6 +55,7 @@ init([Ref, Socket, Transport, Opts]) ->
 		transport = Transport,
 		opts = Opts
 	},
+	?DEBUG("------------------~n",[]),
 	gen_server:enter_loop(?MODULE, [], State, 5000).
 
 handle_call(_Request, _From, State) ->

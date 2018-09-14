@@ -55,7 +55,7 @@ close(FsmRef) -> gen_fsm:send_event(FsmRef, closed).
 %% ----------------------------------------------------------------
 init([]) ->
 	{ok, undefined};
-init([{SockMod, Socket}]) ->
+init([{SockMod, Socket, _SockPid}]) ->
 	{ok, {Address, Port}} = inet:peername(Socket),
 	StateData = #client_state{
 		status = ?LOGGING,

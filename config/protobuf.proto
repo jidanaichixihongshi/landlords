@@ -19,7 +19,7 @@ message UserData {
 
 message RequestLogon {
   required int32 mt = 1;              %% 消息类型编号
-  required int32 mid = 2;             %% 消息id
+  required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
   required UserData data = 5;
@@ -28,7 +28,7 @@ message RequestLogon {
 %% 返回登录响应
 message RequestLogonAck {
   required int32 mt = 1;              %% 消息类型编号
-  required int32 mid = 2;             %% 消息id
+  required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
   optional int32 data = 5;
@@ -37,7 +37,7 @@ message RequestLogonAck {
 %% 登陆成功
 message LogonSuccess {
   required int32 mt = 1;              %% 消息类型编号
-  required int32 mid = 2;             %% 消息id
+  required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
   optional int32 data = 5;
@@ -46,7 +46,7 @@ message LogonSuccess {
 %% 发送增量数据
 message ResponseSession {
   required int32 mt = 1;              %% 消息类型编号
-  required int32 mid = 2;             %% 消息id
+  required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
   optional string data = 5;
@@ -55,7 +55,7 @@ message ResponseSession {
 %% 增量数据接收成功
 message SessionSuccess {
   required int32 mt = 1;              %% 消息类型编号
-  required int32 mid = 2;             %% 消息id
+  required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
   optional int32 data = 5;
@@ -69,7 +69,7 @@ message SessionSuccess {
 %% 心跳消息
 message HeartBeat {
   required int32 mt = 1;              %% 消息类型编号
-  required int32 mid = 2;             %% 消息id
+  required string mid = 2;             %% 消息id
   required int32 sig = 3;             %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
   optional string data = 5;
