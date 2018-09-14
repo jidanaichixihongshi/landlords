@@ -23,9 +23,9 @@
 }).
 -endif.
 
--ifndef(REQUESTLOGONACK_PB_H).
--define(REQUESTLOGONACK_PB_H, true).
--record(requestlogonack, {
+-ifndef(RESPONSELOGON_PB_H).
+-define(RESPONSELOGON_PB_H, true).
+-record(responselogon, {
     mt = erlang:error({required, mt}),
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),

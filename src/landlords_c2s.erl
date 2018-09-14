@@ -118,6 +118,7 @@ wait_for_auth(#requestlogon{
 			fsm_next_state(wait_for_auth, StateData)
 	end;
 wait_for_auth(timeout, StateData) ->
+	?INFO("-----------------~n",[]),
 	{stop, normal, StateData};
 wait_for_auth(closed, StateData) ->
 	{stop, normal, StateData};

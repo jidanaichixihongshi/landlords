@@ -11,9 +11,9 @@
 
 -define(TCP_OPTIONS, [
         binary,
-        {packet, 0},
+        {packet, 4},
         {keepalive, true},
-        {active, false}]).
+        {active, once}]).
 
 -define(HEART_BREAK_TIME, 15000).	%% 心跳
 

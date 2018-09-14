@@ -46,6 +46,9 @@ start_link(Ref, Socket, Transport, Opts) ->
 %% we can use the -behaviour(gen_server) attribute.
 init([Ref, Socket, Transport, Opts]) ->
 	erlang:process_flag(trap_exit, true),
+	ok = proc_lib:init_ack({ok, self()}),
+    	ok = ranch:accept_ack(Ref),
+   	ok = Transport:setopts(Socket, [{active, once}, {packet, 4}]),
 	{ok, Pid} = landlords_c2s:start_link({ranch_tcp, Socket, self()}, []),
 	?INFO("landlords_c2s init, socket: ~p~n", [Socket]),
 	State = #receiver_state{
@@ -55,7 +58,7 @@ init([Ref, Socket, Transport, Opts]) ->
 		transport = Transport,
 		opts = Opts
 	},
-	gen_server:enter_loop(?MODULE, [], State, ?HIBERNATE_TIMEOUT).
+	gen_server:enter_loop(?MODULE,[],State,?HIBERNATE_TIMEOUT).
 
 handle_call(_Request, _From, State) ->
 	?DEBUG("handle_call message ~p ~n", [_Request]),
@@ -75,6 +78,7 @@ handle_cast({send, Msg}, #receiver_state{socket = Socket, transport = Transport 
 
 %% handle socket data
 handle_info({tcp, Socket, Data}, State) ->
+	?INFO("00000000000000000000000000~n",[]),
 	Transport = State#receiver_state.transport,
 	Transport:setopts(Socket, [{active, once}]),
 	%% 要不要把消息存进内存呢？

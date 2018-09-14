@@ -27,8 +27,8 @@ init(_Args) ->
 	{ok, {IP, Port}} = application:get_env(landlords_client, addrs),
 	case gen_tcp:connect(IP, Port, ?TCP_OPTIONS) of
 		{ok, Socket} ->
-			io:format("----------------connect success~n", []),
 			timer:send_interval(?HEART_BREAK_TIME, heartbeat),
+			erlang:send_after( 2000, self(), start_logon),
 			State = #state{
 				ip = IP,
 				port = Port,
@@ -49,6 +49,9 @@ handle_cast(Request, State) ->
 	io:format("handle_cast message ~p ~n", [Request]),
 	{noreply, State}.
 
+handle_info(start_logon, State) ->
+	msg:requestlogon(),
+	{noreply, State};
 
 handle_info(heartbeat, State) ->
 	msg:heartbeat(),
@@ -56,8 +59,14 @@ handle_info(heartbeat, State) ->
 handle_info({send_msg, Msg}, State = #state{socket = Socket}) ->
 	case mod_msg:packet(Msg) of
 		{ok, Data} ->
-			io:format("send msg to server :: ~p~n",[Msg]),
-			gen_tcp:send(Socket, Data);
+			case gen_tcp:send(Socket, Data) of
+				ok ->
+					ok = gen_tcp:send(Socket, Data),
+					
+					io:format("send msg to server :: ~p~n",[Msg]);
+				Error ->
+					io:format("Error: ~p~n",[Error])
+			end;
 		{error, _} ->
 			io:format("msg : ~p packet error!~n", [Msg])
 	end,

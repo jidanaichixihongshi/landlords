@@ -10,6 +10,7 @@
 -auth("cw").
 
 -include("error.hrl").
+-include("logger.hrl").
 
 -export([
 	packet/1,
@@ -30,13 +31,13 @@ packet(Msg) ->
 packet_msg(Msg) ->
 	Type = erlang:element(2, Msg),
 	EMsg = list_to_binary(encode(Msg)),
-	{ok, <<Type:16, EMsg/binary>>};
-packet_msg(Msg) ->
-	{error, Msg}.
+	{ok, <<Type:16, EMsg/binary>>}.
 
 %% 解包客户端消息
 unpacket(Data) when is_binary(Data) ->
+	?INFO("~p~n",[Data]),
 	<<H:16, BinMsg/binary>> = Data,
+	?INFO("~p,   ~p~n",[H,BinMsg]),
 	decode(H, BinMsg);
 unpacket(_Data) ->
 	throw({error, ?ERROR_101}).
@@ -63,7 +64,7 @@ get_decode_type(106) -> sessionsuccess;
 get_decode_type(105) -> responsesession;
 get_decode_type(104) -> logonsuccess;
 get_decode_type(103) -> responselogon;
-get_decode_type(102) -> requestlogin;
+get_decode_type(102) -> requestlogon;
 get_decode_type(101) -> heartbeat.
 
 

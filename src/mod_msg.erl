@@ -58,7 +58,7 @@ produce_responselogon(Mid, Reply) ->
 	}.
 
 produce_session(Mid, Reply) ->
-	#responssession{
+	#responsesession{
 		mt = 105,
 		mid = Mid,
 		sig = ?SIGN2,

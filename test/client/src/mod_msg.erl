@@ -23,8 +23,8 @@ packet(Msg) ->
 
 packet_msg(Msg) ->
 	Type = element(2, Msg),
+	io:format("***************~p~n",[Type]),
 	EMsg = list_to_binary(protobuf_pb:encode(Msg)),
-	io:format("Type: ~p, Emsg: ~p~n",[Type,EMsg]),
 	{ok, <<Type:16, EMsg/binary>>}.
 
 
@@ -44,8 +44,6 @@ unpacket_msg(H, BinMsg) ->
 %% -----------------------------------------------------------------------------
 %% internal function
 %% -----------------------------------------------------------------------------
-
-
 
 get_decode_type(104) -> logonsuccess;
 get_decode_type(103) -> responselogon;

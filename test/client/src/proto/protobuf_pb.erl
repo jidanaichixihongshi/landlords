@@ -9,12 +9,12 @@
 	 encode_responsesession/1, decode_responsesession/1,
 	 delimited_decode_responsesession/1,
 	 encode_logonsuccess/1, decode_logonsuccess/1,
-	 delimited_decode_logonsuccess/1,
-	 encode_requestlogonack/1, decode_requestlogonack/1,
-	 delimited_decode_requestlogonack/1,
-	 encode_requestlogon/1, decode_requestlogon/1,
-	 delimited_decode_requestlogon/1, encode_userdata/1,
-	 decode_userdata/1, delimited_decode_userdata/1]).
+	 delimited_decode_logonsuccess/1, encode_responselogon/1,
+	 decode_responselogon/1,
+	 delimited_decode_responselogon/1, encode_requestlogon/1,
+	 decode_requestlogon/1, delimited_decode_requestlogon/1,
+	 encode_userdata/1, decode_userdata/1,
+	 delimited_decode_userdata/1]).
 
 -export([has_extension/2, extension_size/1,
 	 get_extension/2, set_extension/3]).
@@ -35,8 +35,7 @@
 
 -record(logonsuccess, {mt, mid, sig, timestamp, data}).
 
--record(requestlogonack,
-	{mt, mid, sig, timestamp, data}).
+-record(responselogon, {mt, mid, sig, timestamp, data}).
 
 -record(requestlogon, {mt, mid, sig, timestamp, data}).
 
@@ -75,11 +74,11 @@ encode_logonsuccess(Record)
     when is_record(Record, logonsuccess) ->
     encode(logonsuccess, Record).
 
-encode_requestlogonack(Records) when is_list(Records) ->
+encode_responselogon(Records) when is_list(Records) ->
     delimited_encode(Records);
-encode_requestlogonack(Record)
-    when is_record(Record, requestlogonack) ->
-    encode(requestlogonack, Record).
+encode_responselogon(Record)
+    when is_record(Record, responselogon) ->
+    encode(responselogon, Record).
 
 encode_requestlogon(Records) when is_list(Records) ->
     delimited_encode(Records);
@@ -102,11 +101,10 @@ encode(requestlogon, Records) when is_list(Records) ->
 encode(requestlogon, Record) ->
     [iolist(requestlogon, Record)
      | encode_extensions(Record)];
-encode(requestlogonack, Records)
-    when is_list(Records) ->
+encode(responselogon, Records) when is_list(Records) ->
     delimited_encode(Records);
-encode(requestlogonack, Record) ->
-    [iolist(requestlogonack, Record)
+encode(responselogon, Record) ->
+    [iolist(responselogon, Record)
      | encode_extensions(Record)];
 encode(logonsuccess, Records) when is_list(Records) ->
     delimited_encode(Records);
@@ -144,7 +142,7 @@ iolist(userdata, Record) ->
 	  with_default(Record#userdata.nickname, none), string,
 	  []),
      pack(2, optional,
-	  with_default(Record#userdata.uid, none), string, []),
+	  with_default(Record#userdata.uid, none), int32, []),
      pack(3, optional,
 	  with_default(Record#userdata.phone, none), int64, []),
      pack(4, required,
@@ -174,21 +172,20 @@ iolist(requestlogon, Record) ->
      pack(5, required,
 	  with_default(Record#requestlogon.data, none), userdata,
 	  [])];
-iolist(requestlogonack, Record) ->
+iolist(responselogon, Record) ->
     [pack(1, required,
-	  with_default(Record#requestlogonack.mt, none), int32,
-	  []),
+	  with_default(Record#responselogon.mt, none), int32, []),
      pack(2, required,
-	  with_default(Record#requestlogonack.mid, none), string,
+	  with_default(Record#responselogon.mid, none), string,
 	  []),
      pack(3, required,
-	  with_default(Record#requestlogonack.sig, none), int32,
+	  with_default(Record#responselogon.sig, none), int32,
 	  []),
      pack(4, required,
-	  with_default(Record#requestlogonack.timestamp, none),
+	  with_default(Record#responselogon.timestamp, none),
 	  int64, []),
      pack(5, optional,
-	  with_default(Record#requestlogonack.data, none), int32,
+	  with_default(Record#responselogon.data, none), int32,
 	  [])];
 iolist(logonsuccess, Record) ->
     [pack(1, required,
@@ -304,8 +301,8 @@ decode_responsesession(Bytes) when is_binary(Bytes) ->
 decode_logonsuccess(Bytes) when is_binary(Bytes) ->
     decode(logonsuccess, Bytes).
 
-decode_requestlogonack(Bytes) when is_binary(Bytes) ->
-    decode(requestlogonack, Bytes).
+decode_responselogon(Bytes) when is_binary(Bytes) ->
+    decode(responselogon, Bytes).
 
 decode_requestlogon(Bytes) when is_binary(Bytes) ->
     decode(requestlogon, Bytes).
@@ -319,8 +316,8 @@ delimited_decode_userdata(Bytes) ->
 delimited_decode_requestlogon(Bytes) ->
     delimited_decode(requestlogon, Bytes).
 
-delimited_decode_requestlogonack(Bytes) ->
-    delimited_decode(requestlogonack, Bytes).
+delimited_decode_responselogon(Bytes) ->
+    delimited_decode(responselogon, Bytes).
 
 delimited_decode_logonsuccess(Bytes) ->
     delimited_decode(logonsuccess, Bytes).
@@ -356,7 +353,7 @@ decode(userdata, Bytes) when is_binary(Bytes) ->
     Types = [{8, app_id, string, []},
 	     {7, version, string, []}, {6, device_id, int32, []},
 	     {5, device, int32, []}, {4, token, string, []},
-	     {3, phone, int64, []}, {2, uid, string, []},
+	     {3, phone, int64, []}, {2, uid, int32, []},
 	     {1, nickname, string, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
@@ -368,13 +365,13 @@ decode(requestlogon, Bytes) when is_binary(Bytes) ->
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(requestlogon, Decoded);
-decode(requestlogonack, Bytes) when is_binary(Bytes) ->
+decode(responselogon, Bytes) when is_binary(Bytes) ->
     Types = [{5, data, int32, []},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
 	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
-    to_record(requestlogonack, Decoded);
+    to_record(responselogon, Decoded);
 decode(logonsuccess, Bytes) when is_binary(Bytes) ->
     Types = [{5, data, int32, []},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
@@ -495,14 +492,14 @@ to_record(requestlogon, DecodedTuples) ->
 			  end,
 			  #requestlogon{}, DecodedTuples),
     Record1;
-to_record(requestlogonack, DecodedTuples) ->
+to_record(responselogon, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},
 			       Record) ->
 				  set_record_field(record_info(fields,
-							       requestlogonack),
+							       responselogon),
 						   Record, Name, Val)
 			  end,
-			  #requestlogonack{}, DecodedTuples),
+			  #responselogon{}, DecodedTuples),
     Record1;
 to_record(logonsuccess, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},

@@ -13,7 +13,7 @@
 -include("protobuf_pb.hrl").
 
 -export([
-	requestlogin/0,
+	requestlogon/0,
 	logonsuccess/0,
 	sessionsuccess/0,
 	heartbeat/0]).
@@ -21,7 +21,7 @@
 %% -----------------------------------------------------------------------
 %% 登录功能测试
 %% -----------------------------------------------------------------------
-requestlogin() ->
+requestlogon() ->
 	Uid = 1537096,
 	UserData = #userdata{
 		nickname = "晴天",
@@ -29,7 +29,7 @@ requestlogin() ->
 		phone = 15175066700,
 		token = "testloginserver#2537996#15175066700",
 		device = 1,
-		device_id = 3561943325861,
+		device_id = 3565861,
 		version = "0.0.1",
 		app_id = "32_1_3"
 	},

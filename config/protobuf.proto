@@ -6,7 +6,7 @@
 %% 用户登录请求消息
 message UserData {
   optional string nickname = 1;         %% none/用户昵称
-  optional string uid = 2;              %% uid，使用uid登录可填
+  optional int32 uid = 2;              %% uid，使用uid登录可填
   optional int64 phone = 3;             %% none/手机号，使用手机号登陆可填
   required string token = 4;
   required int32 device = 5;            %% 登录方式，1-安卓/2-ios/3-web
