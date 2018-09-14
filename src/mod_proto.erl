@@ -60,9 +60,9 @@ decode(_Type, _Msg) ->
 %% internal function
 %% -----------------------------------------------------------------------------
 get_decode_type(106) -> sessionsuccess;
-get_decode_type(105) -> responssession;
+get_decode_type(105) -> responsesession;
 get_decode_type(104) -> logonsuccess;
-get_decode_type(103) -> requestlogonack;
+get_decode_type(103) -> responselogon;
 get_decode_type(102) -> requestlogin;
 get_decode_type(101) -> heartbeat.
 

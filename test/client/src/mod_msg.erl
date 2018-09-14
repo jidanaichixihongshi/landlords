@@ -48,7 +48,7 @@ unpacket_msg(H, BinMsg) ->
 
 
 get_decode_type(104) -> logonsuccess;
-get_decode_type(103) -> requestlogonack;
+get_decode_type(103) -> responselogon;
 get_decode_type(102) -> requestlogin;
 get_decode_type(101) -> heartbeat.
 
