@@ -228,6 +228,12 @@ q_asyn(PoolName, Command, Timeout, Times) ->
 		end
 	end.
 
+q0_asyn(PoolName, Command, _Timeout) ->
+	poolboy:transaction(PoolName,
+		fun(Worker) ->
+			eredis:q_noreply(Worker, Command)
+		end).
+
 transaction(PoolName, Fun) when is_function(Fun) ->
 	F = fun(C) ->
 		try
