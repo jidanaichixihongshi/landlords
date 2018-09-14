@@ -20,7 +20,7 @@
 
 %% 钩子注册
 -define(HOOKS_LIST, [
-	{logonrequest, ?LOCALNODE, landlords_auth, handle_user_auth, 50}
+	{update_session_established, ?LOCALNODE, mod_c2s_handle, update_session_established, 50}
 ]).
 
 

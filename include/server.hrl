@@ -25,6 +25,8 @@
 -define(HIBERNATE_TIMEOUT, 30000).                            %% 休眠
 -define(TIMEOUT, 50000).
 -define(DATA_OVERTIME, 3000).																	%% 消息延时
+-define(AUTH_TIMEOUT, 12000).																	%% 登录超时
+-define(FSM_TIMEOUT, 60000).
 
 %% 消息标志位，控制消息走向
 -define(SIGN0, 0).					%% 节点消息
@@ -50,8 +52,8 @@
 %% 用户状态
 -define(STATUS_ONLINE, 0).        	%% 在线
 -define(STATUS_OFFLINE, 1).        	%% 离线
--define(STATUS_LOGGING, 1).        	%% 正在登陆
--define(STATUS_REGISTERING, 1).   	%% 正在注册
+-define(STATUS_LOGGING, 2).        	%% 正在登陆
+-define(STATUS_REGISTERING, 3).   	%% 正在注册
 
 %% 用户状态
 -define(ONLINE, online).		%% 在线状态
@@ -67,6 +69,7 @@
 	version :: <<>>,        	%% 客户端版本
 	device :: <<>>,						%% 客户端类型
 	device_id :: <<>>,        %% 设备id
+	app_id,
 	token :: <<>>,
 	location :: <<>>,       	%% 登录地点
 	login_time,               %% 登录时间
@@ -81,12 +84,10 @@
 	pid,              	%% 用户进程
 	node,            		%% 链接节点
 	socket,           	%% 连接套接字
-	ref,
 	ip,                	%% 连接ip
 	port,              	%% 连接端口
-	transport,
-	otp,
-	last_recv_time,
+	sockmod,
+	retry_times,
 	user_data = #user_data{}  %% 用户详细信息
 }).
 

@@ -30,7 +30,7 @@ login() ->
 		version = "0.0.1"
 		app_id = "32_1_3"
 	},
-	Login = #logonrequest{
+	Login = #requestlogon{
 		mt = 110,
 		mid = 1634682,
 		timestamp = get_mstimestamp(),

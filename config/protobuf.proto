@@ -17,16 +17,49 @@ message UserData {
 
 }
 
-message LogonRequest {
+message RequestLogon {
   required int32 mt = 1;              %% 消息类型编号
   required int32 mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  repeated UserData data = 5;
+  optional UserData data = 5;
 }
 
+%% 返回登录响应
+message RequestLogonAck {
+  required int32 mt = 1;              %% 消息类型编号
+  required int32 mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  optional init32 data = 5;
+}
 
+%% 登陆成功
+message LogonSuccess {
+  required int32 mt = 1;              %% 消息类型编号
+  required int32 mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  optional init32 data = 5;
+}
 
+%% 发送增量数据
+message ResponseSession {
+  required int32 mt = 1;              %% 消息类型编号
+  required int32 mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  optional string data = 5;
+}
+
+%% 增量数据接收成功
+message SessionSuccess {
+  required int32 mt = 1;              %% 消息类型编号
+  required int32 mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  optional init32 data = 5;
+}
 
 %% 用户登录相关end
 
@@ -37,7 +70,7 @@ message LogonRequest {
 message HeartBeat {
   required int32 mt = 1;              %% 消息类型编号
   required int32 mid = 2;             %% 消息id
-    required int32 sig = 3;             %% 消息标志位
+  required int32 sig = 3;             %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
   optional string data = 5;
 }

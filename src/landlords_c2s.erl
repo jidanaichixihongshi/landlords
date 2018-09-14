@@ -9,105 +9,169 @@
 -module(landlords_c2s).
 -auth("cw").
 
--behaviour(gen_server).
--behaviour(ranch_protocol).
+-behaviour(gen_fsm).
 
 -include("server.hrl").
 -include("logger.hrl").
+-include("protobuf_pb.hrl").
 
--export([start_link/4]).
+-define(FSMOPTS, [{debug, [trace]}]).
 
 -export([
+	start/2,
+	stop/1,
+	start_link/2,
+	close/1,
 	init/1,
-	handle_call/3,
-	handle_cast/2,
-	handle_info/2,
-	terminate/2,
-	code_change/3]).
+	handle_event/3,
+	handle_info/3,
+	handle_sync_event/4,
+	terminate/3,
+	code_change/4
+]).
 
--define(SERVER, ?MODULE).
+
+-export([
+	wait_for_auth/2,
+	wait_for_resume/2,
+	session_established/2
+]).
+
+%%%----------------------------------------------------------------------
+%%% API
+%%%----------------------------------------------------------------------
+start(SockData, _Opts) ->
+	gen_fsm:start(?MODULE, [SockData], []).
+
+start_link(SockData, _Opts) ->
+	gen_fsm:start_link(?MODULE, [SockData], []).
+
+stop(FsmRef) -> gen_fsm:send_event(FsmRef, stop).
+close(FsmRef) -> gen_fsm:send_event(FsmRef, closed).
 
 
-%% API.
-
-start_link(Ref, Socket, Transport, Opts) ->
-	gen_server:start_link(?MODULE, [Ref, Socket, Transport, Opts], []).
-
-%% gen_server.
-
-%% This function is never called. We only define it so that
-%% we can use the -behaviour(gen_server) attribute.
-
-init([Ref, Socket, Transport, Opts]) ->
-	%%peername(Socket) -> {ok, {Address, Port}} | {error, posix()}
+%% ----------------------------------------------------------------
+%% GEN_FSM API
+%% ----------------------------------------------------------------
+init([]) ->
+	{ok, undefined};
+init([{SockMod, Socket}]) ->
 	{ok, {Address, Port}} = inet:peername(Socket),
-	State = #client_state{
+	StateData = #client_state{
 		status = ?LOGGING,
-		ref = Ref,
 		node = node(),
 		socket = Socket,
-		transport = Transport,
-		otp = Opts,
 		ip = Address,
-		port = Port},
-	{ok, State, 0}.
-
-handle_call(_Request, _From, State) ->
-	?DEBUG("handle_call message ~p ~n", [_Request]),
-	{reply, ok, State, ?HIBERNATE_TIMEOUT}.
-
-handle_cast({send, Msg}, State = #client_state{socket = Socket, transport = Transport}) ->
-	?INFO("send tcp msg ::: ~p~n", [Msg]),
-	try
-		{ok, SData} = mod_msg:packet(Msg),
-		Transport:send(Socket, SData)
-	catch
-		Reason ->
-			?WARNING("packet msg error : ~p~n", [Reason])
-	end,
-	{noreply, State, ?HIBERNATE_TIMEOUT}.
+		port = Port,
+		sockmod = SockMod,
+		retry_times = 0},
+	{ok, wait_for_auth, StateData, 5000}.
 
 
-%% handle socket data
-handle_info({tcp, Socket, Data}, State) ->
-	Transport = State#client_state.transport,
-	Transport:setopts(Socket, [{active, once}]),
-	%% 要不要把消息存进内存呢？
-	try
-		Msg = mod_msg:unpacket(Data),
-		?INFO("receive tcp msg ::: ~p~n", [Msg]),
-		{ok, NewState} = mod_c2s_handle:handle_c2s_msg(Msg, State),
-		{noreply, NewState, ?HIBERNATE_TIMEOUT}
-	catch
-		Reason ->
-			erlang:send_after(500, self(), {error, Reason}),
-			{noreply, State, ?HIBERNATE_TIMEOUT}
+wait_for_auth(#requestlogon{
+	mt = 201,
+	mid = Mid,
+	sig = ?SIGN1,
+	timestamp = Timestamp,
+	data = Data} = _AuthData, StateData) ->
+	#userdata{
+		uid = Uid,
+		phone = Phone,
+		token = Token,
+		device = Device,
+		device_id = DeviceId,
+		version = Vsn,
+		app_id = AppId} = Data,
+	IFOverTime = not check_msg_timestamp(Timestamp),
+
+	case IFOverTime of
+		true ->
+			{_Node, ProxyPid} = mod_proxy:get_proxy(Uid),
+			mod_proxy:register_client(Uid, Device, Token),
+			UserData = #user_data{
+				uid = Uid,
+				nickname = <<"晴天">>,
+				level = 0,
+				version = Vsn,
+				device = Device,
+				device_id = DeviceId,
+				app_id = AppId,
+				token = Token,
+				location = <<"北京">>,
+				login_time = lib_time:get_mstimestamp(),
+				phone = Phone
+			},
+			NewStateData = StateData#client_state{
+				uid = Uid,
+				proxy = ProxyPid,
+				pid = self(),
+				node = node(),
+				user_data = UserData},
+			Reply = mod_msg:produce_responselogon(Mid, ?ERROR_0),
+			EReply = mod_msg:packet(Reply),
+			(StateData#client_state.sockmod):send(StateData#client_state.socket, EReply),
+			fsm_next_state(session_established, NewStateData);
+		_ ->
+			Reply = mod_msg:produce_responselogon(Mid, ?ERROR_102),
+			EReply = mod_msg:packet(Reply),
+			(StateData#client_state.sockmod):send(StateData#client_state.socket, EReply),
+			fsm_next_state(wait_for_auth, StateData)
 	end;
+wait_for_auth(timeout, StateData) ->
+	{stop, ?ERROR_102, StateData};
+wait_for_auth(closed, StateData) ->
+	{stop, normal, StateData};
+wait_for_auth(stop, StateData) ->
+	{stop, normal, StateData};
+wait_for_auth(_, StateData) ->
+	{stop, ?ERROR_101, StateData}.
 
-%% timout function set opt parms
-handle_info(timeout, #client_state{ref = Ref, socket = Socket, transport = Transport} = State) ->
-	?DEBUG("------------------------------1~n", []),
-	ok = ranch:accept_ack(Ref),
-	ok = Transport:setopts(Socket, [{active, once}]),
-	%%	lib_normal:set_mem(?MODULE, Socket, self()),
-	{noreply, State, ?HIBERNATE_TIMEOUT};
-%% 消息错误，关闭socket
-handle_info({error, Reason}, #client_state{socket = Socket, transport = _Transport} = State) ->
-	Msg = mod_msg:produce_error_msg(error, Reason),
-	self() ! {send, Msg},
-	erlang:send_after(1500, self(), {tcp_error, Reason, Socket}),
-	{noreply, State, ?HIBERNATE_TIMEOUT};
-handle_info({tcp_closed, _Socket}, State) ->
-	{stop, normal, State};
-handle_info({tcp_error, _, Reason}, State) ->
-	{stop, Reason, State};
-handle_info(timeout, State) ->
-	{stop, normal, State};
-handle_info(_Info, State) ->
-	{stop, normal, State}.
 
-terminate(Reason, State) ->
-	#client_state{uid = Uid, proxy = ProxyPid, socket = Socket} = State,
+session_established(#logonsuccess{
+	mt = 201,
+	sig = ?SIGN1,
+	data = ?ERROR_0}, StateData) ->
+	%% 更新增量
+	landlords_hooks:run(update_session_established, node(), StateData),
+	fsm_next_state(session_established, StateData);
+session_established(timeout, StateData) ->
+	fsm_next_state(session_established, StateData);
+session_established(closed, StateData) ->
+	{stop, normal, StateData};
+session_established(stop, StateData) ->
+	{stop, normal, StateData}.
+
+wait_for_resume(_Event, StateData) ->
+	fsm_next_state(wait_for_resume, StateData);
+wait_for_resume(timeout, StateData) ->
+	?DEBUG("Timed out waiting for resumption", []),
+	{stop, normal, StateData};
+wait_for_resume(Event, StateData) ->
+	?DEBUG("Ignoring event while waiting for resumption: ~p", [Event]),
+	fsm_next_state(wait_for_resume, StateData).
+
+
+
+handle_event(Event, StateName, StateData) ->
+	?WARNING("undefined event : ~p~n",[Event]),
+	fsm_next_state(StateName, StateData).
+
+handle_sync_event(_Event, _From, StateName, StateData) ->
+	fsm_reply(ok, StateName, StateData).
+
+handle_info(receive_ack, StateName, StateData) ->
+	fsm_next_state(StateName, StateData);
+handle_info(Event, StateName, StateData) ->
+	?WARNING("undefined event : ~p~n",[Event]),
+	fsm_next_state(StateName, StateData).
+
+
+terminate(Reason, _StateName, StateData) ->
+	#client_state{
+		uid = Uid,
+		proxy = ProxyPid,
+		socket = Socket,
+		sockmod = SockMod} = StateData,
 	?WARNING("======================================== ~n
 		socket ~p terminate, reason: ~p~n
 		======================================== ~n", [Socket, Reason]),
@@ -117,12 +181,48 @@ terminate(Reason, State) ->
 		_ ->
 			ok
 	end,
-	lib_normal:del_mem(?MODULE, Socket),
+	SockMod:close(Socket),
 	ok.
 
-code_change(_OldVsn, State, _Extra) ->
-	?DEBUG("------------------------------8~n", []),
-	{ok, State}.
+code_change(_OldVsn, StateName, StateData, _Extra) ->
+	?INFO("Module ~p changed ...~n", [?MODULE]),
+	{ok, StateName, StateData}.
+
+
+
+
+%% ----------------------------------------------------------------
+%% internal api
+%% ----------------------------------------------------------------
+%% fsm_next_state: Generate the next_state FSM tuple with different
+%% timeout, depending on the future state
+fsm_next_state(session_established, StateData) ->
+	{next_state, session_established, StateData, ?AUTH_TIMEOUT};
+fsm_next_state(wait_for_auth, #client_state{retry_times = TetryTimes} = StateData) when TetryTimes >= 1 ->
+	{stop, normal, StateData};
+fsm_next_state(wait_for_auth, #client_state{retry_times = TetryTimes} = StateData) ->
+	{next_state, wait_for_auth, StateData#client_state{retry_times = TetryTimes + 1}, ?AUTH_TIMEOUT};
+fsm_next_state(StateName, StateData) ->
+	{next_state, StateName, StateData, ?HIBERNATE_TIMEOUT}.
+
+%% fsm_reply: Generate the reply FSM tuple with different timeout,
+%% depending on the future state
+fsm_reply(Reply, session_established, StateData) ->
+	{reply, Reply, session_established, StateData, ?TIMEOUT};
+fsm_reply(Reply, StateName, StateData) ->
+	{reply, Reply, StateName, StateData, ?TIMEOUT}.
+
+
+
+check_msg_timestamp(Timestamp) ->
+	MsTimestamp = lib_time:get_mstimestamp(),
+	Timestamp + ?DATA_OVERTIME > MsTimestamp.
+
+
+
+
+
+
 
 
 

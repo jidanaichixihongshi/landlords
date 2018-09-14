@@ -9,5 +9,7 @@
 
 -define(ERROR_0, 0).					%% 成功
 
--define(ERROR_101, 101).					%% 数据错格式误
+-define(ERROR_100, 100).					%% 未知错误
+-define(ERROR_101, 101).					%% 数据格式错误
 -define(ERROR_102, 102).					%% 数据请求超时
+-define(ERROR_102, 103).					%% 数据请求超时
