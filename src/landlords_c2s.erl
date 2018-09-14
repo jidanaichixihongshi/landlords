@@ -141,7 +141,7 @@ session_established(closed, StateData) ->
 session_established(stop, StateData) ->
 	{stop, normal, StateData}.
 
-wait_for_resume(_Event, StateData) ->
+wait_for_resume(Event, StateData) when is_tuple(Event) ->
 	fsm_next_state(wait_for_resume, StateData);
 wait_for_resume(timeout, StateData) ->
 	?DEBUG("Timed out waiting for resumption", []),

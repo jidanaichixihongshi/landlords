@@ -3,10 +3,18 @@
 -module(protobuf_pb).
 
 -export([encode_heartbeat/1, decode_heartbeat/1,
-	 delimited_decode_heartbeat/1, encode_logonrequest/1,
-	 decode_logonrequest/1, delimited_decode_logonrequest/1,
-	 encode_userdata/1, decode_userdata/1,
-	 delimited_decode_userdata/1]).
+	 delimited_decode_heartbeat/1, encode_sessionsuccess/1,
+	 decode_sessionsuccess/1,
+	 delimited_decode_sessionsuccess/1,
+	 encode_responsesession/1, decode_responsesession/1,
+	 delimited_decode_responsesession/1,
+	 encode_logonsuccess/1, decode_logonsuccess/1,
+	 delimited_decode_logonsuccess/1,
+	 encode_requestlogonack/1, decode_requestlogonack/1,
+	 delimited_decode_requestlogonack/1,
+	 encode_requestlogon/1, decode_requestlogon/1,
+	 delimited_decode_requestlogon/1, encode_userdata/1,
+	 decode_userdata/1, delimited_decode_userdata/1]).
 
 -export([has_extension/2, extension_size/1,
 	 get_extension/2, set_extension/3]).
@@ -19,7 +27,18 @@
 
 -record(heartbeat, {mt, mid, sig, timestamp, data}).
 
--record(logonrequest, {mt, mid, sig, timestamp, data}).
+-record(sessionsuccess,
+	{mt, mid, sig, timestamp, data}).
+
+-record(responsesession,
+	{mt, mid, sig, timestamp, data}).
+
+-record(logonsuccess, {mt, mid, sig, timestamp, data}).
+
+-record(requestlogonack,
+	{mt, mid, sig, timestamp, data}).
+
+-record(requestlogon, {mt, mid, sig, timestamp, data}).
 
 -record(userdata,
 	{nickname, uid, phone, token, device, device_id,
@@ -38,11 +57,35 @@ encode_heartbeat(Record)
     when is_record(Record, heartbeat) ->
     encode(heartbeat, Record).
 
-encode_logonrequest(Records) when is_list(Records) ->
+encode_sessionsuccess(Records) when is_list(Records) ->
     delimited_encode(Records);
-encode_logonrequest(Record)
-    when is_record(Record, logonrequest) ->
-    encode(logonrequest, Record).
+encode_sessionsuccess(Record)
+    when is_record(Record, sessionsuccess) ->
+    encode(sessionsuccess, Record).
+
+encode_responsesession(Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode_responsesession(Record)
+    when is_record(Record, responsesession) ->
+    encode(responsesession, Record).
+
+encode_logonsuccess(Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode_logonsuccess(Record)
+    when is_record(Record, logonsuccess) ->
+    encode(logonsuccess, Record).
+
+encode_requestlogonack(Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode_requestlogonack(Record)
+    when is_record(Record, requestlogonack) ->
+    encode(requestlogonack, Record).
+
+encode_requestlogon(Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode_requestlogon(Record)
+    when is_record(Record, requestlogon) ->
+    encode(requestlogon, Record).
 
 encode_userdata(Records) when is_list(Records) ->
     delimited_encode(Records);
@@ -54,10 +97,32 @@ encode(userdata, Records) when is_list(Records) ->
     delimited_encode(Records);
 encode(userdata, Record) ->
     [iolist(userdata, Record) | encode_extensions(Record)];
-encode(logonrequest, Records) when is_list(Records) ->
+encode(requestlogon, Records) when is_list(Records) ->
     delimited_encode(Records);
-encode(logonrequest, Record) ->
-    [iolist(logonrequest, Record)
+encode(requestlogon, Record) ->
+    [iolist(requestlogon, Record)
+     | encode_extensions(Record)];
+encode(requestlogonack, Records)
+    when is_list(Records) ->
+    delimited_encode(Records);
+encode(requestlogonack, Record) ->
+    [iolist(requestlogonack, Record)
+     | encode_extensions(Record)];
+encode(logonsuccess, Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode(logonsuccess, Record) ->
+    [iolist(logonsuccess, Record)
+     | encode_extensions(Record)];
+encode(responsesession, Records)
+    when is_list(Records) ->
+    delimited_encode(Records);
+encode(responsesession, Record) ->
+    [iolist(responsesession, Record)
+     | encode_extensions(Record)];
+encode(sessionsuccess, Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode(sessionsuccess, Record) ->
+    [iolist(sessionsuccess, Record)
      | encode_extensions(Record)];
 encode(heartbeat, Records) when is_list(Records) ->
     delimited_encode(Records);
@@ -95,18 +160,79 @@ iolist(userdata, Record) ->
      pack(8, required,
 	  with_default(Record#userdata.app_id, none), string,
 	  [])];
-iolist(logonrequest, Record) ->
+iolist(requestlogon, Record) ->
     [pack(1, required,
-	  with_default(Record#logonrequest.mt, none), int32, []),
+	  with_default(Record#requestlogon.mt, none), int32, []),
      pack(2, required,
-	  with_default(Record#logonrequest.mid, none), int32, []),
+	  with_default(Record#requestlogon.mid, none), int32, []),
      pack(3, required,
-	  with_default(Record#logonrequest.sig, none), int32, []),
+	  with_default(Record#requestlogon.sig, none), int32, []),
      pack(4, required,
-	  with_default(Record#logonrequest.timestamp, none),
+	  with_default(Record#requestlogon.timestamp, none),
 	  int64, []),
-     pack(5, repeated,
-	  with_default(Record#logonrequest.data, none), userdata,
+     pack(5, required,
+	  with_default(Record#requestlogon.data, none), userdata,
+	  [])];
+iolist(requestlogonack, Record) ->
+    [pack(1, required,
+	  with_default(Record#requestlogonack.mt, none), int32,
+	  []),
+     pack(2, required,
+	  with_default(Record#requestlogonack.mid, none), int32,
+	  []),
+     pack(3, required,
+	  with_default(Record#requestlogonack.sig, none), int32,
+	  []),
+     pack(4, required,
+	  with_default(Record#requestlogonack.timestamp, none),
+	  int64, []),
+     pack(5, optional,
+	  with_default(Record#requestlogonack.data, none), int32,
+	  [])];
+iolist(logonsuccess, Record) ->
+    [pack(1, required,
+	  with_default(Record#logonsuccess.mt, none), int32, []),
+     pack(2, required,
+	  with_default(Record#logonsuccess.mid, none), int32, []),
+     pack(3, required,
+	  with_default(Record#logonsuccess.sig, none), int32, []),
+     pack(4, required,
+	  with_default(Record#logonsuccess.timestamp, none),
+	  int64, []),
+     pack(5, optional,
+	  with_default(Record#logonsuccess.data, none), int32,
+	  [])];
+iolist(responsesession, Record) ->
+    [pack(1, required,
+	  with_default(Record#responsesession.mt, none), int32,
+	  []),
+     pack(2, required,
+	  with_default(Record#responsesession.mid, none), int32,
+	  []),
+     pack(3, required,
+	  with_default(Record#responsesession.sig, none), int32,
+	  []),
+     pack(4, required,
+	  with_default(Record#responsesession.timestamp, none),
+	  int64, []),
+     pack(5, optional,
+	  with_default(Record#responsesession.data, none), string,
+	  [])];
+iolist(sessionsuccess, Record) ->
+    [pack(1, required,
+	  with_default(Record#sessionsuccess.mt, none), int32,
+	  []),
+     pack(2, required,
+	  with_default(Record#sessionsuccess.mid, none), int32,
+	  []),
+     pack(3, required,
+	  with_default(Record#sessionsuccess.sig, none), int32,
+	  []),
+     pack(4, required,
+	  with_default(Record#sessionsuccess.timestamp, none),
+	  int64, []),
+     pack(5, optional,
+	  with_default(Record#sessionsuccess.data, none), int32,
 	  [])];
 iolist(heartbeat, Record) ->
     [pack(1, required,
@@ -167,8 +293,20 @@ int_to_enum(_, Val) -> Val.
 decode_heartbeat(Bytes) when is_binary(Bytes) ->
     decode(heartbeat, Bytes).
 
-decode_logonrequest(Bytes) when is_binary(Bytes) ->
-    decode(logonrequest, Bytes).
+decode_sessionsuccess(Bytes) when is_binary(Bytes) ->
+    decode(sessionsuccess, Bytes).
+
+decode_responsesession(Bytes) when is_binary(Bytes) ->
+    decode(responsesession, Bytes).
+
+decode_logonsuccess(Bytes) when is_binary(Bytes) ->
+    decode(logonsuccess, Bytes).
+
+decode_requestlogonack(Bytes) when is_binary(Bytes) ->
+    decode(requestlogonack, Bytes).
+
+decode_requestlogon(Bytes) when is_binary(Bytes) ->
+    decode(requestlogon, Bytes).
 
 decode_userdata(Bytes) when is_binary(Bytes) ->
     decode(userdata, Bytes).
@@ -176,8 +314,20 @@ decode_userdata(Bytes) when is_binary(Bytes) ->
 delimited_decode_userdata(Bytes) ->
     delimited_decode(userdata, Bytes).
 
-delimited_decode_logonrequest(Bytes) ->
-    delimited_decode(logonrequest, Bytes).
+delimited_decode_requestlogon(Bytes) ->
+    delimited_decode(requestlogon, Bytes).
+
+delimited_decode_requestlogonack(Bytes) ->
+    delimited_decode(requestlogonack, Bytes).
+
+delimited_decode_logonsuccess(Bytes) ->
+    delimited_decode(logonsuccess, Bytes).
+
+delimited_decode_responsesession(Bytes) ->
+    delimited_decode(responsesession, Bytes).
+
+delimited_decode_sessionsuccess(Bytes) ->
+    delimited_decode(sessionsuccess, Bytes).
 
 delimited_decode_heartbeat(Bytes) ->
     delimited_decode(heartbeat, Bytes).
@@ -209,13 +359,41 @@ decode(userdata, Bytes) when is_binary(Bytes) ->
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(userdata, Decoded);
-decode(logonrequest, Bytes) when is_binary(Bytes) ->
-    Types = [{5, data, userdata, [is_record, repeated]},
+decode(requestlogon, Bytes) when is_binary(Bytes) ->
+    Types = [{5, data, userdata, [is_record]},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
 	     {2, mid, int32, []}, {1, mt, int32, []}],
-    Defaults = [{5, data, []}],
+    Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
-    to_record(logonrequest, Decoded);
+    to_record(requestlogon, Decoded);
+decode(requestlogonack, Bytes) when is_binary(Bytes) ->
+    Types = [{5, data, int32, []},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, int32, []}, {1, mt, int32, []}],
+    Defaults = [],
+    Decoded = decode(Bytes, Types, Defaults),
+    to_record(requestlogonack, Decoded);
+decode(logonsuccess, Bytes) when is_binary(Bytes) ->
+    Types = [{5, data, int32, []},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, int32, []}, {1, mt, int32, []}],
+    Defaults = [],
+    Decoded = decode(Bytes, Types, Defaults),
+    to_record(logonsuccess, Decoded);
+decode(responsesession, Bytes) when is_binary(Bytes) ->
+    Types = [{5, data, string, []},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, int32, []}, {1, mt, int32, []}],
+    Defaults = [],
+    Decoded = decode(Bytes, Types, Defaults),
+    to_record(responsesession, Decoded);
+decode(sessionsuccess, Bytes) when is_binary(Bytes) ->
+    Types = [{5, data, int32, []},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, int32, []}, {1, mt, int32, []}],
+    Defaults = [],
+    Decoded = decode(Bytes, Types, Defaults),
+    to_record(sessionsuccess, Decoded);
 decode(heartbeat, Bytes) when is_binary(Bytes) ->
     Types = [{5, data, string, []},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
@@ -306,14 +484,50 @@ to_record(userdata, DecodedTuples) ->
 			  end,
 			  #userdata{}, DecodedTuples),
     Record1;
-to_record(logonrequest, DecodedTuples) ->
+to_record(requestlogon, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},
 			       Record) ->
 				  set_record_field(record_info(fields,
-							       logonrequest),
+							       requestlogon),
 						   Record, Name, Val)
 			  end,
-			  #logonrequest{}, DecodedTuples),
+			  #requestlogon{}, DecodedTuples),
+    Record1;
+to_record(requestlogonack, DecodedTuples) ->
+    Record1 = lists:foldr(fun ({_FNum, Name, Val},
+			       Record) ->
+				  set_record_field(record_info(fields,
+							       requestlogonack),
+						   Record, Name, Val)
+			  end,
+			  #requestlogonack{}, DecodedTuples),
+    Record1;
+to_record(logonsuccess, DecodedTuples) ->
+    Record1 = lists:foldr(fun ({_FNum, Name, Val},
+			       Record) ->
+				  set_record_field(record_info(fields,
+							       logonsuccess),
+						   Record, Name, Val)
+			  end,
+			  #logonsuccess{}, DecodedTuples),
+    Record1;
+to_record(responsesession, DecodedTuples) ->
+    Record1 = lists:foldr(fun ({_FNum, Name, Val},
+			       Record) ->
+				  set_record_field(record_info(fields,
+							       responsesession),
+						   Record, Name, Val)
+			  end,
+			  #responsesession{}, DecodedTuples),
+    Record1;
+to_record(sessionsuccess, DecodedTuples) ->
+    Record1 = lists:foldr(fun ({_FNum, Name, Val},
+			       Record) ->
+				  set_record_field(record_info(fields,
+							       sessionsuccess),
+						   Record, Name, Val)
+			  end,
+			  #sessionsuccess{}, DecodedTuples),
     Record1;
 to_record(heartbeat, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},
