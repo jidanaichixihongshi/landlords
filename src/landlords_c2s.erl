@@ -65,11 +65,11 @@ init([{SockMod, Socket, _SockPid}]) ->
 		port = Port,
 		sockmod = SockMod,
 		retry_times = 0},
-	{ok, wait_for_auth, StateData, 5000}.
+	{ok, wait_for_auth, StateData, ?AUTH_TIMEOUT}.
 
 
 wait_for_auth(#requestlogon{
-	mt = 201,
+	mt = 102,
 	mid = Mid,
 	sig = ?SIGN1,
 	timestamp = Timestamp,
@@ -108,27 +108,25 @@ wait_for_auth(#requestlogon{
 				node = node(),
 				user_data = UserData},
 			Reply = mod_msg:produce_responselogon(Mid, ?ERROR_0),
-			EReply = mod_msg:packet(Reply),
+			EReply = mod_proto:packet(Reply),
 			(StateData#client_state.sockmod):send(StateData#client_state.socket, EReply),
 			fsm_next_state(session_established, NewStateData);
 		_ ->
 			Reply = mod_msg:produce_responselogon(Mid, ?ERROR_102),
-			EReply = mod_msg:packet(Reply),
+			EReply = mod_proto:packet(Reply),
 			(StateData#client_state.sockmod):send(StateData#client_state.socket, EReply),
 			fsm_next_state(wait_for_auth, StateData)
 	end;
 wait_for_auth(timeout, StateData) ->
-	{stop, ?ERROR_102, StateData};
+	{stop, normal, StateData};
 wait_for_auth(closed, StateData) ->
 	{stop, normal, StateData};
 wait_for_auth(stop, StateData) ->
-	{stop, normal, StateData};
-wait_for_auth(_, StateData) ->
-	{stop, ?ERROR_101, StateData}.
+	{stop, normal, StateData}.
 
 
 session_established(#logonsuccess{
-	mt = 201,
+	mt = 104,
 	sig = ?SIGN1,
 	data = ?ERROR_0}, StateData) ->
 	%% 更新增量

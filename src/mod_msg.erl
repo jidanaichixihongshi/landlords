@@ -15,8 +15,6 @@
 
 -export([
 	produce_mid/1,
-	packet/1,
-	unpacket/1,
 	produce_error_msg/2,
 	produce_heartbeat/2,
 	produce_responselogon/2,
@@ -52,7 +50,7 @@ produce_heartbeat(Mid, MsTimestamp) ->
 
 produce_responselogon(Mid, Reply) ->
 	#responselogon{
-		mt = 201,
+		mt = 103,
 		mid = Mid,
 		sig = ?SIGN2,
 		timestamp = lib_time:get_mstimestamp(),
@@ -61,35 +59,12 @@ produce_responselogon(Mid, Reply) ->
 
 produce_session(Mid, Reply) ->
 	#responssession{
-		mt = 202,
+		mt = 105,
 		mid = Mid,
 		sig = ?SIGN2,
 		timestamp = lib_time:get_mstimestamp(),
 		data = Reply
 	}.
-
-%% ------------------------------------------------------------------------------------------
-%% 消息包编解码
-%% ------------------------------------------------------------------------------------------
-%% 打包客户端消息
-packet(Msg) when is_tuple(Msg) ->
-	packet_msg(Msg);
-packet(Msg) ->
-	{error, Msg}.
-
-packet_msg(Msg) ->
-	Type = erlang:element(1, Msg),
-	EMsg = mod_proto:encode(Msg),
-	{ok, <<Type:16, EMsg/binary>>};
-packet_msg(Msg) ->
-	{error, Msg}.
-
-%% 解包客户端消息
-unpacket(Data) when is_binary(Data) ->
-	<<H:16, BinMsg/binary>> = Data,
-	mod_proto:decode(H, BinMsg);
-unpacket(_Data) ->
-	throw({error, ?ERROR_101}).
 
 
 %% -----------------------------------------------------------------------------

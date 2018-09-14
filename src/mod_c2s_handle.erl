@@ -31,7 +31,7 @@ update_session_established(#client_state{uid = Uid, socket = Socket, sockmod = S
 							{{{nickname,<<" ++ "大鹏" ++ ">>},{uid,1865322},{status,offline}}}}}}}",
 
 	Reply = mod_msg:produce_session(Mid, Msg),
-	EReply = mod_msg:packet(Reply),
+	EReply = mod_proto:packet(Reply),
 	SockMod:send(Socket, EReply),
 	NewStateData = StateData#client_state{status = online},
 	fsm_next_state(wait_for_resume, NewStateData).
