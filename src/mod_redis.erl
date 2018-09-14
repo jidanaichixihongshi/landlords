@@ -210,8 +210,6 @@ q0(PoolName, Command, Timeout) ->
 
 q_asyn(PoolName, Command) ->
 	q_asyn(PoolName, Command, ?TIMEOUT, 1).
-q_asyn(PoolName, Command, Timeout) ->
-	q_asyn(PoolName, Command, Timeout, 1).
 q_asyn(PoolName, Command, Timeout, Times) ->
 	try
 		q0_asyn(PoolName, Command, Timeout)
