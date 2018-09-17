@@ -24,7 +24,10 @@ set_proxy(Uid, Node, Pid) ->
 get_proxy(Uid) ->
 	HKey = get_proxy_key(Uid),
 	{ok,[Pid]} = mod_redis:hmget_redis(?POOL_REDIS, HKey, [pid]),
-	binary_to_term(Pid).
+	if
+		Pid /= undefined -> binary_to_term(Pid);
+		true -> undefined
+	end.
 
 del_proxy(Uid) ->
 	Key = get_proxy_key(Uid),
