@@ -12,7 +12,6 @@
 -behaviour(gen_server).
 
 -include("server.hrl").
--include("proxy.hrl").
 -include("logger.hrl").
 
 -export([start_link/1]).
