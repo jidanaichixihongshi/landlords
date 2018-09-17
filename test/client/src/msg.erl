@@ -84,7 +84,7 @@ heartbeat() ->
 %% internal API
 %% -----------------------------------------------------------------------
 send_msg(Msg) ->
-	self() ! { send_msg, Msg}.
+	erlang:send_after(500, self(), { send_msg, Msg}).
 
 %% 获取时间戳（13位）
 -spec get_mstimestamp() -> integer().
