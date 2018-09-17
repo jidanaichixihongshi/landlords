@@ -7,6 +7,7 @@
 %%% Created : 23. 六月 2018 13:56
 %%%-------------------------------------------------------------------
 
+-include("proxy.hrl").
 -include("common.hrl").
 -include("error.hrl").
 

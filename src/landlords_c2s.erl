@@ -83,9 +83,9 @@ wait_for_auth(#requestlogon{
 		device_id = DeviceId,
 		version = Vsn,
 		app_id = AppId} = Data,
-	IFOverTime = not check_msg_timestamp(Timestamp),
+	IsOverTime = not check_msg_timestamp(Timestamp),
 
-	case IFOverTime of
+	case IsOverTime of
 		false ->
 			{_Node, ProxyPid} = mod_proxy:get_proxy(Uid),
 			mod_proxy:register_client(Uid, Device, Token),

@@ -15,7 +15,6 @@
 -export([start/2, stop/1]).
 
 -include("server.hrl").
--include("proxy.hrl").
 -include("logger.hrl").
 
 %% ===================================================================

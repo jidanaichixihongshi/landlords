@@ -39,7 +39,7 @@ get_proxy(Uid) ->
 					{node(Pid), Pid};
 				Error ->
 					?ERROR("start proxy error: ~p~n", [Error]),
-					undefined
+					{undefined, undefined}
 			end
 	end.
 

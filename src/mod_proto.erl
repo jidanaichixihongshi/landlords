@@ -35,9 +35,7 @@ packet_msg(Msg) ->
 
 %% 解包客户端消息
 unpacket(Data) when is_binary(Data) ->
-	?INFO("~p~n",[Data]),
 	<<H:16, BinMsg/binary>> = Data,
-	?INFO("~p,   ~p~n",[H,BinMsg]),
 	decode(H, BinMsg);
 unpacket(_Data) ->
 	throw({error, ?ERROR_101}).
