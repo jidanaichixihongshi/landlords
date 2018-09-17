@@ -15,7 +15,7 @@
         {keepalive, true},
         {active, once}]).
 
--define(HEART_BREAK_TIME, 15000).	%% 心跳
+-define(HEART_BREAK_TIME, 60000).	%% 心跳
 
 %% 客户端连接状态
 -record(state, {

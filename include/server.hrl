@@ -23,7 +23,7 @@
 	{keepalive, true},
 	{exit_on_close, true}]).
 
--define(HIBERNATE_TIMEOUT, 30000).                            %% 休眠
+-define(HIBERNATE_TIMEOUT, 90000).                            %% 休眠
 -define(TIMEOUT, 50000).
 -define(DATA_OVERTIME, 3000).																	%% 消息延时
 -define(AUTH_TIMEOUT, 12000).																	%% 登录超时
