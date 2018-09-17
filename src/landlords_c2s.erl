@@ -87,30 +87,36 @@ wait_for_auth(#requestlogon{
 
 	case IsOverTime of
 		false ->
-			{_Node, ProxyPid} = mod_proxy:get_proxy(Uid),
-			mod_proxy:register_client(Uid, Device, Token),
-			UserData = #user_data{
-				uid = Uid,
-				nickname = <<"晴天">>,
-				level = 0,
-				version = Vsn,
-				device = Device,
-				device_id = DeviceId,
-				app_id = AppId,
-				token = Token,
-				location = <<"北京">>,
-				login_time = lib_time:get_mstimestamp(),
-				phone = Phone
-			},
-			NewStateData = StateData#client_state{
-				uid = Uid,
-				proxy = ProxyPid,
-				pid = self(),
-				node = node(),
-				user_data = UserData},
-			Reply = mod_msg:produce_responselogon(Mid, ?ERROR_0),
-			tcp_send(StateData#client_state.sockmod, StateData#client_state.socket, Reply),
-			fsm_next_state(session_established, NewStateData);
+			case mod_proxy:get_proxy(Uid) of
+				{_Node, ProxyPid} when is_pid(ProxyPid) ->
+					mod_proxy:register_client(Uid, Device, Token),
+					UserData = #user_data{
+						uid = Uid,
+						nickname = <<"晴天">>,
+						level = 0,
+						version = Vsn,
+						device = Device,
+						device_id = DeviceId,
+						app_id = AppId,
+						token = Token,
+						location = <<"北京">>,
+						login_time = lib_time:get_mstimestamp(),
+						phone = Phone
+					},
+					NewStateData = StateData#client_state{
+						uid = Uid,
+						proxy = ProxyPid,
+						pid = self(),
+						node = node(),
+						user_data = UserData},
+					Reply = mod_msg:produce_responselogon(Mid, ?ERROR_0),
+					tcp_send(StateData#client_state.sockmod, StateData#client_state.socket, Reply),
+					fsm_next_state(session_established, NewStateData);
+				_ ->
+					Reply = mod_msg:produce_responselogon(Mid, ?ERROR_100),
+					tcp_send(StateData#client_state.sockmod, StateData#client_state.socket, Reply),
+					fsm_next_state(wait_for_auth, StateData)
+			end;
 		_ ->
 			Reply = mod_msg:produce_responselogon(Mid, ?ERROR_102),
 			tcp_send(StateData#client_state.sockmod, StateData#client_state.socket, Reply),

@@ -39,13 +39,13 @@ get_proxy(Uid) ->
 					{node(Pid), Pid};
 				Error ->
 					?ERROR("start proxy error: ~p~n", [Error]),
-					{undefined, undefined}
+					undefined
 			end
 	end.
 
 %% 启动proxy
 create_proxy(Uid) ->
-	case landlords_proxy_sup:start_child({landlords_proxy_sup, node()}, [#proxy_state{uid = Uid}]) of
+	case landlords_proxy_sup:start_child(node(), #proxy_state{uid = Uid}) of
 		{ok, Pid} ->
 			{ok, Pid};
 		Error ->
