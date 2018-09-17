@@ -89,7 +89,7 @@ wait_for_auth(#requestlogon{
 		false ->
 			case mod_proxy:get_proxy(Uid) of
 				{_Node, ProxyPid} when is_pid(ProxyPid) ->
-					mod_proxy:register_client(Uid, Device, Token),
+					mod_proxy:register_client(ProxyPid, Uid, Device, Token),
 					UserData = #user_data{
 						uid = Uid,
 						nickname = <<"晴天">>,

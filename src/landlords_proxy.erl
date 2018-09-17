@@ -26,7 +26,6 @@
 
 
 start_link(Args) ->
-	?DEBUG("--------------- start proxy ---------------~n", []),
 	gen_server:start_link(?MODULE, Args, []).
 
 init(Args) ->
