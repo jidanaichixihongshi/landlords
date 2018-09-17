@@ -50,6 +50,9 @@ init(Args) ->
 	NewState :: term(),
 	Timeout :: non_neg_integer() | infinity.
 %% ==================================================================================
+handle_call({register_client, Client}, _From, State) when is_record(Client, proxy_client) ->
+	NewState = register_client(Client, State),
+	{noreply, NewState, ?HIBERNATE_TIMEOUT};
 handle_call({get_all_client_pid, Uid}, _From, State) ->
 	Reply = get_all_client_pid(Uid, State),
 	{reply, Reply, State};
@@ -57,9 +60,7 @@ handle_call(Request, _From, State) ->
 	?WARNING("unknow call  Request ~p", [Request]),
 	{reply, ok, State, ?HIBERNATE_TIMEOUT}.
 
-handle_cast({register_client, Client}, State) when is_record(Client, proxy_client) ->
-	NewState = register_client(Client, State),
-	{noreply, NewState, ?HIBERNATE_TIMEOUT};
+
 handle_cast({unregister_client, Uid, Pid}, State) ->
 	NewState = unregister_client(Uid, Pid, State),
 	{noreply, NewState, ?HIBERNATE_TIMEOUT};
