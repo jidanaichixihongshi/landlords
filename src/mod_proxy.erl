@@ -15,7 +15,7 @@
 %% API
 -export([
 	unregister_client/2,
-	register_client/3,
+	register_client/4,
 
 	get_proxy/1
 ]).
@@ -23,9 +23,8 @@
 unregister_client(ProxyPid, Uid) ->
 	gen_server:cast(ProxyPid, {unregister_client, Uid, self()}).
 
-register_client(Uid, Device, Token) ->
-	{_Node, Pid} = get_proxy(Uid),
-	gen_server:cast(Pid, {register_client, #proxy_client{pid = self(), device = Device, token = Token}}).
+register_client(ProxyPid, Uid, Device, Token) ->
+	gen_server:cast(ProxyPid, {register_client, #proxy_client{pid = self(), device = Device, token = Token}}).
 
 
 get_proxy(Uid) ->
