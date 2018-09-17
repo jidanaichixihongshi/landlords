@@ -80,7 +80,7 @@ handle_info(stop, State) ->
 	io:format("------------------------------stop~n", []),
 	{stop, normal, State};
 handle_info(Info, State) ->
-	io:format("-------------------------~p~n", [Info]),
+	io:format("undefined msg ~p~n", [Info]),
 	{noreply, State}.
 
 terminate(Reason, State) ->
