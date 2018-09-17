@@ -34,7 +34,8 @@
 -export([
 	wait_for_auth/2,
 	wait_for_resume/2,
-	session_established/2
+	session_established/2,
+	tcp_send/3
 ]).
 
 %%%----------------------------------------------------------------------
@@ -85,7 +86,7 @@ wait_for_auth(#requestlogon{
 	IFOverTime = not check_msg_timestamp(Timestamp),
 
 	case IFOverTime of
-		true ->
+		false ->
 			{_Node, ProxyPid} = mod_proxy:get_proxy(Uid),
 			mod_proxy:register_client(Uid, Device, Token),
 			UserData = #user_data{
@@ -108,17 +109,15 @@ wait_for_auth(#requestlogon{
 				node = node(),
 				user_data = UserData},
 			Reply = mod_msg:produce_responselogon(Mid, ?ERROR_0),
-			EReply = mod_proto:packet(Reply),
-			(StateData#client_state.sockmod):send(StateData#client_state.socket, EReply),
+			tcp_send(StateData#client_state.sockmod, StateData#client_state.socket, Reply),
 			fsm_next_state(session_established, NewStateData);
 		_ ->
 			Reply = mod_msg:produce_responselogon(Mid, ?ERROR_102),
-			EReply = mod_proto:packet(Reply),
-			(StateData#client_state.sockmod):send(StateData#client_state.socket, EReply),
+			tcp_send(StateData#client_state.sockmod, StateData#client_state.socket, Reply),
 			fsm_next_state(wait_for_auth, StateData)
 	end;
 wait_for_auth(timeout, StateData) ->
-	?INFO("-----------------~n",[]),
+	?INFO("-----------------~n", []),
 	{stop, normal, StateData};
 wait_for_auth(closed, StateData) ->
 	{stop, normal, StateData};
@@ -152,7 +151,7 @@ wait_for_resume(Event, StateData) ->
 
 
 handle_event(Event, StateName, StateData) ->
-	?WARNING("undefined event : ~p~n",[Event]),
+	?WARNING("undefined event : ~p~n", [Event]),
 	fsm_next_state(StateName, StateData).
 
 handle_sync_event(_Event, _From, StateName, StateData) ->
@@ -161,7 +160,7 @@ handle_sync_event(_Event, _From, StateName, StateData) ->
 handle_info(receive_ack, StateName, StateData) ->
 	fsm_next_state(StateName, StateData);
 handle_info(Event, StateName, StateData) ->
-	?WARNING("undefined event : ~p~n",[Event]),
+	?WARNING("undefined event : ~p~n", [Event]),
 	fsm_next_state(StateName, StateData).
 
 
@@ -187,7 +186,10 @@ code_change(_OldVsn, StateName, StateData, _Extra) ->
 	?INFO("Module ~p changed ...~n", [?MODULE]),
 	{ok, StateName, StateData}.
 
-
+tcp_send(Mod, Socket, Reply) ->
+	?INFO("tcp ~p send msg :: ~p~n", [Socket, Reply]),
+	{ok, EReply} = mod_proto:packet(Reply),
+	Mod:send(Socket, EReply).
 
 
 %% ----------------------------------------------------------------

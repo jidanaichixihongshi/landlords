@@ -78,12 +78,10 @@ handle_cast({send, Msg}, #receiver_state{socket = Socket, transport = Transport 
 
 %% handle socket data
 handle_info({tcp, Socket, Data}, State) ->
-	?INFO("00000000000000000000000000~n",[]),
 	Transport = State#receiver_state.transport,
 	Transport:setopts(Socket, [{active, once}]),
 	%% 要不要把消息存进内存呢？
 	Msg = mod_proto:unpacket(Data),
-	?DEBUG("receive tcp msg ::: ~p~n", [Msg]),
 	NewState = process_msg(Msg, State),
 	{noreply, NewState, ?HIBERNATE_TIMEOUT};
 
@@ -125,7 +123,8 @@ process_msg(#heartbeat{mt = 101, mid = Mid, sig = ?SIGN1, timestamp = MTimestamp
 	case MTimestamp + ?DATA_OVERTIME > MsTimestamp of
 		true ->
 			AskMsg = mod_msg:produce_heartbeat(Mid, MsTimestamp),  %% ASK
-			AskData = mod_proto:packet(AskMsg),
+			{ok, AskData} = mod_proto:packet(AskMsg),
+			?DEBUG("recv ~p ack ok ... ...~n", [State#receiver_state.socket]),
 			self() ! {ask, AskData},
 			{ok, State#receiver_state{last_recv_time = MsTimestamp}};
 		_ ->
@@ -137,7 +136,8 @@ process_msg(Msg, #receiver_state{c2s_pid = C2SPid} = State) when is_pid(C2SPid) 
 	catch
 		gen_fsm:send_event(C2SPid, Msg),
 	State;
-process_msg(_, State) ->
+process_msg(Msg, State) ->
+	?WARNING("recv unrecognized message :: ~p~n",[Msg]),
 	State.
 
 

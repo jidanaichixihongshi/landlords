@@ -24,7 +24,7 @@
 requestlogon() ->
 	Uid = 1537096,
 	UserData = #userdata{
-		nickname = "晴天",
+		nickname = <<"晴天">>,
 		uid = Uid,
 		phone = 15175066700,
 		token = "testloginserver#2537996#15175066700",
