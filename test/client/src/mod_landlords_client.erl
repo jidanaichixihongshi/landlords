@@ -61,8 +61,6 @@ handle_info({send_msg, Msg}, State = #state{socket = Socket}) ->
 		{ok, Data} ->
 			case gen_tcp:send(Socket, Data) of
 				ok ->
-					ok = gen_tcp:send(Socket, Data),
-					
 					io:format("send msg to server :: ~p~n",[Msg]);
 				Error ->
 					io:format("Error: ~p~n",[Error])
