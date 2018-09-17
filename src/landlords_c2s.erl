@@ -170,10 +170,8 @@ terminate(Reason, _StateName, StateData) ->
 		proxy = ProxyPid,
 		socket = Socket,
 		sockmod = SockMod} = StateData,
-	?WARNING("======================================== ~n
-		socket ~p terminate, reason: ~p~n
-		======================================== ~n", [Socket, Reason]),
-	case is_pid(ProxyPid) andalso mod_proc:is_proc_alive(ProxyPid) of
+	?INFO("gen_fsm for ~p terminate, reason: ~p~n", [Uid, Reason]),
+	case mod_proc:is_proc_alive(ProxyPid) of
 		true ->
 			mod_proxy:unregister_client(ProxyPid, Uid);
 		_ ->

@@ -105,8 +105,9 @@ terminate(Reason, State) ->
 	#receiver_state{c2s_pid = C2SPid, socket = Socket} = State,
 	?INFO("socket ~p terminate, reason: ~p~n", [Socket, Reason]),
 	%% 清除连接
+	IsAlive = mod_proc:is_proc_alive(C2SPid),
 	if
-		C2SPid /= ?UNDEFINED ->
+		IsAlive ->
 			gen_fsm:send_event(C2SPid, closed);
 		true -> ok
 	end,
