@@ -56,9 +56,9 @@ create_proxy(Uid) ->
 
 %% 先在本地ets中找，没找到再去redis中找
 select_proxy(Uid) ->
-	case landlords_ets:lookup_element_proxy(Uid, #proxy_state.pid) of
-		Pid when is_pid(Pid) ->
-			{ok, Pid};
+	case landlords_ets:lookup_proxy(Uid) of
+		[ProxyState] when is_record(ProxyState, proxy_state) ->
+			{ok, ProxyState#proxy_state.pid};
 		_ ->
 			case landlords_redis:get_proxy(Uid) of
 				Pid when is_pid(Pid) ->
