@@ -75,7 +75,8 @@ handle_info({tcp, _Socket, Data}, State) ->
 			handle_msg(Type, Msg);
 		_ ->
 			io:format("unknow msg : ~p~n", [Data])
-	end;
+	end,
+	{noreply, State};
 
 handle_info({tcp_error, _, Reason}, State) ->
 	io:format("------------------------------tcp_error~n", []),
@@ -104,15 +105,15 @@ code_change(_OldVsn, State, _Extra) ->
 
 %% process server msg
 handle_msg(heartbeat, Msg) ->
-	io:format("recv heartbeat msg: ~p~n",[Msg]);
+	io:format("recv heartbeat msg: ~p~n", [Msg]);
 handle_msg(responselogon, Msg) ->   %% 登录结果
-	io:format("recv responselogon msg: ~p~n",[Msg]),
+	io:format("recv responselogon msg: ~p~n", [Msg]),
 	msg:logonsuccess();
 handle_msg(responsesession, Msg) ->   %% 增量消息
-	io:format("recv responsesession msg: ~p~n",[Msg]),
+	io:format("recv responsesession msg: ~p~n", [Msg]),
 	msg:sessionsuccess();
 handle_msg(_Type, Msg) ->
-	io:format("recv unused msg: ~p~n",[Msg]).
+	io:format("recv unused msg: ~p~n", [Msg]).
 
 
 
