@@ -166,6 +166,8 @@ handle_sync_event(_Event, _From, StateName, StateData) ->
 
 handle_info(receive_ack, StateName, StateData) ->
 	fsm_next_state(StateName, StateData);
+handle_info(update_session_established_ok, _StateName, StateData) ->
+	fsm_next_state(wait_for_resume, StateData#client_state{status = online});
 handle_info(Event, StateName, StateData) ->
 	?WARNING("undefined event : ~p~n", [Event]),
 	fsm_next_state(StateName, StateData).
