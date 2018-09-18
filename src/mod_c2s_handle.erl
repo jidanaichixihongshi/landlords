@@ -21,16 +21,16 @@
 update_session_established(#client_state{uid = Uid, socket = Socket, sockmod = SockMod} = StateData) ->
 	?DEBUG("------------------------------SESSION~n~n",[]),
 	Mid = mod_msg:produce_mid(Uid),
-	Msg = "{{address,
-						{<<" ++ "我的好友" ++ ">>,
-							{{{nickname,<<" ++ "小太阳" ++ ">>},{uid,1286147},{status,onlie}}},
-							{{{nickname,<<" ++ "大鹏" ++ ">>},{uid,1865322},{status,offline}}}}
-					},
-					{groups,
-						{{gid,29643},{name,<<" ++ "一起来聊天" ++ ">>},{numbers,
-							{{{nickname,<<" ++ "小太阳" ++ ">>},{uid,1286147},{status,onlie}}},
-							{{{nickname,<<" ++ "大鹏" ++ ">>},{uid,1865322},{status,offline}}}}}}}",
-
+%%	Msg = "{{address,
+%%						{<<" ++ "我的好友" ++ ">>,
+%%							{{{nickname,<<" ++ "小太阳" ++ ">>},{uid,1286147},{status,onlie}}},
+%%							{{{nickname,<<" ++ "大鹏" ++ ">>},{uid,1865322},{status,offline}}}}
+%%					},
+%%					{groups,
+%%						{{gid,29643},{name,<<" ++ "一起来聊天" ++ ">>},{numbers,
+%%							{{{nickname,<<" ++ "小太阳" ++ ">>},{uid,1286147},{status,onlie}}},
+%%							{{{nickname,<<" ++ "大鹏" ++ ">>},{uid,1865322},{status,offline}}}}}}}",
+	Msg = "test",
 	Reply = mod_msg:produce_session(Mid, Msg),
 	landlords_c2s:tcp_send(SockMod, Socket, Reply),
 	NewStateData = StateData#client_state{status = online},
