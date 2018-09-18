@@ -11,8 +11,7 @@
 
 -behaviour(gen_server).
 
--include("server.hrl").
-%-include("common.hrl").
+-include("common.hrl").
 -include("logger.hrl").
 
 -export([
@@ -181,7 +180,6 @@ safe_apply(Hook, Module, Function, Args) ->
 		apply(Function, Args);
 				true ->
 					?DEBUG("=========== ~p, ~p, ~p~n", [Module, Function, Args]),
-					Arg = Args#client_state{proxy = undefined, pid = undefined},
 					apply(Module, Function, Args)
 			end
 	catch E:R when E /= exit; R /= normal ->

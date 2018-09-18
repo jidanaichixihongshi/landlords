@@ -20,7 +20,7 @@
 
 %% 钩子注册
 -define(HOOKS_LIST, [
-	{update_session_established, ?LOCALNODE, mod_c2s_handle, update_session_established, 50}
+	{update_session_established, ?LOCALNODE, 'mod_c2s_handle', 'update_session_established', 50}
 ]).
 
 
