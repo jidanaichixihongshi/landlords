@@ -19,6 +19,7 @@
 %% 一些特殊消息的处理
 %% -------------------------------------------------------------------------
 update_session_established(#client_state{uid = Uid, socket = Socket, sockmod = SockMod} = StateData) ->
+	?DEBUG("------------------------------SESSION~n~n",[]),
 	Mid = mod_msg:produce_mid(Uid),
 	Msg = "{{address,
 						{<<" ++ "我的好友" ++ ">>,
@@ -33,7 +34,9 @@ update_session_established(#client_state{uid = Uid, socket = Socket, sockmod = S
 	Reply = mod_msg:produce_session(Mid, Msg),
 	landlords_c2s:tcp_send(SockMod, Socket, Reply),
 	NewStateData = StateData#client_state{status = online},
-	fsm_next_state(wait_for_resume, NewStateData).
+	fsm_next_state(wait_for_resume, NewStateData);
+update_session_established(StateData) ->
+	?DEBUG("------------------------------SESSION: ~p~n~n",[StateData]).
 
 
 
