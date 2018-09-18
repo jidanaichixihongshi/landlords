@@ -87,7 +87,8 @@ handle_info(Info, State) ->
 	| {shutdown, term()}
 	| term().
 %% ==================================================================================
-terminate(Reason, #proxy_state{uid = Uid} = State) ->
+terminate(Reason, State) ->
+	Uid = State#proxy_state.uid,
 	?INFO("stop proxy Reason:~p", [Reason]),
 	landlords_ets:del_proxy(Uid),
 	landlords_redis:del_proxy(Uid),
