@@ -179,8 +179,9 @@ safe_apply(Hook, Module, Function, Args) ->
 	try if is_function(Function) ->
 		apply(Function, Args);
 				true ->
-					?DEBUG("=========== ~p, ~p, ~p~n", [Module, Function, Args]),
-					apply(Module, Function, Args)
+					?DEBUG("=========== ~p, ~p, ~p~n~n", [Module, Function, Args]),
+					Module:Function(Args)
+					%apply(Module, Function, Args)
 			end
 	catch E:R when E /= exit; R /= normal ->
 		?ERROR("Hook ~p crashed when running ~p:~p/~p:~n"
