@@ -47,8 +47,8 @@ start_link(Ref, Socket, Transport, Opts) ->
 init([Ref, Socket, Transport, Opts]) ->
 	erlang:process_flag(trap_exit, true),
 	ok = proc_lib:init_ack({ok, self()}),
-    	ok = ranch:accept_ack(Ref),
-   	ok = Transport:setopts(Socket, [{active, once}, {packet, 4}]),
+	ok = ranch:accept_ack(Ref),
+	ok = Transport:setopts(Socket, [{active, once}, {packet, 4}]),
 	{ok, Pid} = landlords_c2s:start_link({ranch_tcp, Socket, self()}, []),
 	?INFO("landlords_c2s init, socket: ~p~n", [Socket]),
 	State = #receiver_state{
@@ -58,7 +58,7 @@ init([Ref, Socket, Transport, Opts]) ->
 		transport = Transport,
 		opts = Opts
 	},
-	gen_server:enter_loop(?MODULE,[],State,?HIBERNATE_TIMEOUT).
+	gen_server:enter_loop(?MODULE, [], State, ?HIBERNATE_TIMEOUT).
 
 handle_call(_Request, _From, State) ->
 	?DEBUG("handle_call message ~p ~n", [_Request]),
@@ -82,7 +82,7 @@ handle_info({tcp, Socket, Data}, State) ->
 	Transport:setopts(Socket, [{active, once}]),
 	%% 要不要把消息存进内存呢？
 	Msg = mod_proto:unpacket(Data),
-	NewState = process_msg(Msg, State),
+	{ok, NewState} = process_msg(Msg, State),
 	{noreply, NewState, ?HIBERNATE_TIMEOUT};
 
 handle_info({ask, AskData}, #receiver_state{socket = Socket, transport = Transport} = State) ->
@@ -138,7 +138,7 @@ process_msg(Msg, #receiver_state{c2s_pid = C2SPid} = State) when is_pid(C2SPid) 
 		gen_fsm:send_event(C2SPid, Msg),
 	State;
 process_msg(Msg, State) ->
-	?WARNING("recv unrecognized message :: ~p~n",[Msg]),
+	?WARNING("recv unrecognized message :: ~p~n", [Msg]),
 	State.
 
 
