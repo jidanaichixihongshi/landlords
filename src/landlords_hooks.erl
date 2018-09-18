@@ -179,7 +179,6 @@ safe_apply(Hook, Module, Function, Args) ->
 	try if is_function(Function) ->
 		apply(Function, Args);
 				true ->
-					?DEBUG("=========== ~p, ~p, ~p~n~n", [Module, Function, Args]),
 					Module:Function(Args)
 					%apply(Module, Function, Args)
 			end
