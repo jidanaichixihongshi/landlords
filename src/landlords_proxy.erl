@@ -50,9 +50,6 @@ init(Args) ->
 	NewState :: term(),
 	Timeout :: non_neg_integer() | infinity.
 %% ==================================================================================
-handle_call({register_client, Client}, _From, State) when is_record(Client, proxy_client) ->
-	NewState = register_client(Client, State),
-	{noreply, NewState, ?HIBERNATE_TIMEOUT};
 handle_call({get_all_client_pid, Uid}, _From, State) ->
 	Reply = get_all_client_pid(Uid, State),
 	{reply, Reply, State};
@@ -61,6 +58,9 @@ handle_call(Request, _From, State) ->
 	{reply, ok, State, ?HIBERNATE_TIMEOUT}.
 
 
+handle_cast({register_client, Client}, State) when is_record(Client, proxy_client) ->
+	NewState = register_client(Client, State),
+	{noreply, NewState, ?HIBERNATE_TIMEOUT};
 handle_cast({unregister_client, Uid, Pid}, State) ->
 	NewState = unregister_client(Uid, Pid, State),
 	{noreply, NewState, ?HIBERNATE_TIMEOUT};
@@ -68,9 +68,6 @@ handle_cast(Msg, State) ->
 	?WARNING("Unknown Msg:~p", [Msg]),
 	{noreply, State, ?HIBERNATE_TIMEOUT}.
 
-handle_info(check_state, State) ->
-	?INFO("proxy state:~p", [State]),
-	{noreply, State, ?HIBERNATE_TIMEOUT};
 handle_info({'EXIT', Pid, Reason}, State) ->
 	?WARNING("proxy pid ~p exit with reason:~p", [Pid, Reason]),
 	{stop, normal, State};
