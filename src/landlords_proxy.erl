@@ -68,7 +68,9 @@ handle_cast(Msg, State) ->
 	?WARNING("Unknown Msg:~p", [Msg]),
 	{noreply, State, ?HIBERNATE_TIMEOUT}.
 
-
+handle_info(check_state, State) ->
+	?INFO("proxy state:~p", [State]),
+	{noreply, State, ?HIBERNATE_TIMEOUT};
 handle_info({'EXIT', Pid, Reason}, State) ->
 	?WARNING("proxy pid ~p exit with reason:~p", [Pid, Reason]),
 	{stop, normal, State};
