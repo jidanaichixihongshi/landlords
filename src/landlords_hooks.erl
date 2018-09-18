@@ -179,14 +179,14 @@ safe_apply(Hook, Module, Function, Args) ->
 	try if is_function(Function) ->
 		apply(Function, Args);
 				true ->
+					?DEBUG("=========== ~p, ~p, ~p~n", [Module, Function, Args]),
 					apply(Module, Function, Args)
 			end
 	catch E:R when E /= exit; R /= normal ->
 		?ERROR("Hook ~p crashed when running ~p:~p/~p:~n"
 		"** Reason = ~p~n"
 		"** Arguments = ~p",
-			[Hook, Module, Function, length(Args),
-				{E, R, get_stacktrace()}, Args]),
+			[Hook, Module, Function, 1, {E, R, get_stacktrace()}, Args]),
 		'EXIT'
 	end.
 
@@ -209,8 +209,8 @@ handle_add(Hook, Node, El) ->
 			ok
 	end.
 
--type local_hook() :: { Seq :: integer(), Module :: atom(), Function :: atom()}.
--type distributed_hook() :: { Seq :: integer(), Node :: atom(), Module :: atom(), Function :: atom()}.
+-type local_hook() :: {Seq :: integer(), Module :: atom(), Function :: atom()}.
+-type distributed_hook() :: {Seq :: integer(), Node :: atom(), Module :: atom(), Function :: atom()}.
 -spec handle_delete(atom(), atom(), local_hook() | distributed_hook()) -> ok.
 %% in-memory storage operation: Handle deleting hook from ETS table
 handle_delete(Hook, Node, El) ->

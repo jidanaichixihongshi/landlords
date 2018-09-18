@@ -4,6 +4,7 @@
 -behaviour(gen_server).
 
 -include("common.hrl").
+-include("protobuf_pb.hrl").
 
 -export([start_link/0]).
 
@@ -108,7 +109,12 @@ handle_msg(heartbeat, Msg) ->
 	io:format("recv heartbeat msg: ~p~n", [Msg]);
 handle_msg(responselogon, Msg) ->   %% 登录结果
 	io:format("recv responselogon msg: ~p~n", [Msg]),
-	msg:logonsuccess();
+	case Msg#responselogon.data of
+		0 ->
+			msg:logonsuccess();
+		_ ->
+			ok
+	end;
 handle_msg(responsesession, Msg) ->   %% 增量消息
 	io:format("recv responsesession msg: ~p~n", [Msg]),
 	msg:sessionsuccess();

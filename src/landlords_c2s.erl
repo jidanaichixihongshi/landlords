@@ -137,6 +137,7 @@ session_established(#logonsuccess{
 	data = ?ERROR_0}, StateData) ->
 	%% 更新增量
 	landlords_hooks:run(update_session_established, node(), StateData),
+
 	fsm_next_state(session_established, StateData);
 session_established(timeout, StateData) ->
 	fsm_next_state(session_established, StateData);
