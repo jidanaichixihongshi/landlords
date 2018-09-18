@@ -44,7 +44,8 @@ unpacket_msg(H, BinMsg) ->
 %% -----------------------------------------------------------------------------
 %% internal function
 %% -----------------------------------------------------------------------------
-
+get_decode_type(106) -> sessionsuccess;
+get_decode_type(105) -> responsesession;
 get_decode_type(104) -> logonsuccess;
 get_decode_type(103) -> responselogon;
 get_decode_type(102) -> requestlogin;
