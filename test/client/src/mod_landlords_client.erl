@@ -71,6 +71,7 @@ handle_info({send_msg, Msg}, State = #state{socket = Socket}) ->
 	end,
 	{noreply, State};
 handle_info({tcp, _Socket, Data}, State) ->
+	io:format("------------------------------~p~n~n", [Data]),
 	case mod_msg:unpacket(Data) of
 		{Type, Msg} ->
 			handle_msg(Type, Msg);
