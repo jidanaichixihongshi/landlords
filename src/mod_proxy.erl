@@ -11,6 +11,7 @@
 -auth("cw").
 
 -include("proxy.hrl").
+-include("common.hrl").
 -include("logger.hrl").
 %% API
 -export([
@@ -19,6 +20,7 @@
 
 	get_proxy/1
 ]).
+
 
 unregister_client(ProxyPid, Uid) ->
 	gen_server:cast(ProxyPid, {unregister_client, Uid, self()}).
@@ -57,15 +59,11 @@ create_proxy(Uid) ->
 select_proxy(Uid) ->
 	case landlords_ets:lookup_proxy(Uid) of
 		[ProxyState] when is_record(ProxyState, proxy_state) ->
-			{ok, ProxyState#proxy_state.pid};
+			Pid = ProxyState#proxy_state.pid,
+			?IF(mod_proc:is_proc_alive(Pid), {ok, Pid}, undefined);
 		_ ->
 			Pid = landlords_redis:get_proxy(Uid),
-			case mod_proc:is_proc_alive(Pid) of
-				true ->
-					{ok, Pid};
-				_ ->
-					undefined
-			end
+			?IF(mod_proc:is_proc_alive(Pid), {ok, Pid}, undefined)
 	end.
 
 

@@ -63,11 +63,15 @@ handle_cast({register_client, Client}, State) when is_record(Client, proxy_clien
 	{noreply, NewState, ?HIBERNATE_TIMEOUT};
 handle_cast({unregister_client, Uid, Pid}, State) ->
 	NewState = unregister_client(Uid, Pid, State),
+	?DEBUG("user ~p unregister client Pid ~p~n", [Uid, Pid]),
 	{noreply, NewState, ?HIBERNATE_TIMEOUT};
 handle_cast(Msg, State) ->
 	?WARNING("Unknown Msg:~p", [Msg]),
 	{noreply, State, ?HIBERNATE_TIMEOUT}.
 
+handle_info(timeout, State) ->
+	%proc_lib:hibernate(gen_server, enter_loop, [?MODULE, [], State]),
+	{noreply, State, ?HIBERNATE_TIMEOUT};
 handle_info({'EXIT', Pid, Reason}, State) ->
 	?WARNING("proxy pid ~p exit with reason:~p", [Pid, Reason]),
 	{stop, normal, State};
@@ -83,9 +87,10 @@ handle_info(Info, State) ->
 	| {shutdown, term()}
 	| term().
 %% ==================================================================================
-terminate(Reason, State) ->
+terminate(Reason, #proxy_state{uid = Uid} = State) ->
 	?INFO("stop proxy Reason:~p", [Reason]),
-	landlords_redis:del_proxy(State#proxy_state.uid),
+	landlords_ets:del_proxy(Uid),
+	landlords_redis:del_proxy(Uid),
 	ok.
 
 %% ==================================================================================
