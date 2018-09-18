@@ -26,7 +26,7 @@ start_link() ->
 
 
 start_child(Node, Args) when is_record(Args, proxy_state) ->
-	case supervisor:start_child({?MODULE, Node}, [Args]) of
+	case supervisor:start_child({landlords_proxy, Node}, [Args]) of
 		{ok, Pid} ->
 			{ok, Pid};
 		{error, {already_started, Pid}} ->

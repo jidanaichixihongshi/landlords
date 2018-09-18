@@ -98,7 +98,8 @@ handle_info({tcp_closed, _Socket}, State) ->
 	{stop, normal, State};
 handle_info({tcp_error, _, Reason}, State) ->
 	{stop, Reason, State};
-handle_info(_Info, State) ->
+handle_info(Info, State) ->
+	?WARNING("unused info : ~p~n",[Info]),
 	{noreply, State, ?HIBERNATE_TIMEOUT}.
 
 terminate(Reason, State) ->
