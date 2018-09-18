@@ -24,7 +24,7 @@ unregister_client(ProxyPid, Uid) ->
 	gen_server:cast(ProxyPid, {unregister_client, Uid, self()}).
 
 register_client(ProxyPid, _Uid, Device, Token) ->
-	gen_server:cast(ProxyPid, {register_client, #proxy_client{pid = self(), device = Device, token = Token}}).
+	gen_server:call(ProxyPid, {register_client, #proxy_client{pid = self(), device = Device, token = Token}}).
 
 
 get_proxy(Uid) ->
