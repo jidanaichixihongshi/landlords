@@ -24,7 +24,7 @@ unregister_client(ProxyPid, Uid) ->
 	gen_server:cast(ProxyPid, {unregister_client, Uid, self()}).
 
 register_client(ProxyPid, _Uid, Device, Token) ->
-	gen_server:call(ProxyPid, {register_client, #proxy_client{pid = self(), device = Device, token = Token}}).
+	gen_server:cast(ProxyPid, {register_client, #proxy_client{pid = self(), device = Device, token = Token}}).
 
 
 get_proxy(Uid) ->
@@ -59,8 +59,9 @@ select_proxy(Uid) ->
 		[ProxyState] when is_record(ProxyState, proxy_state) ->
 			{ok, ProxyState#proxy_state.pid};
 		_ ->
-			case landlords_redis:get_proxy(Uid) of
-				Pid when is_pid(Pid) ->
+			Pid = landlords_redis:get_proxy(Uid),
+			case mod_proc:is_proc_alive(Pid) of
+				true ->
 					{ok, Pid};
 				_ ->
 					undefined
