@@ -135,6 +135,7 @@ session_established(#logonsuccess{
 	mt = 104,
 	sig = ?SIGN1,
 	data = ?ERROR_0}, StateData) ->
+
 	%% 更新增量
 	landlords_hooks:run(update_session_established, node(), StateData),
 
