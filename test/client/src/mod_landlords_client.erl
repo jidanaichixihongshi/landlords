@@ -35,7 +35,6 @@ init(_Args) ->
 				port = Port,
 				socket = Socket,
 				status = connect},
-			io:format("----------------init success~n", []),
 			{ok, State};
 		{error, Reason} ->
 			io:format("-------------connect error~n", []),
@@ -70,8 +69,8 @@ handle_info({send_msg, Msg}, State = #state{socket = Socket}) ->
 			io:format("msg : ~p packet error!~n", [Msg])
 	end,
 	{noreply, State};
-handle_info({tcp, _Socket, Data}, State) ->
-	io:format("------------------------------~p~n~n", [Data]),
+handle_info({tcp, Socket, Data}, State) ->
+	inet:setopts(Socket, [{active, once}]),
 	case mod_msg:unpacket(Data) of
 		{Type, Msg} ->
 			handle_msg(Type, Msg);
