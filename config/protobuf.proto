@@ -63,16 +63,13 @@ message SessionSuccess {
 %% 用户登录相关end
 
 %% 消息路由
-message From {
-  required int32 user = 1;              %% uid/gid
-  required int32 device = 2;             %% 设备类型编号
-  required int32 server = 3;             %% 服务器地址
-}
-
-message To {
-  required int32 user = 1;              %% uid/gid
-  required int32 device = 2;             %% 设备类型编号
-  required int32 server = 3;             %% 服务器地址
+message Router {
+  required int32 from = 1;              %% uid/gid
+  required int32 from_device = 2;      %% 设备类型编号
+  required int32 from_server = 3;             %% 服务器地址
+  required int32 to = 4;              %% uid/gid
+  required int32 to_device = 5;         %% 设备类型编号
+  required int32 to_server = 6;             %% 服务器地址
 }
 
 message Chat {
@@ -89,9 +86,8 @@ message SeekUser {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required string data = 7;
+  required Router router = 5;
+  required string data = 6;
 }
 
 message ResponseSeekUser {
@@ -99,9 +95,8 @@ message ResponseSeekUser {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required bytes data = 7;           %% 用户数据
+  required Router router = 5;
+  required bytes data = 6;           %% 用户数据
 }
 
 message RequestFriend {
@@ -109,9 +104,8 @@ message RequestFriend {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required string data = 7;           %% 用户数据
+  required Router router = 5;
+  required string bytes = 6;           %% 用户数据
 }
 
 message RsponseRequestFriend {
@@ -119,9 +113,8 @@ message RsponseRequestFriend {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required string data = 7;
+  required Router router = 5;
+  required string data = 6;
 }
 
 message RemoveFriend {
@@ -129,9 +122,8 @@ message RemoveFriend {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required bytes data = 7;
+  required Router router = 5;
+  required bytes data = 6;
 }
 
 message ResponseRemoveFriend {
@@ -139,9 +131,8 @@ message ResponseRemoveFriend {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required string data = 7;
+  required Router router = 5;
+  required string data = 6;
 }
 
 message PersonalChat {
@@ -149,9 +140,8 @@ message PersonalChat {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required Chat data = 7;
+  required Router router = 5;
+  required Chat data = 6;
 }
 
 message ResponsePersonalChat {
@@ -159,9 +149,8 @@ message ResponsePersonalChat {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required int32 data = 7;
+  required Router router = 5;
+  required int32 data = 6;
 }
 
 %% 用户关系相关end
@@ -173,18 +162,16 @@ message CreateGroup {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required bytes data = 7;
+  required Router router = 5;
+  required bytes data = 6;
 }
 message ResponseCreateGroup {
   required int32 mt = 1;              %% 消息类型编号
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required int32 data = 7;
+  required Router router = 5;
+  required int32 data = 6;
 }
 
 %% 群增量消息
@@ -193,9 +180,8 @@ message GroupSession {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required bytes data = 7;
+  required Router router = 5;
+  required bytes data = 6;
 }
 
 
@@ -208,9 +194,8 @@ message GroupChat {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required Chat data = 7;
+  required Router router = 5;
+  required Chat data = 6;
 }
 
 message ResponseGroupChat {
@@ -218,9 +203,8 @@ message ResponseGroupChat {
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required From from = 5;
-  required To to = 6;
-  required int32 data = 7;
+  required Router router = 5;
+  required int32 data = 6;
 }
 
 %% 群操作相关end
