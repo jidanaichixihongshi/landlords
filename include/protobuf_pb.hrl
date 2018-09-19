@@ -172,9 +172,9 @@
 }).
 -endif.
 
--ifndef(GRIVATECHAT_PB_H).
--define(GRIVATECHAT_PB_H, true).
--record(grivatechat, {
+-ifndef(PERSONALCHAT_PB_H).
+-define(PERSONALCHAT_PB_H, true).
+-record(personalchat, {
     mt = erlang:error({required, mt}),
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
@@ -185,9 +185,48 @@
 }).
 -endif.
 
--ifndef(RESPONSEGRIVATECHAT_PB_H).
--define(RESPONSEGRIVATECHAT_PB_H, true).
--record(responsegrivatechat, {
+-ifndef(RESPONSEPERSONALCHAT_PB_H).
+-define(RESPONSEPERSONALCHAT_PB_H, true).
+-record(responsepersonalchat, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(CREATEGROUP_PB_H).
+-define(CREATEGROUP_PB_H, true).
+-record(creategroup, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(RESPONSECREATEGROUP_PB_H).
+-define(RESPONSECREATEGROUP_PB_H, true).
+-record(responsecreategroup, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(GROUPSESSION_PB_H).
+-define(GROUPSESSION_PB_H, true).
+-record(groupsession, {
     mt = erlang:error({required, mt}),
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),

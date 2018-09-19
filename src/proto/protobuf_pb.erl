@@ -7,12 +7,18 @@
 	 encode_responsegroupchat/1, decode_responsegroupchat/1,
 	 delimited_decode_responsegroupchat/1,
 	 encode_groupchat/1, decode_groupchat/1,
-	 delimited_decode_groupchat/1,
-	 encode_responsegrivatechat/1,
-	 decode_responsegrivatechat/1,
-	 delimited_decode_responsegrivatechat/1,
-	 encode_grivatechat/1, decode_grivatechat/1,
-	 delimited_decode_grivatechat/1,
+	 delimited_decode_groupchat/1, encode_groupsession/1,
+	 decode_groupsession/1, delimited_decode_groupsession/1,
+	 encode_responsecreategroup/1,
+	 decode_responsecreategroup/1,
+	 delimited_decode_responsecreategroup/1,
+	 encode_creategroup/1, decode_creategroup/1,
+	 delimited_decode_creategroup/1,
+	 encode_responsepersonalchat/1,
+	 decode_responsepersonalchat/1,
+	 delimited_decode_responsepersonalchat/1,
+	 encode_personalchat/1, decode_personalchat/1,
+	 delimited_decode_personalchat/1,
 	 encode_responseremovefriend/1,
 	 decode_responseremovefriend/1,
 	 delimited_decode_responseremovefriend/1,
@@ -58,10 +64,19 @@
 -record(groupchat,
 	{mt, mid, sig, timestamp, from, to, data}).
 
--record(responsegrivatechat,
+-record(groupsession,
 	{mt, mid, sig, timestamp, from, to, data}).
 
--record(grivatechat,
+-record(responsecreategroup,
+	{mt, mid, sig, timestamp, from, to, data}).
+
+-record(creategroup,
+	{mt, mid, sig, timestamp, from, to, data}).
+
+-record(responsepersonalchat,
+	{mt, mid, sig, timestamp, from, to, data}).
+
+-record(personalchat,
 	{mt, mid, sig, timestamp, from, to, data}).
 
 -record(responseremovefriend,
@@ -130,18 +145,37 @@ encode_groupchat(Record)
     when is_record(Record, groupchat) ->
     encode(groupchat, Record).
 
-encode_responsegrivatechat(Records)
+encode_groupsession(Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode_groupsession(Record)
+    when is_record(Record, groupsession) ->
+    encode(groupsession, Record).
+
+encode_responsecreategroup(Records)
     when is_list(Records) ->
     delimited_encode(Records);
-encode_responsegrivatechat(Record)
-    when is_record(Record, responsegrivatechat) ->
-    encode(responsegrivatechat, Record).
+encode_responsecreategroup(Record)
+    when is_record(Record, responsecreategroup) ->
+    encode(responsecreategroup, Record).
 
-encode_grivatechat(Records) when is_list(Records) ->
+encode_creategroup(Records) when is_list(Records) ->
     delimited_encode(Records);
-encode_grivatechat(Record)
-    when is_record(Record, grivatechat) ->
-    encode(grivatechat, Record).
+encode_creategroup(Record)
+    when is_record(Record, creategroup) ->
+    encode(creategroup, Record).
+
+encode_responsepersonalchat(Records)
+    when is_list(Records) ->
+    delimited_encode(Records);
+encode_responsepersonalchat(Record)
+    when is_record(Record, responsepersonalchat) ->
+    encode(responsepersonalchat, Record).
+
+encode_personalchat(Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode_personalchat(Record)
+    when is_record(Record, personalchat) ->
+    encode(personalchat, Record).
 
 encode_responseremovefriend(Records)
     when is_list(Records) ->
@@ -307,16 +341,32 @@ encode(responseremovefriend, Records)
 encode(responseremovefriend, Record) ->
     [iolist(responseremovefriend, Record)
      | encode_extensions(Record)];
-encode(grivatechat, Records) when is_list(Records) ->
+encode(personalchat, Records) when is_list(Records) ->
     delimited_encode(Records);
-encode(grivatechat, Record) ->
-    [iolist(grivatechat, Record)
+encode(personalchat, Record) ->
+    [iolist(personalchat, Record)
      | encode_extensions(Record)];
-encode(responsegrivatechat, Records)
+encode(responsepersonalchat, Records)
     when is_list(Records) ->
     delimited_encode(Records);
-encode(responsegrivatechat, Record) ->
-    [iolist(responsegrivatechat, Record)
+encode(responsepersonalchat, Record) ->
+    [iolist(responsepersonalchat, Record)
+     | encode_extensions(Record)];
+encode(creategroup, Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode(creategroup, Record) ->
+    [iolist(creategroup, Record)
+     | encode_extensions(Record)];
+encode(responsecreategroup, Records)
+    when is_list(Records) ->
+    delimited_encode(Records);
+encode(responsecreategroup, Record) ->
+    [iolist(responsecreategroup, Record)
+     | encode_extensions(Record)];
+encode(groupsession, Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode(groupsession, Record) ->
+    [iolist(groupsession, Record)
      | encode_extensions(Record)];
 encode(groupchat, Records) when is_list(Records) ->
     delimited_encode(Records);
@@ -581,45 +631,105 @@ iolist(responseremovefriend, Record) ->
      pack(7, required,
 	  with_default(Record#responseremovefriend.data, none),
 	  string, [])];
-iolist(grivatechat, Record) ->
+iolist(personalchat, Record) ->
     [pack(1, required,
-	  with_default(Record#grivatechat.mt, none), int32, []),
+	  with_default(Record#personalchat.mt, none), int32, []),
      pack(2, required,
-	  with_default(Record#grivatechat.mid, none), string, []),
-     pack(3, required,
-	  with_default(Record#grivatechat.sig, none), int32, []),
-     pack(4, required,
-	  with_default(Record#grivatechat.timestamp, none), int64,
+	  with_default(Record#personalchat.mid, none), string,
 	  []),
+     pack(3, required,
+	  with_default(Record#personalchat.sig, none), int32, []),
+     pack(4, required,
+	  with_default(Record#personalchat.timestamp, none),
+	  int64, []),
      pack(5, required,
-	  with_default(Record#grivatechat.from, none), from, []),
+	  with_default(Record#personalchat.from, none), from, []),
      pack(6, required,
-	  with_default(Record#grivatechat.to, none), to, []),
+	  with_default(Record#personalchat.to, none), to, []),
      pack(7, required,
-	  with_default(Record#grivatechat.data, none), chat, [])];
-iolist(responsegrivatechat, Record) ->
+	  with_default(Record#personalchat.data, none), chat,
+	  [])];
+iolist(responsepersonalchat, Record) ->
     [pack(1, required,
-	  with_default(Record#responsegrivatechat.mt, none),
+	  with_default(Record#responsepersonalchat.mt, none),
 	  int32, []),
      pack(2, required,
-	  with_default(Record#responsegrivatechat.mid, none),
+	  with_default(Record#responsepersonalchat.mid, none),
 	  string, []),
      pack(3, required,
-	  with_default(Record#responsegrivatechat.sig, none),
+	  with_default(Record#responsepersonalchat.sig, none),
 	  int32, []),
      pack(4, required,
-	  with_default(Record#responsegrivatechat.timestamp,
+	  with_default(Record#responsepersonalchat.timestamp,
 		       none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#responsegrivatechat.from, none),
+	  with_default(Record#responsepersonalchat.from, none),
 	  from, []),
      pack(6, required,
-	  with_default(Record#responsegrivatechat.to, none), to,
+	  with_default(Record#responsepersonalchat.to, none), to,
 	  []),
      pack(7, required,
-	  with_default(Record#responsegrivatechat.data, none),
+	  with_default(Record#responsepersonalchat.data, none),
 	  int32, [])];
+iolist(creategroup, Record) ->
+    [pack(1, required,
+	  with_default(Record#creategroup.mt, none), int32, []),
+     pack(2, required,
+	  with_default(Record#creategroup.mid, none), string, []),
+     pack(3, required,
+	  with_default(Record#creategroup.sig, none), int32, []),
+     pack(4, required,
+	  with_default(Record#creategroup.timestamp, none), int64,
+	  []),
+     pack(5, required,
+	  with_default(Record#creategroup.from, none), from, []),
+     pack(6, required,
+	  with_default(Record#creategroup.to, none), to, []),
+     pack(7, required,
+	  with_default(Record#creategroup.data, none), bytes,
+	  [])];
+iolist(responsecreategroup, Record) ->
+    [pack(1, required,
+	  with_default(Record#responsecreategroup.mt, none),
+	  int32, []),
+     pack(2, required,
+	  with_default(Record#responsecreategroup.mid, none),
+	  string, []),
+     pack(3, required,
+	  with_default(Record#responsecreategroup.sig, none),
+	  int32, []),
+     pack(4, required,
+	  with_default(Record#responsecreategroup.timestamp,
+		       none),
+	  int64, []),
+     pack(5, required,
+	  with_default(Record#responsecreategroup.from, none),
+	  from, []),
+     pack(6, required,
+	  with_default(Record#responsecreategroup.to, none), to,
+	  []),
+     pack(7, required,
+	  with_default(Record#responsecreategroup.data, none),
+	  int32, [])];
+iolist(groupsession, Record) ->
+    [pack(1, required,
+	  with_default(Record#groupsession.mt, none), int32, []),
+     pack(2, required,
+	  with_default(Record#groupsession.mid, none), string,
+	  []),
+     pack(3, required,
+	  with_default(Record#groupsession.sig, none), int32, []),
+     pack(4, required,
+	  with_default(Record#groupsession.timestamp, none),
+	  int64, []),
+     pack(5, required,
+	  with_default(Record#groupsession.from, none), from, []),
+     pack(6, required,
+	  with_default(Record#groupsession.to, none), to, []),
+     pack(7, required,
+	  with_default(Record#groupsession.data, none), bytes,
+	  [])];
 iolist(groupchat, Record) ->
     [pack(1, required,
 	  with_default(Record#groupchat.mt, none), int32, []),
@@ -723,12 +833,22 @@ decode_responsegroupchat(Bytes) when is_binary(Bytes) ->
 decode_groupchat(Bytes) when is_binary(Bytes) ->
     decode(groupchat, Bytes).
 
-decode_responsegrivatechat(Bytes)
-    when is_binary(Bytes) ->
-    decode(responsegrivatechat, Bytes).
+decode_groupsession(Bytes) when is_binary(Bytes) ->
+    decode(groupsession, Bytes).
 
-decode_grivatechat(Bytes) when is_binary(Bytes) ->
-    decode(grivatechat, Bytes).
+decode_responsecreategroup(Bytes)
+    when is_binary(Bytes) ->
+    decode(responsecreategroup, Bytes).
+
+decode_creategroup(Bytes) when is_binary(Bytes) ->
+    decode(creategroup, Bytes).
+
+decode_responsepersonalchat(Bytes)
+    when is_binary(Bytes) ->
+    decode(responsepersonalchat, Bytes).
+
+decode_personalchat(Bytes) when is_binary(Bytes) ->
+    decode(personalchat, Bytes).
 
 decode_responseremovefriend(Bytes)
     when is_binary(Bytes) ->
@@ -822,11 +942,20 @@ delimited_decode_removefriend(Bytes) ->
 delimited_decode_responseremovefriend(Bytes) ->
     delimited_decode(responseremovefriend, Bytes).
 
-delimited_decode_grivatechat(Bytes) ->
-    delimited_decode(grivatechat, Bytes).
+delimited_decode_personalchat(Bytes) ->
+    delimited_decode(personalchat, Bytes).
 
-delimited_decode_responsegrivatechat(Bytes) ->
-    delimited_decode(responsegrivatechat, Bytes).
+delimited_decode_responsepersonalchat(Bytes) ->
+    delimited_decode(responsepersonalchat, Bytes).
+
+delimited_decode_creategroup(Bytes) ->
+    delimited_decode(creategroup, Bytes).
+
+delimited_decode_responsecreategroup(Bytes) ->
+    delimited_decode(responsecreategroup, Bytes).
+
+delimited_decode_groupsession(Bytes) ->
+    delimited_decode(groupsession, Bytes).
 
 delimited_decode_groupchat(Bytes) ->
     delimited_decode(groupchat, Bytes).
@@ -967,15 +1096,15 @@ decode(responseremovefriend, Bytes)
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(responseremovefriend, Decoded);
-decode(grivatechat, Bytes) when is_binary(Bytes) ->
+decode(personalchat, Bytes) when is_binary(Bytes) ->
     Types = [{7, data, chat, [is_record]},
 	     {6, to, to, [is_record]}, {5, from, from, [is_record]},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
 	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
-    to_record(grivatechat, Decoded);
-decode(responsegrivatechat, Bytes)
+    to_record(personalchat, Decoded);
+decode(responsepersonalchat, Bytes)
     when is_binary(Bytes) ->
     Types = [{7, data, int32, []}, {6, to, to, [is_record]},
 	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
@@ -983,7 +1112,32 @@ decode(responsegrivatechat, Bytes)
 	     {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
-    to_record(responsegrivatechat, Decoded);
+    to_record(responsepersonalchat, Decoded);
+decode(creategroup, Bytes) when is_binary(Bytes) ->
+    Types = [{7, data, bytes, []}, {6, to, to, [is_record]},
+	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
+	     {3, sig, int32, []}, {2, mid, string, []},
+	     {1, mt, int32, []}],
+    Defaults = [],
+    Decoded = decode(Bytes, Types, Defaults),
+    to_record(creategroup, Decoded);
+decode(responsecreategroup, Bytes)
+    when is_binary(Bytes) ->
+    Types = [{7, data, int32, []}, {6, to, to, [is_record]},
+	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
+	     {3, sig, int32, []}, {2, mid, string, []},
+	     {1, mt, int32, []}],
+    Defaults = [],
+    Decoded = decode(Bytes, Types, Defaults),
+    to_record(responsecreategroup, Decoded);
+decode(groupsession, Bytes) when is_binary(Bytes) ->
+    Types = [{7, data, bytes, []}, {6, to, to, [is_record]},
+	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
+	     {3, sig, int32, []}, {2, mid, string, []},
+	     {1, mt, int32, []}],
+    Defaults = [],
+    Decoded = decode(Bytes, Types, Defaults),
+    to_record(groupsession, Decoded);
 decode(groupchat, Bytes) when is_binary(Bytes) ->
     Types = [{7, data, chat, [is_record]},
 	     {6, to, to, [is_record]}, {5, from, from, [is_record]},
@@ -1214,23 +1368,50 @@ to_record(responseremovefriend, DecodedTuples) ->
 			  end,
 			  #responseremovefriend{}, DecodedTuples),
     Record1;
-to_record(grivatechat, DecodedTuples) ->
+to_record(personalchat, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},
 			       Record) ->
 				  set_record_field(record_info(fields,
-							       grivatechat),
+							       personalchat),
 						   Record, Name, Val)
 			  end,
-			  #grivatechat{}, DecodedTuples),
+			  #personalchat{}, DecodedTuples),
     Record1;
-to_record(responsegrivatechat, DecodedTuples) ->
+to_record(responsepersonalchat, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},
 			       Record) ->
 				  set_record_field(record_info(fields,
-							       responsegrivatechat),
+							       responsepersonalchat),
 						   Record, Name, Val)
 			  end,
-			  #responsegrivatechat{}, DecodedTuples),
+			  #responsepersonalchat{}, DecodedTuples),
+    Record1;
+to_record(creategroup, DecodedTuples) ->
+    Record1 = lists:foldr(fun ({_FNum, Name, Val},
+			       Record) ->
+				  set_record_field(record_info(fields,
+							       creategroup),
+						   Record, Name, Val)
+			  end,
+			  #creategroup{}, DecodedTuples),
+    Record1;
+to_record(responsecreategroup, DecodedTuples) ->
+    Record1 = lists:foldr(fun ({_FNum, Name, Val},
+			       Record) ->
+				  set_record_field(record_info(fields,
+							       responsecreategroup),
+						   Record, Name, Val)
+			  end,
+			  #responsecreategroup{}, DecodedTuples),
+    Record1;
+to_record(groupsession, DecodedTuples) ->
+    Record1 = lists:foldr(fun ({_FNum, Name, Val},
+			       Record) ->
+				  set_record_field(record_info(fields,
+							       groupsession),
+						   Record, Name, Val)
+			  end,
+			  #groupsession{}, DecodedTuples),
     Record1;
 to_record(groupchat, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},
