@@ -144,7 +144,7 @@ message ResponseRemoveFriend {
   required string data = 7;
 }
 
-message GrivateChat {
+message PersonalChat {
   required int32 mt = 1;              %% 消息类型编号
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
@@ -154,7 +154,7 @@ message GrivateChat {
   required Chat data = 7;
 }
 
-message ResponseGrivateChat {
+message ResponsePersonalChat {
   required int32 mt = 1;              %% 消息类型编号
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
@@ -168,6 +168,37 @@ message ResponseGrivateChat {
 
 
 %% 群操作相关
+message CreateGroup {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required bytes data = 7;
+}
+message ResponseCreateGroup {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required int32 data = 7;
+}
+
+%% 群增量消息
+message GroupSession {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required bytes data = 7;
+}
+
+
 
 
 

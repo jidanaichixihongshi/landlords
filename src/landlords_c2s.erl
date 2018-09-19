@@ -144,6 +144,7 @@ session_established(#sessionsuccess{
 	mt = 106,
 	sig = ?SIGN1,
 	data = ?ERROR_0}, StateData) ->
+
 	fsm_next_state(wait_for_resume, StateData#client_state{status = online});
 session_established(timeout, StateData) ->
 	fsm_next_state(session_established, StateData);
@@ -158,6 +159,10 @@ wait_for_resume(#sessionsuccess{
 	sig = ?SIGN1,
 	data = ?ERROR_0}, StateData) ->
 	fsm_next_state(wait_for_resume, StateData);
+wait_for_resume(Msg, StateData) when is_tuple(Msg) ->
+	landlords_hooks:run(element(1,Msg), node(), Msg),
+	fsm_next_state(wait_for_resume, StateData);
+
 wait_for_resume(timeout, StateData) ->
 	?DEBUG("Timed out waiting for resumption", []),
 	{stop, normal, StateData};

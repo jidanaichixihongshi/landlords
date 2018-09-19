@@ -14,13 +14,19 @@
 -define(UNDEFINED, undefined).
 -define(LOCALNODE, node()).
 
-
 -define(UID_HASH_RANGE, 10000000).      %% 和uid相关的hash值取值范围
 
 
 %% 钩子注册
 -define(HOOKS_LIST, [
-	{update_session_established, ?LOCALNODE, mod_c2s_handle, update_session_established, 50}
+	{update_session_established, ?LOCALNODE, mod_c2s_handle, update_session_established, 50},
+	{seekuser, ?LOCALNODE, mod_c2s_handle, seekuser, 50},
+	{requestfriend, ?LOCALNODE, mod_c2s_handle, request_friend, 50},
+	{rsponserequestfriend, ?LOCALNODE, mod_c2s_handle, add_roster, 50},
+	{removefriend, ?LOCALNODE, mod_c2s_handle, del_roster, 50},
+	{creategroup, ?LOCALNODE, mod_c2s_handle, create_group, 50},
+	{responsecreategroup, ?LOCALNODE, landlords_group, response_create_group, 50},
+	{groupsession, ?LOCALNODE, mod_c2s_handle, group_session, 50}
 ]).
 
 
