@@ -33,9 +33,9 @@
 	 delimited_decode_responseseekuser/1, encode_seekuser/1,
 	 decode_seekuser/1, delimited_decode_seekuser/1,
 	 encode_chat/1, decode_chat/1, delimited_decode_chat/1,
-	 encode_to/1, decode_to/1, delimited_decode_to/1,
-	 encode_from/1, decode_from/1, delimited_decode_from/1,
-	 encode_sessionsuccess/1, decode_sessionsuccess/1,
+	 encode_router/1, decode_router/1,
+	 delimited_decode_router/1, encode_sessionsuccess/1,
+	 decode_sessionsuccess/1,
 	 delimited_decode_sessionsuccess/1,
 	 encode_responsesession/1, decode_responsesession/1,
 	 delimited_decode_responsesession/1,
@@ -59,49 +59,49 @@
 -record(heartbeat, {mt, mid, sig, timestamp, data}).
 
 -record(responsegroupchat,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(groupchat,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(groupsession,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(responsecreategroup,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(creategroup,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(responsepersonalchat,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(personalchat,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(responseremovefriend,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(removefriend,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(rsponserequestfriend,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(requestfriend,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, bytes}).
 
 -record(responseseekuser,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(seekuser,
-	{mt, mid, sig, timestamp, from, to, data}).
+	{mt, mid, sig, timestamp, router, data}).
 
 -record(chat, {from, device, c}).
 
--record(to, {user, device, server}).
-
--record(from, {user, device, server}).
+-record(router,
+	{from, from_device, from_server, to, to_device,
+	 to_server}).
 
 -record(sessionsuccess,
 	{mt, mid, sig, timestamp, data}).
@@ -221,15 +221,10 @@ encode_chat(Records) when is_list(Records) ->
 encode_chat(Record) when is_record(Record, chat) ->
     encode(chat, Record).
 
-encode_to(Records) when is_list(Records) ->
+encode_router(Records) when is_list(Records) ->
     delimited_encode(Records);
-encode_to(Record) when is_record(Record, to) ->
-    encode(to, Record).
-
-encode_from(Records) when is_list(Records) ->
-    delimited_encode(Records);
-encode_from(Record) when is_record(Record, from) ->
-    encode(from, Record).
+encode_router(Record) when is_record(Record, router) ->
+    encode(router, Record).
 
 encode_sessionsuccess(Records) when is_list(Records) ->
     delimited_encode(Records);
@@ -297,14 +292,10 @@ encode(sessionsuccess, Records) when is_list(Records) ->
 encode(sessionsuccess, Record) ->
     [iolist(sessionsuccess, Record)
      | encode_extensions(Record)];
-encode(from, Records) when is_list(Records) ->
+encode(router, Records) when is_list(Records) ->
     delimited_encode(Records);
-encode(from, Record) ->
-    [iolist(from, Record) | encode_extensions(Record)];
-encode(to, Records) when is_list(Records) ->
-    delimited_encode(Records);
-encode(to, Record) ->
-    [iolist(to, Record) | encode_extensions(Record)];
+encode(router, Record) ->
+    [iolist(router, Record) | encode_extensions(Record)];
 encode(chat, Records) when is_list(Records) ->
     delimited_encode(Records);
 encode(chat, Record) ->
@@ -489,20 +480,22 @@ iolist(sessionsuccess, Record) ->
      pack(5, optional,
 	  with_default(Record#sessionsuccess.data, none), int32,
 	  [])];
-iolist(from, Record) ->
-    [pack(1, required, with_default(Record#from.user, none),
-	  int32, []),
+iolist(router, Record) ->
+    [pack(1, required,
+	  with_default(Record#router.from, none), int32, []),
      pack(2, required,
-	  with_default(Record#from.device, none), int32, []),
+	  with_default(Record#router.from_device, none), int32,
+	  []),
      pack(3, required,
-	  with_default(Record#from.server, none), int32, [])];
-iolist(to, Record) ->
-    [pack(1, required, with_default(Record#to.user, none),
+	  with_default(Record#router.from_server, none), int32,
+	  []),
+     pack(4, required, with_default(Record#router.to, none),
 	  int32, []),
-     pack(2, required, with_default(Record#to.device, none),
-	  int32, []),
-     pack(3, required, with_default(Record#to.server, none),
-	  int32, [])];
+     pack(5, required,
+	  with_default(Record#router.to_device, none), int32, []),
+     pack(6, required,
+	  with_default(Record#router.to_server, none), int32,
+	  [])];
 iolist(chat, Record) ->
     [pack(1, required, with_default(Record#chat.from, none),
 	  int32, []),
@@ -521,10 +514,8 @@ iolist(seekuser, Record) ->
 	  with_default(Record#seekuser.timestamp, none), int64,
 	  []),
      pack(5, required,
-	  with_default(Record#seekuser.from, none), from, []),
+	  with_default(Record#seekuser.router, none), router, []),
      pack(6, required,
-	  with_default(Record#seekuser.to, none), to, []),
-     pack(7, required,
 	  with_default(Record#seekuser.data, none), string, [])];
 iolist(responseseekuser, Record) ->
     [pack(1, required,
@@ -540,11 +531,9 @@ iolist(responseseekuser, Record) ->
 	  with_default(Record#responseseekuser.timestamp, none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#responseseekuser.from, none), from,
-	  []),
+	  with_default(Record#responseseekuser.router, none),
+	  router, []),
      pack(6, required,
-	  with_default(Record#responseseekuser.to, none), to, []),
-     pack(7, required,
 	  with_default(Record#responseseekuser.data, none), bytes,
 	  [])];
 iolist(requestfriend, Record) ->
@@ -560,12 +549,10 @@ iolist(requestfriend, Record) ->
 	  with_default(Record#requestfriend.timestamp, none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#requestfriend.from, none), from,
+	  with_default(Record#requestfriend.router, none), router,
 	  []),
      pack(6, required,
-	  with_default(Record#requestfriend.to, none), to, []),
-     pack(7, required,
-	  with_default(Record#requestfriend.data, none), string,
+	  with_default(Record#requestfriend.bytes, none), string,
 	  [])];
 iolist(rsponserequestfriend, Record) ->
     [pack(1, required,
@@ -582,12 +569,9 @@ iolist(rsponserequestfriend, Record) ->
 		       none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#rsponserequestfriend.from, none),
-	  from, []),
+	  with_default(Record#rsponserequestfriend.router, none),
+	  router, []),
      pack(6, required,
-	  with_default(Record#rsponserequestfriend.to, none), to,
-	  []),
-     pack(7, required,
 	  with_default(Record#rsponserequestfriend.data, none),
 	  string, [])];
 iolist(removefriend, Record) ->
@@ -602,10 +586,9 @@ iolist(removefriend, Record) ->
 	  with_default(Record#removefriend.timestamp, none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#removefriend.from, none), from, []),
+	  with_default(Record#removefriend.router, none), router,
+	  []),
      pack(6, required,
-	  with_default(Record#removefriend.to, none), to, []),
-     pack(7, required,
 	  with_default(Record#removefriend.data, none), bytes,
 	  [])];
 iolist(responseremovefriend, Record) ->
@@ -623,12 +606,9 @@ iolist(responseremovefriend, Record) ->
 		       none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#responseremovefriend.from, none),
-	  from, []),
+	  with_default(Record#responseremovefriend.router, none),
+	  router, []),
      pack(6, required,
-	  with_default(Record#responseremovefriend.to, none), to,
-	  []),
-     pack(7, required,
 	  with_default(Record#responseremovefriend.data, none),
 	  string, [])];
 iolist(personalchat, Record) ->
@@ -643,10 +623,9 @@ iolist(personalchat, Record) ->
 	  with_default(Record#personalchat.timestamp, none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#personalchat.from, none), from, []),
+	  with_default(Record#personalchat.router, none), router,
+	  []),
      pack(6, required,
-	  with_default(Record#personalchat.to, none), to, []),
-     pack(7, required,
 	  with_default(Record#personalchat.data, none), chat,
 	  [])];
 iolist(responsepersonalchat, Record) ->
@@ -664,12 +643,9 @@ iolist(responsepersonalchat, Record) ->
 		       none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#responsepersonalchat.from, none),
-	  from, []),
+	  with_default(Record#responsepersonalchat.router, none),
+	  router, []),
      pack(6, required,
-	  with_default(Record#responsepersonalchat.to, none), to,
-	  []),
-     pack(7, required,
 	  with_default(Record#responsepersonalchat.data, none),
 	  int32, [])];
 iolist(creategroup, Record) ->
@@ -683,10 +659,9 @@ iolist(creategroup, Record) ->
 	  with_default(Record#creategroup.timestamp, none), int64,
 	  []),
      pack(5, required,
-	  with_default(Record#creategroup.from, none), from, []),
+	  with_default(Record#creategroup.router, none), router,
+	  []),
      pack(6, required,
-	  with_default(Record#creategroup.to, none), to, []),
-     pack(7, required,
 	  with_default(Record#creategroup.data, none), bytes,
 	  [])];
 iolist(responsecreategroup, Record) ->
@@ -704,12 +679,9 @@ iolist(responsecreategroup, Record) ->
 		       none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#responsecreategroup.from, none),
-	  from, []),
+	  with_default(Record#responsecreategroup.router, none),
+	  router, []),
      pack(6, required,
-	  with_default(Record#responsecreategroup.to, none), to,
-	  []),
-     pack(7, required,
 	  with_default(Record#responsecreategroup.data, none),
 	  int32, [])];
 iolist(groupsession, Record) ->
@@ -724,10 +696,9 @@ iolist(groupsession, Record) ->
 	  with_default(Record#groupsession.timestamp, none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#groupsession.from, none), from, []),
+	  with_default(Record#groupsession.router, none), router,
+	  []),
      pack(6, required,
-	  with_default(Record#groupsession.to, none), to, []),
-     pack(7, required,
 	  with_default(Record#groupsession.data, none), bytes,
 	  [])];
 iolist(groupchat, Record) ->
@@ -741,10 +712,9 @@ iolist(groupchat, Record) ->
 	  with_default(Record#groupchat.timestamp, none), int64,
 	  []),
      pack(5, required,
-	  with_default(Record#groupchat.from, none), from, []),
+	  with_default(Record#groupchat.router, none), router,
+	  []),
      pack(6, required,
-	  with_default(Record#groupchat.to, none), to, []),
-     pack(7, required,
 	  with_default(Record#groupchat.data, none), chat, [])];
 iolist(responsegroupchat, Record) ->
     [pack(1, required,
@@ -760,12 +730,9 @@ iolist(responsegroupchat, Record) ->
 	  with_default(Record#responsegroupchat.timestamp, none),
 	  int64, []),
      pack(5, required,
-	  with_default(Record#responsegroupchat.from, none), from,
-	  []),
+	  with_default(Record#responsegroupchat.router, none),
+	  router, []),
      pack(6, required,
-	  with_default(Record#responsegroupchat.to, none), to,
-	  []),
-     pack(7, required,
 	  with_default(Record#responsegroupchat.data, none),
 	  int32, [])];
 iolist(heartbeat, Record) ->
@@ -873,11 +840,8 @@ decode_seekuser(Bytes) when is_binary(Bytes) ->
 decode_chat(Bytes) when is_binary(Bytes) ->
     decode(chat, Bytes).
 
-decode_to(Bytes) when is_binary(Bytes) ->
-    decode(to, Bytes).
-
-decode_from(Bytes) when is_binary(Bytes) ->
-    decode(from, Bytes).
+decode_router(Bytes) when is_binary(Bytes) ->
+    decode(router, Bytes).
 
 decode_sessionsuccess(Bytes) when is_binary(Bytes) ->
     decode(sessionsuccess, Bytes).
@@ -915,11 +879,8 @@ delimited_decode_responsesession(Bytes) ->
 delimited_decode_sessionsuccess(Bytes) ->
     delimited_decode(sessionsuccess, Bytes).
 
-delimited_decode_from(Bytes) ->
-    delimited_decode(from, Bytes).
-
-delimited_decode_to(Bytes) ->
-    delimited_decode(to, Bytes).
+delimited_decode_router(Bytes) ->
+    delimited_decode(router, Bytes).
 
 delimited_decode_chat(Bytes) ->
     delimited_decode(chat, Bytes).
@@ -1028,18 +989,14 @@ decode(sessionsuccess, Bytes) when is_binary(Bytes) ->
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(sessionsuccess, Decoded);
-decode(from, Bytes) when is_binary(Bytes) ->
-    Types = [{3, server, int32, []}, {2, device, int32, []},
-	     {1, user, int32, []}],
+decode(router, Bytes) when is_binary(Bytes) ->
+    Types = [{6, to_server, int32, []},
+	     {5, to_device, int32, []}, {4, to, int32, []},
+	     {3, from_server, int32, []},
+	     {2, from_device, int32, []}, {1, from, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
-    to_record(from, Decoded);
-decode(to, Bytes) when is_binary(Bytes) ->
-    Types = [{3, server, int32, []}, {2, device, int32, []},
-	     {1, user, int32, []}],
-    Defaults = [],
-    Decoded = decode(Bytes, Types, Defaults),
-    to_record(to, Decoded);
+    to_record(router, Decoded);
 decode(chat, Bytes) when is_binary(Bytes) ->
     Types = [{3, c, string, []}, {2, device, int32, []},
 	     {1, from, int32, []}],
@@ -1047,24 +1004,24 @@ decode(chat, Bytes) when is_binary(Bytes) ->
     Decoded = decode(Bytes, Types, Defaults),
     to_record(chat, Decoded);
 decode(seekuser, Bytes) when is_binary(Bytes) ->
-    Types = [{7, data, string, []},
-	     {6, to, to, [is_record]}, {5, from, from, [is_record]},
+    Types = [{6, data, string, []},
+	     {5, router, router, [is_record]},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
 	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(seekuser, Decoded);
 decode(responseseekuser, Bytes) when is_binary(Bytes) ->
-    Types = [{7, data, bytes, []}, {6, to, to, [is_record]},
-	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
-	     {3, sig, int32, []}, {2, mid, string, []},
-	     {1, mt, int32, []}],
+    Types = [{6, data, bytes, []},
+	     {5, router, router, [is_record]},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(responseseekuser, Decoded);
 decode(requestfriend, Bytes) when is_binary(Bytes) ->
-    Types = [{7, data, string, []},
-	     {6, to, to, [is_record]}, {5, from, from, [is_record]},
+    Types = [{6, bytes, string, []},
+	     {5, router, router, [is_record]},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
 	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
@@ -1072,33 +1029,33 @@ decode(requestfriend, Bytes) when is_binary(Bytes) ->
     to_record(requestfriend, Decoded);
 decode(rsponserequestfriend, Bytes)
     when is_binary(Bytes) ->
-    Types = [{7, data, string, []},
-	     {6, to, to, [is_record]}, {5, from, from, [is_record]},
+    Types = [{6, data, string, []},
+	     {5, router, router, [is_record]},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
 	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(rsponserequestfriend, Decoded);
 decode(removefriend, Bytes) when is_binary(Bytes) ->
-    Types = [{7, data, bytes, []}, {6, to, to, [is_record]},
-	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
-	     {3, sig, int32, []}, {2, mid, string, []},
-	     {1, mt, int32, []}],
+    Types = [{6, data, bytes, []},
+	     {5, router, router, [is_record]},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(removefriend, Decoded);
 decode(responseremovefriend, Bytes)
     when is_binary(Bytes) ->
-    Types = [{7, data, string, []},
-	     {6, to, to, [is_record]}, {5, from, from, [is_record]},
+    Types = [{6, data, string, []},
+	     {5, router, router, [is_record]},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
 	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(responseremovefriend, Decoded);
 decode(personalchat, Bytes) when is_binary(Bytes) ->
-    Types = [{7, data, chat, [is_record]},
-	     {6, to, to, [is_record]}, {5, from, from, [is_record]},
+    Types = [{6, data, chat, [is_record]},
+	     {5, router, router, [is_record]},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
 	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
@@ -1106,41 +1063,41 @@ decode(personalchat, Bytes) when is_binary(Bytes) ->
     to_record(personalchat, Decoded);
 decode(responsepersonalchat, Bytes)
     when is_binary(Bytes) ->
-    Types = [{7, data, int32, []}, {6, to, to, [is_record]},
-	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
-	     {3, sig, int32, []}, {2, mid, string, []},
-	     {1, mt, int32, []}],
+    Types = [{6, data, int32, []},
+	     {5, router, router, [is_record]},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(responsepersonalchat, Decoded);
 decode(creategroup, Bytes) when is_binary(Bytes) ->
-    Types = [{7, data, bytes, []}, {6, to, to, [is_record]},
-	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
-	     {3, sig, int32, []}, {2, mid, string, []},
-	     {1, mt, int32, []}],
+    Types = [{6, data, bytes, []},
+	     {5, router, router, [is_record]},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(creategroup, Decoded);
 decode(responsecreategroup, Bytes)
     when is_binary(Bytes) ->
-    Types = [{7, data, int32, []}, {6, to, to, [is_record]},
-	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
-	     {3, sig, int32, []}, {2, mid, string, []},
-	     {1, mt, int32, []}],
+    Types = [{6, data, int32, []},
+	     {5, router, router, [is_record]},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(responsecreategroup, Decoded);
 decode(groupsession, Bytes) when is_binary(Bytes) ->
-    Types = [{7, data, bytes, []}, {6, to, to, [is_record]},
-	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
-	     {3, sig, int32, []}, {2, mid, string, []},
-	     {1, mt, int32, []}],
+    Types = [{6, data, bytes, []},
+	     {5, router, router, [is_record]},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(groupsession, Decoded);
 decode(groupchat, Bytes) when is_binary(Bytes) ->
-    Types = [{7, data, chat, [is_record]},
-	     {6, to, to, [is_record]}, {5, from, from, [is_record]},
+    Types = [{6, data, chat, [is_record]},
+	     {5, router, router, [is_record]},
 	     {4, timestamp, int64, []}, {3, sig, int32, []},
 	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
@@ -1148,10 +1105,10 @@ decode(groupchat, Bytes) when is_binary(Bytes) ->
     to_record(groupchat, Decoded);
 decode(responsegroupchat, Bytes)
     when is_binary(Bytes) ->
-    Types = [{7, data, int32, []}, {6, to, to, [is_record]},
-	     {5, from, from, [is_record]}, {4, timestamp, int64, []},
-	     {3, sig, int32, []}, {2, mid, string, []},
-	     {1, mt, int32, []}],
+    Types = [{6, data, int32, []},
+	     {5, router, router, [is_record]},
+	     {4, timestamp, int64, []}, {3, sig, int32, []},
+	     {2, mid, string, []}, {1, mt, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(responsegroupchat, Decoded);
@@ -1290,21 +1247,13 @@ to_record(sessionsuccess, DecodedTuples) ->
 			  end,
 			  #sessionsuccess{}, DecodedTuples),
     Record1;
-to_record(from, DecodedTuples) ->
+to_record(router, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},
 			       Record) ->
-				  set_record_field(record_info(fields, from),
+				  set_record_field(record_info(fields, router),
 						   Record, Name, Val)
 			  end,
-			  #from{}, DecodedTuples),
-    Record1;
-to_record(to, DecodedTuples) ->
-    Record1 = lists:foldr(fun ({_FNum, Name, Val},
-			       Record) ->
-				  set_record_field(record_info(fields, to),
-						   Record, Name, Val)
-			  end,
-			  #to{}, DecodedTuples),
+			  #router{}, DecodedTuples),
     Record1;
 to_record(chat, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},

@@ -67,21 +67,15 @@
 }).
 -endif.
 
--ifndef(FROM_PB_H).
--define(FROM_PB_H, true).
--record(from, {
-    user = erlang:error({required, user}),
-    device = erlang:error({required, device}),
-    server = erlang:error({required, server})
-}).
--endif.
-
--ifndef(TO_PB_H).
--define(TO_PB_H, true).
--record(to, {
-    user = erlang:error({required, user}),
-    device = erlang:error({required, device}),
-    server = erlang:error({required, server})
+-ifndef(ROUTER_PB_H).
+-define(ROUTER_PB_H, true).
+-record(router, {
+    from = erlang:error({required, from}),
+    from_device = erlang:error({required, from_device}),
+    from_server = erlang:error({required, from_server}),
+    to = erlang:error({required, to}),
+    to_device = erlang:error({required, to_device}),
+    to_server = erlang:error({required, to_server})
 }).
 -endif.
 
@@ -101,8 +95,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -114,8 +107,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -127,9 +119,8 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
-    data = erlang:error({required, data})
+    router = erlang:error({required, router}),
+    bytes = erlang:error({required, bytes})
 }).
 -endif.
 
@@ -140,8 +131,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -153,8 +143,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -166,8 +155,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -179,8 +167,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -192,8 +179,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -205,8 +191,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -218,8 +203,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -231,8 +215,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -244,8 +227,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
@@ -257,8 +239,7 @@
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
     timestamp = erlang:error({required, timestamp}),
-    from = erlang:error({required, from}),
-    to = erlang:error({required, to}),
+    router = erlang:error({required, router}),
     data = erlang:error({required, data})
 }).
 -endif.
