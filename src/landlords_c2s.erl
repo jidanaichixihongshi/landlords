@@ -146,8 +146,13 @@ session_established(closed, StateData) ->
 session_established(stop, StateData) ->
 	{stop, normal, StateData}.
 
-wait_for_resume(Event, StateData) when is_tuple(Event) ->
-	fsm_next_state(wait_for_resume, StateData);
+%% session success
+wait_for_resume(#sessionsuccess{
+	mt = 106,
+	sig = ?SIGN1,
+	data = ?ERROR_0}, StateData) ->
+
+	fsm_next_state(wait_for_resume, StateData#client_state{status = online});
 wait_for_resume(timeout, StateData) ->
 	?DEBUG("Timed out waiting for resumption", []),
 	{stop, normal, StateData};
@@ -166,8 +171,8 @@ handle_sync_event(_Event, _From, StateName, StateData) ->
 
 handle_info(receive_ack, StateName, StateData) ->
 	fsm_next_state(StateName, StateData);
-handle_info(update_session_established_ok, _StateName, StateData) ->
-	fsm_next_state(wait_for_resume, StateData#client_state{status = online});
+handle_info({fsm_next_state, NewStateName}, _StateName, StateData) ->
+	fsm_next_state(NewStateName, StateData);
 handle_info(Event, StateName, StateData) ->
 	?WARNING("undefined event : ~p~n", [Event]),
 	fsm_next_state(StateName, StateData).

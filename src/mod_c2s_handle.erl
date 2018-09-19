@@ -15,11 +15,11 @@
 
 -export([update_session_established/1]).
 
+
 %% -------------------------------------------------------------------------
 %% 一些特殊消息的处理
 %% -------------------------------------------------------------------------
 update_session_established(#client_state{uid = Uid, pid = Pid, socket = Socket, sockmod = SockMod} = StateData) ->
-	?DEBUG("------------------------------SESSION~n~n", []),
 	Mid = mod_msg:produce_mid(Uid),
 	Msg = "{{address,
 						{<<" ++ "我的好友" ++ ">>,
@@ -31,8 +31,8 @@ update_session_established(#client_state{uid = Uid, pid = Pid, socket = Socket, 
 							{{{nickname,<<" ++ "小太阳" ++ ">>},{uid,1286147},{status,onlie}}},
 							{{{nickname,<<" ++ "大鹏" ++ ">>},{uid,1865322},{status,offline}}}}}}}",
 	Reply = mod_msg:produce_session(Mid, Msg),
-	landlords_c2s:tcp_send(SockMod, Socket, Reply),
-	Pid ! update_session_established_ok.
+	Pid ! {fsm_next_state, wait_for_resume},
+	landlords_c2s:tcp_send(SockMod, Socket, Reply).
 
 
 

@@ -11,7 +11,6 @@ message UserData {
   required string token = 4;
   required int32 device = 5;            %% 登录方式，1-安卓/2-ios/3-web
   optional int32 device_id = 6;         %% 设备id
-
   required string version = 7;          %% 客户端版本
   required string app_id = 8;           %% 程序软件编号
 
@@ -63,6 +62,144 @@ message SessionSuccess {
 
 %% 用户登录相关end
 
+%% 消息路由
+message From {
+  required int32 user = 1;              %% uid/gid
+  required int32 device = 2;             %% 设备类型编号
+  required int32 server = 3;             %% 服务器地址
+}
+
+message To {
+  required int32 user = 1;              %% uid/gid
+  required int32 device = 2;             %% 设备类型编号
+  required int32 server = 3;             %% 服务器地址
+}
+
+message Chat {
+  required int32 from = 1;              %% uid/gid
+  required int32 device = 2;             %% 设备类型编号
+  required string c = 3;                 %% 内容
+}
+
+%% 消息路由end
+
+%% 用户关系相关
+message SeekUser {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required string data = 7;
+}
+
+message ResponseSeekUser {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required enum data = 7;           %% 用户数据
+}
+
+message RequestFriend {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required string data = 7;           %% 用户数据
+}
+
+message RsponseRequestFriend {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required string data = 7;
+}
+
+message RemoveFriend {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required enum data = 7;
+}
+
+message ResponseRemoveFriend {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required string data = 7;
+}
+
+message GrivateChat {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required Chat data = 7;
+}
+
+message ResponseGrivateChat {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required int32 data = 7;
+}
+
+%% 用户关系相关end
+
+
+%% 群操作相关
+
+
+
+
+message GroupChat {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required Chat data = 7;
+}
+
+message ResponseGroupChat {
+  required int32 mt = 1;              %% 消息类型编号
+  required string mid = 2;             %% 消息id
+  required int32 sig = 3;               %% 消息标志位
+  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
+  required From from = 5;
+  required To to = 6;
+  required int32 data = 7;
+}
+
+%% 群操作相关end
+
+
+%% 游戏房间
+
+
+
+%% 房间相关end
 
 
 %% 其他消息
