@@ -67,6 +67,163 @@
 }).
 -endif.
 
+-ifndef(FROM_PB_H).
+-define(FROM_PB_H, true).
+-record(from, {
+    user = erlang:error({required, user}),
+    device = erlang:error({required, device}),
+    server = erlang:error({required, server})
+}).
+-endif.
+
+-ifndef(TO_PB_H).
+-define(TO_PB_H, true).
+-record(to, {
+    user = erlang:error({required, user}),
+    device = erlang:error({required, device}),
+    server = erlang:error({required, server})
+}).
+-endif.
+
+-ifndef(CHAT_PB_H).
+-define(CHAT_PB_H, true).
+-record(chat, {
+    from = erlang:error({required, from}),
+    device = erlang:error({required, device}),
+    c = erlang:error({required, c})
+}).
+-endif.
+
+-ifndef(SEEKUSER_PB_H).
+-define(SEEKUSER_PB_H, true).
+-record(seekuser, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(RESPONSESEEKUSER_PB_H).
+-define(RESPONSESEEKUSER_PB_H, true).
+-record(responseseekuser, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(REQUESTFRIEND_PB_H).
+-define(REQUESTFRIEND_PB_H, true).
+-record(requestfriend, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(RSPONSEREQUESTFRIEND_PB_H).
+-define(RSPONSEREQUESTFRIEND_PB_H, true).
+-record(rsponserequestfriend, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(REMOVEFRIEND_PB_H).
+-define(REMOVEFRIEND_PB_H, true).
+-record(removefriend, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(RESPONSEREMOVEFRIEND_PB_H).
+-define(RESPONSEREMOVEFRIEND_PB_H, true).
+-record(responseremovefriend, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(GRIVATECHAT_PB_H).
+-define(GRIVATECHAT_PB_H, true).
+-record(grivatechat, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(RESPONSEGRIVATECHAT_PB_H).
+-define(RESPONSEGRIVATECHAT_PB_H, true).
+-record(responsegrivatechat, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(GROUPCHAT_PB_H).
+-define(GROUPCHAT_PB_H, true).
+-record(groupchat, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
+-ifndef(RESPONSEGROUPCHAT_PB_H).
+-define(RESPONSEGROUPCHAT_PB_H, true).
+-record(responsegroupchat, {
+    mt = erlang:error({required, mt}),
+    mid = erlang:error({required, mid}),
+    sig = erlang:error({required, sig}),
+    timestamp = erlang:error({required, timestamp}),
+    from = erlang:error({required, from}),
+    to = erlang:error({required, to}),
+    data = erlang:error({required, data})
+}).
+-endif.
+
 -ifndef(HEARTBEAT_PB_H).
 -define(HEARTBEAT_PB_H, true).
 -record(heartbeat, {
