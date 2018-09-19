@@ -101,7 +101,7 @@ message ResponseSeekUser {
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
   required From from = 5;
   required To to = 6;
-  required enum data = 7;           %% 用户数据
+  required bytes data = 7;           %% 用户数据
 }
 
 message RequestFriend {
@@ -131,7 +131,7 @@ message RemoveFriend {
   required int64 timestamp = 4;         %% 时间戳，消息产生的时间
   required From from = 5;
   required To to = 6;
-  required enum data = 7;
+  required bytes data = 7;
 }
 
 message ResponseRemoveFriend {
