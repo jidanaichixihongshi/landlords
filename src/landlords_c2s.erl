@@ -139,6 +139,12 @@ session_established(#logonsuccess{
 	landlords_hooks:run(update_session_established, node(), StateData),
 
 	fsm_next_state(session_established, StateData);
+%% session success
+session_established(#sessionsuccess{
+	mt = 106,
+	sig = ?SIGN1,
+	data = ?ERROR_0}, StateData) ->
+	fsm_next_state(wait_for_resume, StateData#client_state{status = online});
 session_established(timeout, StateData) ->
 	fsm_next_state(session_established, StateData);
 session_established(closed, StateData) ->
@@ -151,8 +157,7 @@ wait_for_resume(#sessionsuccess{
 	mt = 106,
 	sig = ?SIGN1,
 	data = ?ERROR_0}, StateData) ->
-
-	fsm_next_state(wait_for_resume, StateData#client_state{status = online});
+	fsm_next_state(wait_for_resume, StateData);
 wait_for_resume(timeout, StateData) ->
 	?DEBUG("Timed out waiting for resumption", []),
 	{stop, normal, StateData};
