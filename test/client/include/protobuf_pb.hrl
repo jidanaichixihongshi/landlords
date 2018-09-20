@@ -1,69 +1,12 @@
--ifndef(USERDATA_PB_H).
--define(USERDATA_PB_H, true).
--record(userdata, {
-    nickname,
-    uid,
-    phone,
-    token = erlang:error({required, token}),
-    device = erlang:error({required, device}),
-    device_id,
-    version = erlang:error({required, version}),
-    app_id = erlang:error({required, app_id})
-}).
--endif.
-
--ifndef(REQUESTLOGON_PB_H).
--define(REQUESTLOGON_PB_H, true).
--record(requestlogon, {
+-ifndef(PROTO_PB_H).
+-define(PROTO_PB_H, true).
+-record(proto, {
     mt = erlang:error({required, mt}),
     mid = erlang:error({required, mid}),
     sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    data = erlang:error({required, data})
-}).
--endif.
-
--ifndef(RESPONSELOGON_PB_H).
--define(RESPONSELOGON_PB_H, true).
--record(responselogon, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    data
-}).
--endif.
-
--ifndef(LOGONSUCCESS_PB_H).
--define(LOGONSUCCESS_PB_H, true).
--record(logonsuccess, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    data
-}).
--endif.
-
--ifndef(RESPONSESESSION_PB_H).
--define(RESPONSESESSION_PB_H, true).
--record(responsesession, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    data
-}).
--endif.
-
--ifndef(SESSIONSUCCESS_PB_H).
--define(SESSIONSUCCESS_PB_H, true).
--record(sessionsuccess, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    data
+    router = erlang:error({required, router}),
+    data,
+    timestamp = erlang:error({required, timestamp})
 }).
 -endif.
 
@@ -71,11 +14,11 @@
 -define(ROUTER_PB_H, true).
 -record(router, {
     from = erlang:error({required, from}),
-    from_device = erlang:error({required, from_device}),
-    from_server = erlang:error({required, from_server}),
-    to = erlang:error({required, to}),
-    to_device = erlang:error({required, to_device}),
-    to_server = erlang:error({required, to_server})
+    from_device,
+    from_server,
+    to,
+    to_device,
+    to_server
 }).
 -endif.
 
@@ -88,170 +31,100 @@
 }).
 -endif.
 
--ifndef(SEEKUSER_PB_H).
--define(SEEKUSER_PB_H, true).
--record(seekuser, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
+-ifndef(LOGONPARAMETER_PB_H).
+-define(LOGONPARAMETER_PB_H, true).
+-record(logonparameter, {
+    uid,
+    nickname,
+    phone,
+    token = erlang:error({required, token}),
+    device = erlang:error({required, device}),
+    device_id,
+    version,
+    app_id,
+    extend
 }).
 -endif.
 
--ifndef(RESPONSESEEKUSER_PB_H).
--define(RESPONSESEEKUSER_PB_H, true).
--record(responseseekuser, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
+-ifndef(CATEGORY_PB_H).
+-define(CATEGORY_PB_H, true).
+-record(category, {
+    name = erlang:error({required, name}),
+    members
 }).
 -endif.
 
--ifndef(REQUESTFRIEND_PB_H).
--define(REQUESTFRIEND_PB_H, true).
--record(requestfriend, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    bytes = erlang:error({required, bytes})
+-ifndef(PERSONSESSION_PB_H).
+-define(PERSONSESSION_PB_H, true).
+-record(personsession, {
+    uid = erlang:error({required, uid}),
+    nickname = erlang:error({required, nickname}),
+    portrait = erlang:error({required, portrait}),
+    personlabel = erlang:error({required, personlabel}),
+    setting,
+    rosters,
+    groups,
+    serverparameter = erlang:error({required, serverparameter}),
+    extend
 }).
 -endif.
 
--ifndef(RSPONSEREQUESTFRIEND_PB_H).
--define(RSPONSEREQUESTFRIEND_PB_H, true).
--record(rsponserequestfriend, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
-}).
--endif.
-
--ifndef(REMOVEFRIEND_PB_H).
--define(REMOVEFRIEND_PB_H, true).
--record(removefriend, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
-}).
--endif.
-
--ifndef(RESPONSEREMOVEFRIEND_PB_H).
--define(RESPONSEREMOVEFRIEND_PB_H, true).
--record(responseremovefriend, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
-}).
--endif.
-
--ifndef(PERSONALCHAT_PB_H).
--define(PERSONALCHAT_PB_H, true).
--record(personalchat, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
-}).
--endif.
-
--ifndef(RESPONSEPERSONALCHAT_PB_H).
--define(RESPONSEPERSONALCHAT_PB_H, true).
--record(responsepersonalchat, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
-}).
--endif.
-
--ifndef(CREATEGROUP_PB_H).
--define(CREATEGROUP_PB_H, true).
--record(creategroup, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
-}).
--endif.
-
--ifndef(RESPONSECREATEGROUP_PB_H).
--define(RESPONSECREATEGROUP_PB_H, true).
--record(responsecreategroup, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
+-ifndef(PERSONRESEARCH_PB_H).
+-define(PERSONRESEARCH_PB_H, true).
+-record(personresearch, {
+    uid = erlang:error({required, uid}),
+    nickname = erlang:error({required, nickname}),
+    portrait = erlang:error({required, portrait}),
+    personlabel = erlang:error({required, personlabel}),
+    extend
 }).
 -endif.
 
 -ifndef(GROUPSESSION_PB_H).
 -define(GROUPSESSION_PB_H, true).
 -record(groupsession, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
+    gid = erlang:error({required, gid}),
+    gnickname = erlang:error({required, gnickname}),
+    gportrait = erlang:error({required, gportrait}),
+    setting = erlang:error({required, setting}),
+    admin = erlang:error({required, admin}),
+    numbers = erlang:error({required, numbers}),
+    announcement = erlang:error({required, announcement}),
+    extend
 }).
 -endif.
 
--ifndef(GROUPCHAT_PB_H).
--define(GROUPCHAT_PB_H, true).
--record(groupchat, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
+-ifndef(GROUPRESEARCH_PB_H).
+-define(GROUPRESEARCH_PB_H, true).
+-record(groupresearch, {
+    gid = erlang:error({required, gid}),
+    gnickname = erlang:error({required, gnickname}),
+    gportrait = erlang:error({required, gportrait}),
+    announcement = erlang:error({required, announcement}),
+    extend
 }).
 -endif.
 
--ifndef(RESPONSEGROUPCHAT_PB_H).
--define(RESPONSEGROUPCHAT_PB_H, true).
--record(responsegroupchat, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    router = erlang:error({required, router}),
-    data = erlang:error({required, data})
+-ifndef(ROOMSESSION_PB_H).
+-define(ROOMSESSION_PB_H, true).
+-record(roomsession, {
+    rid = erlang:error({required, rid}),
+    type = erlang:error({required, type}),
+    setting = erlang:error({required, setting}),
+    creator = erlang:error({required, creator}),
+    numbers = erlang:error({required, numbers}),
+    extend
 }).
 -endif.
 
--ifndef(HEARTBEAT_PB_H).
--define(HEARTBEAT_PB_H, true).
--record(heartbeat, {
-    mt = erlang:error({required, mt}),
-    mid = erlang:error({required, mid}),
-    sig = erlang:error({required, sig}),
-    timestamp = erlang:error({required, timestamp}),
-    data
+-ifndef(ROOMRESEARCH_PB_H).
+-define(ROOMRESEARCH_PB_H, true).
+-record(roomresearch, {
+    rid = erlang:error({required, rid}),
+    type = erlang:error({required, type}),
+    creator = erlang:error({required, creator}),
+    numbers = erlang:error({required, numbers}),
+    extend
 }).
 -endif.
 
