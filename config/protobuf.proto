@@ -2,230 +2,156 @@
 %%% protobuf配置文件
 %%% ===============================================================================================
 
-%% 用户登录相关
-%% 用户登录请求消息
-message UserData {
-  optional string nickname = 1;         %% none/用户昵称
-  optional int32 uid = 2;              %% uid，使用uid登录可填
-  optional int64 phone = 3;             %% none/手机号，使用手机号登陆可填
-  required string token = 4;
-  required int32 device = 5;            %% 登录方式，1-安卓/2-ios/3-web
-  optional int32 device_id = 6;         %% 设备id
-  required string version = 7;          %% 客户端版本
-  required string app_id = 8;           %% 程序软件编号
 
-}
+%% 101  -   心跳消息
+%% 102  -   登录相关
+%% 103  -   增量消息
+%% 104  -   roster相关
+%% 107  -   聊天消息
 
-message RequestLogon {
+%% 110  -   推送服务
+
+%% 117  -   群操作相关
+%% 118  -   群增量消息
+%% 119  -   群聊消息
+
+%% 201  -   room操作消息
+%% 202  -   游戏操作
+%% 203  -   room聊天消息
+
+message proto {
   required int32 mt = 1;              %% 消息类型编号
   required string mid = 2;             %% 消息id
   required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required UserData data = 5;
+  required Router router = 4;
+  optional bytes data = 5;
+  required int64 timestamp = 6;         %% 时间戳，消息产生的时间
 }
-
-%% 返回登录响应
-message ResponseLogon {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  optional int32 data = 5;
-}
-
-%% 登陆成功
-message LogonSuccess {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  optional int32 data = 5;
-}
-
-%% 发送增量数据
-message ResponseSession {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  optional string data = 5;
-}
-
-%% 增量数据接收成功
-message SessionSuccess {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  optional int32 data = 5;
-}
-
-%% 用户登录相关end
-
+%% ================================================================================
 %% 消息路由
+%% ================================================================================
 message Router {
-  required int32 from = 1;              %% uid/gid
-  required int32 from_device = 2;      %% 设备类型编号
-  required int32 from_server = 3;             %% 服务器地址
-  required int32 to = 4;              %% uid/gid
-  required int32 to_device = 5;         %% 设备类型编号
-  required int32 to_server = 6;             %% 服务器地址
+  required bytes from = 1;              %% uid/gid
+  optional bytes from_device = 2;       %% 设备类型编号
+  optional bytes from_server = 3;       %% 服务器地址
+  optional bytes to = 4;                %% uid/gid
+  optional bytes to_device = 5;         %% 设备类型编号
+  optional bytes to_server = 6;         %% 服务器地址
 }
 
 message Chat {
-  required int32 from = 1;              %% uid/gid
-  required int32 device = 2;             %% 设备类型编号
-  required string c = 3;                 %% 内容
+  required bytes from = 1;              %% uid/gid
+  required bytes device = 2;            %% 设备类型编号
+  required bytes c = 3;                 %% 内容
 }
 
 %% 消息路由end
+%% ==================================================================================
 
-%% 用户关系相关
-message SeekUser {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required string data = 6;
+%% ==================================================================================
+%% 个人操作相关
+%% ==================================================================================
+%% 登录请求参数
+message LogonParameter {
+  optional bytes uid = 1;              %% uid，使用uid登录可填
+  optional bytes nickname = 2;         %% none/用户昵称
+  optional bytes phone = 3;             %% none/手机号，使用手机号登陆可填
+  required bytes token = 4;
+  required bytes device = 5;            %% 登录方式，1-安卓/2-ios/3-web
+  optional bytes device_id = 6;         %% 设备id
+  optional bytes version = 7;          %% 客户端版本
+  optional bytes app_id = 8;           %% 程序软件编号
+  optional bytes extend = 9;            %% 扩展信息
 }
 
-message ResponseSeekUser {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required bytes data = 6;           %% 用户数据
+
+msgage Category {
+  required bytes name = 1;        %% 类别名称
+  optional bytes members = 2;     %% 成员
 }
 
-message RequestFriend {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required string bytes = 6;           %% 用户数据
+%% 个人增量消息
+message PersonSession {
+  required bytes uid = 1;               %% uid
+  required bytes nickname = 2;
+  required bytes portrait = 3;          %% 头像
+  required bytes personlabel = 4;       %% 个人标签
+  optional bytes setting = 5;           %% 个人设置
+  optional bytes rosters = 6;           %% 通讯录
+  optional bytes groups = 7;            %% 加入的群
+  required bytes serverparameter = 8;   %% 服务器参数
+  optional bytes extend = 9;            %% 扩展信息
 }
 
-message RsponseRequestFriend {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required string data = 6;
+%% 人员查找
+message PersonResearch {
+  required bytes uid = 1;               %% uid
+  required bytes nickname = 2;
+  required bytes portrait = 3;          %% 头像
+  required bytes personlabel = 4;       %% 个人标签
+  optional bytes extend = 5;            %% 扩展信息
 }
 
-message RemoveFriend {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required bytes data = 6;
-}
 
-message ResponseRemoveFriend {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required string data = 6;
-}
+%% ==================================================================================
 
-message PersonalChat {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required Chat data = 6;
-}
-
-message ResponsePersonalChat {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required int32 data = 6;
-}
-
-%% 用户关系相关end
-
-
+%% ==========================================================================
 %% 群操作相关
-message CreateGroup {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required bytes data = 6;
-}
-message ResponseCreateGroup {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required int32 data = 6;
-}
-
+%% ==========================================================================
 %% 群增量消息
 message GroupSession {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required bytes data = 6;
+  required bytes gid = 1;              %% gid
+  required bytes gnickname = 2;
+  required bytes gportrait = 3;        %% 群头像
+  required bytes setting = 4;           %% 群设置
+  required bytes admin = 5;            %% 管理员
+  required bytes numbers = 6;           %% 群成员
+  required bytes announcement = 7;     %% 公告
+  optional bytes extend = 8;           %% 扩展信息
 }
 
 
-
-
-
-
-message GroupChat {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required Chat data = 6;
+%% 群查找
+message GroupResearch {
+  required bytes gid = 1;               %% gid
+  required bytes gnickname = 2;
+  required bytes gportrait = 3;          %% 头像
+  required bytes announcement = 4;       %% 公告
+  optional bytes extend = 5;            %% 扩展信息
 }
 
-message ResponseGroupChat {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  required Router router = 5;
-  required int32 data = 6;
-}
 
 %% 群操作相关end
+%% ===============================================================================
 
 
+%% ==============================================================================
 %% 游戏房间
+%% ===============================================================================
+%% 房间增量消息
+message RoomSession {
+  required bytes rid = 1;              %% 房间编号
+  required bytes type = 2;             %% 房间类型编号
+  required bytes setting = 3;          %% 设置参数
+  required bytes creator = 4;          %% 创建者
+  required bytes numbers = 5;          %% 成员信息
+  optional bytes extend = 6;           %% 扩展信息
+}
 
-
+%% 房间查找
+message RoomResearch {
+  required bytes rid = 1;               %% gid
+  required bytes type = 2;             %% 房间类型编号
+  required bytes creator = 3;          %% 创建者
+  required bytes numbers = 4;          %% 成员信息
+  optional bytes extend = 5;            %% 扩展信息
+}
 
 %% 房间相关end
+%% ================================================================================
 
 
 %% 其他消息
-%% 心跳消息
-message HeartBeat {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;             %% 消息标志位
-  required int64 timestamp = 4;         %% 时间戳，消息产生的时间
-  optional string data = 5;
-}
 
 
 
