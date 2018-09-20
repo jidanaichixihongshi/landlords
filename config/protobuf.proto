@@ -53,11 +53,11 @@ message Chat {
 %% ==================================================================================
 %% 登录请求参数
 message LogonParameter {
-  optional bytes uid = 1;              %% uid，使用uid登录可填
+  optional int32 uid = 1;              %% uid，使用uid登录可填
   optional bytes nickname = 2;         %% none/用户昵称
   optional bytes phone = 3;             %% none/手机号，使用手机号登陆可填
   required bytes token = 4;
-  required bytes device = 5;            %% 登录方式，1-安卓/2-ios/3-web
+  required int32 device = 5;            %% 登录方式，1-安卓/2-ios/3-web
   optional bytes device_id = 6;         %% 设备id
   optional bytes version = 7;          %% 客户端版本
   optional bytes app_id = 8;           %% 程序软件编号
@@ -72,7 +72,7 @@ message Category {
 
 %% 个人增量消息
 message PersonSession {
-  required bytes uid = 1;               %% uid
+  required int32 uid = 1;               %% uid
   required bytes nickname = 2;
   required bytes portrait = 3;          %% 头像
   required bytes personlabel = 4;       %% 个人标签
@@ -85,7 +85,7 @@ message PersonSession {
 
 %% 人员查找
 message PersonResearch {
-  required bytes uid = 1;               %% uid
+  required int32 uid = 1;               %% uid
   required bytes nickname = 2;
   required bytes portrait = 3;          %% 头像
   required bytes personlabel = 4;       %% 个人标签
@@ -100,7 +100,7 @@ message PersonResearch {
 %% ==========================================================================
 %% 群增量消息
 message GroupSession {
-  required bytes gid = 1;              %% gid
+  required int32 gid = 1;              %% gid
   required bytes gnickname = 2;
   required bytes gportrait = 3;        %% 群头像
   required bytes setting = 4;           %% 群设置
@@ -113,7 +113,7 @@ message GroupSession {
 
 %% 群查找
 message GroupResearch {
-  required bytes gid = 1;               %% gid
+  required int32 gid = 1;               %% gid
   required bytes gnickname = 2;
   required bytes gportrait = 3;          %% 头像
   required bytes announcement = 4;       %% 公告
@@ -130,19 +130,19 @@ message GroupResearch {
 %% ===============================================================================
 %% 房间增量消息
 message RoomSession {
-  required bytes rid = 1;              %% 房间编号
+  required int32 rid = 1;              %% 房间编号
   required bytes type = 2;             %% 房间类型编号
   required bytes setting = 3;          %% 设置参数
-  required bytes creator = 4;          %% 创建者
+  required int32 creator = 4;          %% 创建者
   required bytes numbers = 5;          %% 成员信息
   optional bytes extend = 6;           %% 扩展信息
 }
 
 %% 房间查找
 message RoomResearch {
-  required bytes rid = 1;               %% gid
+  required int32 rid = 1;               %% gid
   required bytes type = 2;             %% 房间类型编号
-  required bytes creator = 3;          %% 创建者
+  required int32 creator = 3;          %% 创建者
   required bytes numbers = 4;          %% 成员信息
   optional bytes extend = 5;            %% 扩展信息
 }
