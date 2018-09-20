@@ -65,7 +65,7 @@ message LogonParameter {
 }
 
 
-messgage Category {
+message Category {
   required bytes name = 1;        %% 类别名称
   optional bytes members = 2;     %% 成员
 }
