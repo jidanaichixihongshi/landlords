@@ -233,7 +233,7 @@ iolist(chat, Record) ->
 	  bytes, [])];
 iolist(logonparameter, Record) ->
     [pack(1, optional,
-	  with_default(Record#logonparameter.uid, none), bytes,
+	  with_default(Record#logonparameter.uid, none), int32,
 	  []),
      pack(2, optional,
 	  with_default(Record#logonparameter.nickname, none),
@@ -245,7 +245,7 @@ iolist(logonparameter, Record) ->
 	  with_default(Record#logonparameter.token, none), bytes,
 	  []),
      pack(5, required,
-	  with_default(Record#logonparameter.device, none), bytes,
+	  with_default(Record#logonparameter.device, none), int32,
 	  []),
      pack(6, optional,
 	  with_default(Record#logonparameter.device_id, none),
@@ -267,7 +267,7 @@ iolist(category, Record) ->
 	  [])];
 iolist(personsession, Record) ->
     [pack(1, required,
-	  with_default(Record#personsession.uid, none), bytes,
+	  with_default(Record#personsession.uid, none), int32,
 	  []),
      pack(2, required,
 	  with_default(Record#personsession.nickname, none),
@@ -296,7 +296,7 @@ iolist(personsession, Record) ->
 	  [])];
 iolist(personresearch, Record) ->
     [pack(1, required,
-	  with_default(Record#personresearch.uid, none), bytes,
+	  with_default(Record#personresearch.uid, none), int32,
 	  []),
      pack(2, required,
 	  with_default(Record#personresearch.nickname, none),
@@ -312,7 +312,7 @@ iolist(personresearch, Record) ->
 	  [])];
 iolist(groupsession, Record) ->
     [pack(1, required,
-	  with_default(Record#groupsession.gid, none), bytes, []),
+	  with_default(Record#groupsession.gid, none), int32, []),
      pack(2, required,
 	  with_default(Record#groupsession.gnickname, none),
 	  bytes, []),
@@ -336,7 +336,7 @@ iolist(groupsession, Record) ->
 	  [])];
 iolist(groupresearch, Record) ->
     [pack(1, required,
-	  with_default(Record#groupresearch.gid, none), bytes,
+	  with_default(Record#groupresearch.gid, none), int32,
 	  []),
      pack(2, required,
 	  with_default(Record#groupresearch.gnickname, none),
@@ -352,14 +352,14 @@ iolist(groupresearch, Record) ->
 	  [])];
 iolist(roomsession, Record) ->
     [pack(1, required,
-	  with_default(Record#roomsession.rid, none), bytes, []),
+	  with_default(Record#roomsession.rid, none), int32, []),
      pack(2, required,
 	  with_default(Record#roomsession.type, none), bytes, []),
      pack(3, required,
 	  with_default(Record#roomsession.setting, none), bytes,
 	  []),
      pack(4, required,
-	  with_default(Record#roomsession.creator, none), bytes,
+	  with_default(Record#roomsession.creator, none), int32,
 	  []),
      pack(5, required,
 	  with_default(Record#roomsession.numbers, none), bytes,
@@ -369,12 +369,12 @@ iolist(roomsession, Record) ->
 	  [])];
 iolist(roomresearch, Record) ->
     [pack(1, required,
-	  with_default(Record#roomresearch.rid, none), bytes, []),
+	  with_default(Record#roomresearch.rid, none), int32, []),
      pack(2, required,
 	  with_default(Record#roomresearch.type, none), bytes,
 	  []),
      pack(3, required,
-	  with_default(Record#roomresearch.creator, none), bytes,
+	  with_default(Record#roomresearch.creator, none), int32,
 	  []),
      pack(4, required,
 	  with_default(Record#roomresearch.numbers, none), bytes,
@@ -535,9 +535,9 @@ decode(chat, Bytes) when is_binary(Bytes) ->
 decode(logonparameter, Bytes) when is_binary(Bytes) ->
     Types = [{9, extend, bytes, []}, {8, app_id, bytes, []},
 	     {7, version, bytes, []}, {6, device_id, bytes, []},
-	     {5, device, bytes, []}, {4, token, bytes, []},
+	     {5, device, int32, []}, {4, token, bytes, []},
 	     {3, phone, bytes, []}, {2, nickname, bytes, []},
-	     {1, uid, bytes, []}],
+	     {1, uid, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(logonparameter, Decoded);
@@ -551,14 +551,14 @@ decode(personsession, Bytes) when is_binary(Bytes) ->
 	     {8, serverparameter, bytes, []}, {7, groups, bytes, []},
 	     {6, rosters, bytes, []}, {5, setting, bytes, []},
 	     {4, personlabel, bytes, []}, {3, portrait, bytes, []},
-	     {2, nickname, bytes, []}, {1, uid, bytes, []}],
+	     {2, nickname, bytes, []}, {1, uid, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(personsession, Decoded);
 decode(personresearch, Bytes) when is_binary(Bytes) ->
     Types = [{5, extend, bytes, []},
 	     {4, personlabel, bytes, []}, {3, portrait, bytes, []},
-	     {2, nickname, bytes, []}, {1, uid, bytes, []}],
+	     {2, nickname, bytes, []}, {1, uid, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(personresearch, Decoded);
@@ -567,29 +567,29 @@ decode(groupsession, Bytes) when is_binary(Bytes) ->
 	     {7, announcement, bytes, []}, {6, numbers, bytes, []},
 	     {5, admin, bytes, []}, {4, setting, bytes, []},
 	     {3, gportrait, bytes, []}, {2, gnickname, bytes, []},
-	     {1, gid, bytes, []}],
+	     {1, gid, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(groupsession, Decoded);
 decode(groupresearch, Bytes) when is_binary(Bytes) ->
     Types = [{5, extend, bytes, []},
 	     {4, announcement, bytes, []}, {3, gportrait, bytes, []},
-	     {2, gnickname, bytes, []}, {1, gid, bytes, []}],
+	     {2, gnickname, bytes, []}, {1, gid, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(groupresearch, Decoded);
 decode(roomsession, Bytes) when is_binary(Bytes) ->
     Types = [{6, extend, bytes, []},
-	     {5, numbers, bytes, []}, {4, creator, bytes, []},
+	     {5, numbers, bytes, []}, {4, creator, int32, []},
 	     {3, setting, bytes, []}, {2, type, bytes, []},
-	     {1, rid, bytes, []}],
+	     {1, rid, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(roomsession, Decoded);
 decode(roomresearch, Bytes) when is_binary(Bytes) ->
     Types = [{5, extend, bytes, []},
-	     {4, numbers, bytes, []}, {3, creator, bytes, []},
-	     {2, type, bytes, []}, {1, rid, bytes, []}],
+	     {4, numbers, bytes, []}, {3, creator, int32, []},
+	     {2, type, bytes, []}, {1, rid, int32, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(roomresearch, Decoded).
