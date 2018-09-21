@@ -31,6 +31,7 @@ init(_Args) ->
 			timer:send_interval(?HEART_BREAK_TIME, heartbeat),
 			erlang:send_after(2000, self(), start_logon),
 			State = #state{
+				uid = 1000000,
 				ip = IP,
 				port = Port,
 				socket = Socket,
@@ -50,11 +51,13 @@ handle_cast(Request, State) ->
 	{noreply, State}.
 
 handle_info(start_logon, State) ->
-	msg:requestlogon(),
+	Msg = msg:get_login(State#state.uid),
+	tcp_send(State#state.socket, Msg),
 	{noreply, State};
 
 handle_info(heartbeat, State) ->
-	msg:heartbeat(),
+	Msg = msg:get_heartbeat(State#state.uid),
+	tcp_send(State#state.socket, Msg),
 	{noreply, State};
 handle_info({send_msg, Msg}, State = #state{socket = Socket}) ->
 	case mod_msg:packet(Msg) of
@@ -71,12 +74,8 @@ handle_info({send_msg, Msg}, State = #state{socket = Socket}) ->
 	{noreply, State};
 handle_info({tcp, Socket, Data}, State) ->
 	inet:setopts(Socket, [{active, once}]),
-	case mod_msg:unpacket(Data) of
-		{Type, Msg} ->
-			handle_msg(Type, Msg);
-		_ ->
-			io:format("unknow msg : ~p~n", [Data])
-	end,
+	Msg = mod_msg:unpacket(Data),
+	handle_msg(Msg, State),
 	{noreply, State};
 
 handle_info({tcp_error, _, Reason}, State) ->
@@ -94,9 +93,7 @@ handle_info(Info, State) ->
 
 terminate(Reason, State) ->
 	Socket = State#state.socket,
-	io:format("======================================== ~n
-		socket ~p terminate, reason: ~p ~n
-	======================================== ~n", [Socket, Reason]),
+	io:format("socket ~p terminate, reason: ~p ~n", [Socket, Reason]),
 	gen_tcp:close(Socket),
 	ok.
 
@@ -104,21 +101,39 @@ code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
 
+
+tcp_send(Socket, Msg) ->
+	Packet = mod_msg:packet(Msg),
+	gen_tcp:send(Socket, Packet).
+
+
 %% process server msg
-handle_msg(heartbeat, Msg) ->
+handle_msg(#proto{mt = 101, sig = 2} = Msg, _State) ->
 	io:format("recv heartbeat msg: ~p~n", [Msg]);
-handle_msg(responselogon, Msg) ->   %% 登录结果
+handle_msg(#proto{mt = Mt, sig = 2, data = Data} = Msg,
+	#state{uid = Uid, socket = Socket} = State) ->   %% 登录结果
 	io:format("recv responselogon msg: ~p~n", [Msg]),
-	case Msg#responselogon.data of
-		0 ->
-			msg:logonsuccess();
+	case Mt of
+		102 ->
+			case Data of
+				<<"0">> ->
+					io:format("login success, begin session ...~n", []),
+					Reply = term_to_binary({login_success, 0}),
+					Response = msg:produce_msg(Uid, <<"">>, Mt, Reply),
+					tcp_send(Socket, Response);
+				_ ->
+					io:format("login faile, close socket ...", []),
+					gen_tcp:close(Socket)
+			end;
+		103 ->
+			io:format("session success : ~p~n", [Data]),
+			Reply = term_to_binary({login_success, 0}),
+			Response = msg:produce_msg(Uid, <<"">>, Mt, Reply),
+			tcp_send(Socket, Response);
 		_ ->
-			ok
+			io:format("undefined msg: ~p~n", [Msg])
 	end;
-handle_msg(responsesession, Msg) ->   %% 增量消息
-	io:format("recv responsesession msg: ~p~n", [Msg]),
-	msg:sessionsuccess();
-handle_msg(_Type, Msg) ->
+handle_msg(Msg, _State) ->
 	io:format("recv unused msg: ~p~n", [Msg]).
 
 

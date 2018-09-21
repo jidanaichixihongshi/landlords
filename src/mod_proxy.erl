@@ -18,7 +18,9 @@
 	unregister_client/2,
 	register_client/4,
 
-	get_proxy/1
+	get_proxy/1,
+
+	get_client_list/1
 ]).
 
 
@@ -28,7 +30,8 @@ unregister_client(ProxyPid, Uid) ->
 register_client(ProxyPid, _Uid, Device, Token) ->
 	gen_server:cast(ProxyPid, {register_client, #proxy_client{pid = self(), device = Device, token = Token}}).
 
-
+get_proxy(Uid) when is_binary(Uid) ->
+	get_proxy(binary_to_integer(Uid));
 get_proxy(Uid) ->
 	case select_proxy(Uid) of
 		{ok, Pid} ->
@@ -44,17 +47,6 @@ get_proxy(Uid) ->
 			end
 	end.
 
-%% 启动proxy
-create_proxy(Uid) ->
-	case landlords_proxy_sup:start_child(node(), #proxy_state{uid = Uid}) of
-		{ok, Pid} ->
-			{ok, Pid};
-		Error ->
-			?ERROR("create proxy error: ~p~n", [Error]),
-			Error
-	end.
-
-
 %% 先在本地ets中找，没找到再去redis中找
 select_proxy(Uid) ->
 	case landlords_ets:lookup_proxy(Uid) of
@@ -66,13 +58,25 @@ select_proxy(Uid) ->
 			?IF(mod_proc:is_proc_alive(Pid), {ok, Pid}, undefined)
 	end.
 
+%% 启动proxy
+create_proxy(Uid) ->
+	case landlords_proxy_sup:start_child(node(), #proxy_state{uid = Uid}) of
+		{ok, Pid} ->
+			{ok, Pid};
+		Error ->
+			?ERROR("create proxy error: ~p~n", [Error]),
+			Error
+	end.
 
 
 
-
-
-
-
+get_client_list(ProxyPid) ->
+	case gen_server:call(ProxyPid, get_client_list, 3000) of
+		ClientList when is_list(ClientList) ->
+			ClientList;
+		_ ->
+			[]
+	end.
 
 
 

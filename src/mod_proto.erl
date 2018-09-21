@@ -29,17 +29,8 @@ packet(Msg) ->
 	{error, Msg}.
 
 packet_msg(Msg) ->
-	Type = erlang:element(2, Msg),
 	EMsg = list_to_binary(encode(Msg)),
-	{ok, <<Type:16, EMsg/binary>>}.
-
-%% 解包客户端消息
-unpacket(Data) when is_binary(Data) ->
-	<<H:16, BinMsg/binary>> = Data,
-	decode(H, BinMsg);
-unpacket(_Data) ->
-	throw({error, ?ERROR_101}).
-
+	{ok, <<0:16, EMsg/binary>>}.
 
 %% 编码
 encode(Msg) when is_tuple(Msg) ->
@@ -47,23 +38,22 @@ encode(Msg) when is_tuple(Msg) ->
 encode(_Msg) ->
 	throw(error).
 
+
+%% 解包客户端消息
+unpacket(Data) when is_binary(Data) ->
+	<<0:16, BinMsg/binary>> = Data,
+	protobuf_pb:decode(proto, BinMsg);
+unpacket(_Data) ->
+	throw({error, ?ERROR_101}).
+
 %% 解码
-decode(H, BinMsg) when is_binary(BinMsg) ->
-	Type = get_decode_type(H),
-	protobuf_pb:decode(Type, BinMsg);
-decode(_Type, _Msg) ->
+decode(T, BinMsg) when is_binary(BinMsg) ->
+	protobuf_pb:decode(T, BinMsg);
+decode(_T, _Msg) ->
 	throw({error, ?ERROR_101}).
 
 
-%% -----------------------------------------------------------------------------
-%% internal function
-%% -----------------------------------------------------------------------------
-get_decode_type(106) -> sessionsuccess;
-get_decode_type(105) -> responsesession;
-get_decode_type(104) -> logonsuccess;
-get_decode_type(103) -> responselogon;
-get_decode_type(102) -> requestlogon;
-get_decode_type(101) -> heartbeat.
+
 
 
 

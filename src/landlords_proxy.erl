@@ -50,8 +50,8 @@ init(Args) ->
 	NewState :: term(),
 	Timeout :: non_neg_integer() | infinity.
 %% ==================================================================================
-handle_call({get_all_client_pid, Uid}, _From, State) ->
-	Reply = get_all_client_pid(Uid, State),
+handle_call(get_client_list, _From, State) ->
+	Reply = get_client_list(State),
 	{reply, Reply, State};
 handle_call(Request, _From, State) ->
 	?WARNING("unknow call  Request ~p", [Request]),
@@ -161,24 +161,19 @@ register_client(Client, State) ->
 
 
 %% 获取所有连接pid，顺便检查死掉的连接
-get_all_client_pid(Uid, State) ->
-	if
-		Uid == State#proxy_state.uid ->
-			lists:foldl(
-				fun(Client, Acc) when is_pid(Client#proxy_client.pid) ->
-					case mod_proc:is_proc_alive(Client#proxy_client.pid) of
-						true ->
-							[Client#proxy_client.pid | Acc];
-						false ->
-							self() ! {client_update, Client#proxy_client{pid = undefined}},
-							Acc
-					end;
-					(_, Acc) ->
-						Acc
-				end, [], State#proxy_state.client);
-		true ->
-			undefined
-	end.
+get_client_list(State) ->
+	lists:foldl(
+		fun(Client, Acc) when is_pid(Client#proxy_client.pid) ->
+			case mod_proc:is_proc_alive(Client#proxy_client.pid) of
+				true ->
+					[Client#proxy_client.pid | Acc];
+				false ->
+					erlang:send_after(3000, self(), {client_update, Client#proxy_client{pid = undefined}}),
+					Acc
+			end;
+			(_, Acc) ->
+				Acc
+		end, [], State#proxy_state.client).
 
 
 

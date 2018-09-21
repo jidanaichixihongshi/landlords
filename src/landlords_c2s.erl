@@ -69,13 +69,9 @@ init([{SockMod, Socket, _SockPid}]) ->
 	{ok, wait_for_auth, StateData, ?AUTH_TIMEOUT}.
 
 
-wait_for_auth(#requestlogon{
-	mt = 102,
-	mid = Mid,
-	sig = ?SIGN1,
-	timestamp = Timestamp,
-	data = Data} = _AuthData, StateData) ->
-	#userdata{
+wait_for_auth(#proto{mt = ?MT_102, mid = Mid, sig = ?SIGN1, router = Router, data = Data, timestamp = Timestamp},
+	#client_state{sockmod = SockMod, socket = Socket} = StateData) ->
+	#logonparameter{
 		uid = Uid,
 		phone = Phone,
 		token = Token,
@@ -83,10 +79,9 @@ wait_for_auth(#requestlogon{
 		device_id = DeviceId,
 		version = Vsn,
 		app_id = AppId} = Data,
-	IsOverTime = not check_msg_timestamp(Timestamp),
-
-	case IsOverTime of
-		false ->
+	NotOverTime = mod_msg:check_msg_timestamp(Timestamp),
+	case NotOverTime of
+		true ->
 			case mod_proxy:get_proxy(Uid) of
 				{_Node, ProxyPid} when is_pid(ProxyPid) ->
 					mod_proxy:register_client(ProxyPid, Uid, Device, Token),
@@ -100,7 +95,6 @@ wait_for_auth(#requestlogon{
 						app_id = AppId,
 						token = Token,
 						location = <<"北京">>,
-						login_time = lib_time:get_mstimestamp(),
 						phone = Phone
 					},
 					NewStateData = StateData#client_state{
@@ -109,21 +103,20 @@ wait_for_auth(#requestlogon{
 						pid = self(),
 						node = node(),
 						user_data = UserData},
-					Reply = mod_msg:produce_responselogon(Mid, ?ERROR_0),
-					tcp_send(StateData#client_state.sockmod, StateData#client_state.socket, Reply),
+					Reply = mod_msg:produce_responselogon(?MT_102, Mid, Router, ?ERROR_0),
+					tcp_send(SockMod, Socket, Reply),
 					fsm_next_state(session_established, NewStateData);
 				_ ->
-					Reply = mod_msg:produce_responselogon(Mid, ?ERROR_100),
-					tcp_send(StateData#client_state.sockmod, StateData#client_state.socket, Reply),
+					Reply = mod_msg:produce_responselogon(?MT_102, Mid, Router, ?ERROR_100),
+					tcp_send(SockMod, Socket, Reply),
 					fsm_next_state(wait_for_auth, StateData)
 			end;
 		_ ->
-			Reply = mod_msg:produce_responselogon(Mid, ?ERROR_102),
-			tcp_send(StateData#client_state.sockmod, StateData#client_state.socket, Reply),
+			Reply = mod_msg:produce_responselogon(?MT_102, Mid, Router, ?ERROR_102),
+			tcp_send(SockMod, Socket, Reply),
 			fsm_next_state(wait_for_auth, StateData)
 	end;
 wait_for_auth(timeout, StateData) ->
-	?INFO("-----------------~n", []),
 	{stop, normal, StateData};
 wait_for_auth(closed, StateData) ->
 	{stop, normal, StateData};
@@ -131,21 +124,24 @@ wait_for_auth(stop, StateData) ->
 	{stop, normal, StateData}.
 
 
-session_established(#logonsuccess{
-	mt = 104,
-	sig = ?SIGN1,
-	data = ?ERROR_0}, StateData) ->
-	%% 更新增量
-	landlords_hooks:run(update_session_established, node(), StateData),
-
-	fsm_next_state(session_established, StateData);
-%% session success
-session_established(#sessionsuccess{
-	mt = 106,
-	sig = ?SIGN1,
-	data = ?ERROR_0}, StateData) ->
-
-	fsm_next_state(wait_for_resume, StateData#client_state{status = online});
+session_established(#proto{mt = ?MT_102, sig = ?SIGN1, data = Data},
+	#client_state{user_data = UserData} = StateData) ->
+	case binary_to_term(Data) of
+		{login_success, ?ERROR_0} ->  %% 登陆成功
+			landlords_hooks:run(update_session, node(), StateData),
+			fsm_next_state(session_established, StateData);
+		{session_established, ?ERROR_0} ->    %% session success
+			NewStateData = StateData#client_state{
+				user_data = UserData#user_data{login_time = lib_time:get_mstimestamp()},
+				status = online
+			},
+			fsm_next_state(wait_for_resume, NewStateData);
+		{session_established, request} ->    %% 更新增量
+			landlords_hooks:run(update_session, node(), StateData),
+			fsm_next_state(session_established, StateData);
+		_ ->
+			fsm_next_state(session_established, StateData)
+	end;
 session_established(timeout, StateData) ->
 	fsm_next_state(session_established, StateData);
 session_established(closed, StateData) ->
@@ -154,15 +150,14 @@ session_established(stop, StateData) ->
 	{stop, normal, StateData}.
 
 %% session success
-wait_for_resume(#sessionsuccess{
-	mt = 106,
-	sig = ?SIGN1,
-	data = ?ERROR_0}, StateData) ->
-	fsm_next_state(wait_for_resume, StateData);
-wait_for_resume(Msg, StateData) when is_tuple(Msg) ->
-	landlords_hooks:run(element(1,Msg), node(), Msg),
-	fsm_next_state(wait_for_resume, StateData);
-
+wait_for_resume(Msg, StateData) ->
+	try
+		mod_c2s_handle:handle_msg(Msg, StateData)
+	catch
+		Error ->
+			?ERROR("handle msg error : ~p~n reason : ~p~n", [Msg, Error]),
+			fsm_next_state(wait_for_resume, StateData)
+	end;
 wait_for_resume(timeout, StateData) ->
 	?DEBUG("Timed out waiting for resumption", []),
 	{stop, normal, StateData};
@@ -210,7 +205,7 @@ code_change(_OldVsn, StateName, StateData, _Extra) ->
 
 tcp_send(Mod, Socket, Reply) ->
 	{ok, EReply} = mod_proto:packet(Reply),
-	?DEBUG("~p~n",[EReply]),
+	?DEBUG("~p~n", [EReply]),
 	Mod:send(Socket, EReply).
 
 
@@ -237,9 +232,6 @@ fsm_reply(Reply, StateName, StateData) ->
 
 
 
-check_msg_timestamp(Timestamp) ->
-	MsTimestamp = lib_time:get_mstimestamp(),
-	Timestamp + ?DATA_OVERTIME > MsTimestamp.
 
 
 

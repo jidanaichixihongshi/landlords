@@ -19,6 +19,7 @@
 
 %% 客户端连接状态
 -record(state, {
+	uid,
 	ip,
 	port,
 	socket,

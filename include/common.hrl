@@ -16,10 +16,20 @@
 
 -define(UID_HASH_RANGE, 10000000).      %% 和uid相关的hash值取值范围
 
+%% 消息类型
+-define(MT_101, 101).		%% 心跳消息
+-define(MT_102, 102).		%% 登录相关
+-define(MT_103, 103).		%% 增量消息
+-define(MT_104, 104).		%% roster相关
+-define(MT_107, 107).		%% 聊天消息
+
+
+-define(MT_118, 118).		%% 群增量
+
 
 %% 钩子注册
 -define(HOOKS_LIST, [
-	{update_session_established, ?LOCALNODE, mod_c2s_handle, update_session_established, 50},
+	{update_session, ?LOCALNODE, mod_c2s_handle, update_session, 50},
 	{seekuser, ?LOCALNODE, mod_c2s_handle, seekuser, 50},
 	{requestfriend, ?LOCALNODE, mod_c2s_handle, request_friend, 50},
 	{rsponserequestfriend, ?LOCALNODE, mod_c2s_handle, add_roster, 50},

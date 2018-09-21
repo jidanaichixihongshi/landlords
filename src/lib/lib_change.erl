@@ -44,8 +44,13 @@ to_atom(_) ->
 -spec to_binary(Msg :: any()) -> binary().
 to_binary(Msg) when is_binary(Msg) ->
 	Msg;
+to_binary(Msg) when is_tuple(Msg) ->
+	term_to_binary(Msg);
 to_binary(Msg) when is_atom(Msg) ->
 	list_to_binary(atom_to_list(Msg));
+to_binary(Msg) when is_map(Msg) ->
+	LMsg = maps:to_list(Msg),
+	term_to_binary(LMsg);
 %%atom_to_binary(Msg, utf8);
 to_binary(Msg) when is_list(Msg) ->
 	list_to_binary(Msg);

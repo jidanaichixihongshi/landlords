@@ -13,7 +13,12 @@
 
 -export([
 	packet/1,
-	unpacket/1]).
+	unpacket/1,
+	decode/2]).
+
+-define(SIGN0, 0).          %% 节点消息
+-define(SIGN1, 1).          %% c2s消息
+-define(SIGN2, 2).          %% s2c消息
 
 %% 打包客户端消息
 packet(Msg) when is_tuple(Msg) ->
@@ -22,34 +27,29 @@ packet(Msg) ->
 	{error,Msg}.
 
 packet_msg(Msg) ->
-	Type = element(2, Msg),
-	io:format("***************~p~n",[Type]),
 	EMsg = list_to_binary(protobuf_pb:encode(Msg)),
-	{ok, <<Type:16, EMsg/binary>>}.
+	{ok, <<0:16, EMsg/binary>>}.
+
 
 
 %% 解包服务器消息
 unpacket(Data) when is_binary(Data) ->
-	<<H:16, BinMsg/binary>> = Data,
-	unpacket_msg(H, BinMsg);
+	<<0:16, BinMsg/binary>> = Data,
+	protobuf_pb:decode(proto, BinMsg);
 unpacket(_Data) ->
 	error.
 
-unpacket_msg(H, BinMsg) ->
-	Type = get_decode_type(H),
-	Msg = protobuf_pb:decode(Type, BinMsg),
-	{Type, Msg}.
+%% 解码
+decode(T, BinMsg) when is_binary(BinMsg) ->
+	protobuf_pb:decode(T, BinMsg);
+decode(_T, _Msg) ->
+	error.
 
 
 %% -----------------------------------------------------------------------------
 %% internal function
 %% -----------------------------------------------------------------------------
-get_decode_type(106) -> sessionsuccess;
-get_decode_type(105) -> responsesession;
-get_decode_type(104) -> logonsuccess;
-get_decode_type(103) -> responselogon;
-get_decode_type(102) -> requestlogin;
-get_decode_type(101) -> heartbeat.
+
 
 
 

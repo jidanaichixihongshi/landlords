@@ -68,13 +68,13 @@
 	nickname :: <<>>,        	%% 昵称
 	level,                    %% 用户等级
 	version :: <<>>,        	%% 客户端版本
-	device :: <<>>,						%% 客户端类型
+	device,			        			%% 客户端类型
 	device_id :: <<>>,        %% 设备id
 	app_id,
 	token :: <<>>,
 	location :: <<>>,       	%% 登录地点
 	login_time,               %% 登录时间
-	phone                    	%% 电话
+	phone :: <<>>            	%% 电话
 }).
 
 %% 用户连接信息

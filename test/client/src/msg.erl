@@ -12,80 +12,62 @@
 -include("common.hrl").
 -include("protobuf_pb.hrl").
 
--export([
-	requestlogon/0,
-	logonsuccess/0,
-	sessionsuccess/0,
-	heartbeat/0]).
+-compile(export_all).
 
 %% -----------------------------------------------------------------------
 %% 登录功能测试
 %% -----------------------------------------------------------------------
-requestlogon() ->
-	Uid = 1537096,
-	UserData = #userdata{
-		nickname = <<"晴天">>,
+get_login(Uid) ->
+	Parameter = #logonparameter{
 		uid = Uid,
-		phone = 15175066700,
-		token = "testloginserver#2537996#15175066700",
+		nickname = <<"晴天">>,
+		phone = <<"15175066700">>,
+		token = <<"testloginserver#2537996#15175066700">>,
 		device = 1,
-		device_id = 3565861,
-		version = "0.0.1",
-		app_id = "32_1_3"
+		device_id = <<"3565861">>,
+		version = <<"0.0.1">>,
+		app_id = <<"32_1_3">>
 	},
-	RequestLogin = #requestlogon{
+	Router = get_router(Uid, <<"">>),
+	#proto{
 		mt = 102,
 		mid = produce_mid(Uid),
 		sig = 1,
-		timestamp = get_mstimestamp(),
-		data = UserData
-	},
-	send_msg(RequestLogin).
+		router = term_to_binary(Router),
+		data = term_to_binary(Parameter),
+		timestamp = get_mstimestamp()
+	}.
 
-logonsuccess() ->
-	Uid = 1537096,
-	LoginSuccess = #logonsuccess{
-                mt = 104,
-                mid = produce_mid(Uid),
-                sig = 1,
-                timestamp = get_mstimestamp(),
-                data = 0
-        },
-        send_msg(LoginSuccess).
-
-sessionsuccess() ->
-        Uid = 1537096,
-        SessionSuccess = #sessionsuccess{
-                mt = 106,
-                mid = produce_mid(Uid),
-                sig = 1,
-                timestamp = get_mstimestamp(),
-                data = 0
-        },
-        send_msg(SessionSuccess).
-
+produce_msg(Uid, To, Mt, Reply) ->
+	Router = get_router(Uid, To)
+	#proto{
+		mt = Mt,
+		mid = produce_mid(Uid),
+		sig = 1,
+		router = term_to_binary(Router),
+		data = Reply,
+		timestamp = get_mstimestamp()
+	}.
 
 
 %% -----------------------------------------------------------------------
 %% 其他功能测试
 %% -----------------------------------------------------------------------
-heartbeat() ->
-        Uid = 1537096,
-	Heart = #heartbeat{
+get_heartbeat(Uid) ->
+	Router = get_router(Uid, <<"">>),
+	#proto{
 		mt = 101,
-                mid = produce_mid(Uid),
+		mid = produce_mid(Uid),
 		sig = 1,
-                timestamp = get_mstimestamp(),
-		data = ""},
-	send_msg(Heart).
+		router = term_to_binary(Router),
+		data = <<"">>,
+		timestamp = get_mstimestamp()
+	}.
 
 
 %% -----------------------------------------------------------------------
 %% internal API
 %% -----------------------------------------------------------------------
-send_msg(Msg) ->
-	erlang:send_after(500, self(), { send_msg, Msg}).
-
 %% 获取时间戳（13位）
 -spec get_mstimestamp() -> integer().
 get_mstimestamp() ->
@@ -95,6 +77,16 @@ get_mstimestamp() ->
 produce_mid(Uid) ->
 	MsTimesstamp = get_mstimestamp(),
 	integer_to_list(Uid) ++ "_" ++ integer_to_list(MsTimesstamp).
+
+get_router(Uid, To) ->
+	#router{
+		from = integer_to_binary(Uid),
+		from_device = <<"1">>,
+		from_server = <<"">>,
+		to = To,
+		to_device = <<"">>,
+		to_server = <<"">>
+	}.
 
 
 

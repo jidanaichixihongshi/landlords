@@ -65,11 +65,6 @@ message LogonParameter {
 }
 
 
-message Category {
-  required bytes name = 1;        %% 类别名称
-  optional bytes members = 2;     %% 成员
-}
-
 %% 个人增量消息
 message PersonSession {
   required int32 uid = 1;               %% uid

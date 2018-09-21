@@ -64,7 +64,7 @@ handle_call(_Request, _From, State) ->
 	?DEBUG("handle_call message ~p ~n", [_Request]),
 	{reply, ok, State, ?HIBERNATE_TIMEOUT}.
 
-handle_cast({send, Msg}, #receiver_state{socket = Socket, transport = Transport = State}) ->
+handle_cast({send, Msg}, #receiver_state{socket = Socket, transport = Transport} = State) ->
 	?INFO("send tcp msg ::: ~p~n", [Msg]),
 	try
 		{ok, SData} = mod_proto:packet(Msg),
@@ -84,10 +84,6 @@ handle_info({tcp, Socket, Data}, State) ->
 	Msg = mod_proto:unpacket(Data),
 	NewState = process_msg(Msg, State),
 	{noreply, NewState, ?HIBERNATE_TIMEOUT};
-
-handle_info({ask, AskData}, #receiver_state{socket = Socket, transport = Transport} = State) ->
-	Transport:send(Socket, AskData),
-	{noreply, State, ?HIBERNATE_TIMEOUT};
 
 %% timout function
 handle_info(timeout, State) ->
@@ -120,27 +116,29 @@ code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
 %% ACK
-process_msg(#heartbeat{mt = 101, mid = Mid, sig = ?SIGN1, timestamp = MTimestamp} = Msg, State) ->
+process_msg(#proto{mt = ?MT_101, sig = ?SIGN1, timestamp = MTimestamp} = Msg,
+	#receiver_state{transport = Mod, socket = Socket} = State) ->
 	MsTimestamp = lib_time:get_mstimestamp(),
 	case MTimestamp + ?DATA_OVERTIME > MsTimestamp of
 		true ->
-			AskMsg = mod_msg:produce_heartbeat(Mid, MsTimestamp),  %% ASK
-			{ok, AskData} = mod_proto:packet(AskMsg),
+			AskMsg = mod_msg:produce_heartbeat(Msg),  %% ASK
 			?DEBUG("recv ~p ack ok ... ...~n", [State#receiver_state.socket]),
-			self() ! {ask, AskData},
+			landlords_c2s:tcp_send(Mod, Socket, AskMsg),
 			State#receiver_state{last_recv_time = MsTimestamp};
 		_ ->
 			?WARNING("recv overtime msg,~p~n ", [Msg#heartbeat.mid]),
-			State
+			State#receiver_state{last_recv_time = MsTimestamp}
 	end;
 process_msg(Msg, #receiver_state{c2s_pid = C2SPid} = State) when is_pid(C2SPid) ->
 	?INFO("receive tcp msg ::: ~p~n", [Msg]),
+	MsTimestamp = lib_time:get_mstimestamp(),
 	catch
 		gen_fsm:send_event(C2SPid, Msg),
-	State;
+	State#receiver_state{last_recv_time = MsTimestamp};
 process_msg(Msg, State) ->
+	MsTimestamp = lib_time:get_mstimestamp(),
 	?WARNING("recv unrecognized message :: ~p~n", [Msg]),
-	State.
+	State#receiver_state{last_recv_time = MsTimestamp}.
 
 
 
