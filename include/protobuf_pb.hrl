@@ -46,14 +46,6 @@
 }).
 -endif.
 
--ifndef(CATEGORY_PB_H).
--define(CATEGORY_PB_H, true).
--record(category, {
-    name = erlang:error({required, name}),
-    members
-}).
--endif.
-
 -ifndef(PERSONSESSION_PB_H).
 -define(PERSONSESSION_PB_H, true).
 -record(personsession, {

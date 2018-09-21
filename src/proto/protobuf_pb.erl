@@ -11,8 +11,7 @@
 	 encode_personresearch/1, decode_personresearch/1,
 	 delimited_decode_personresearch/1,
 	 encode_personsession/1, decode_personsession/1,
-	 delimited_decode_personsession/1, encode_category/1,
-	 decode_category/1, delimited_decode_category/1,
+	 delimited_decode_personsession/1,
 	 encode_logonparameter/1, decode_logonparameter/1,
 	 delimited_decode_logonparameter/1, encode_chat/1,
 	 decode_chat/1, delimited_decode_chat/1, encode_router/1,
@@ -48,8 +47,6 @@
 -record(personsession,
 	{uid, nickname, portrait, personlabel, setting, rosters,
 	 groups, serverparameter, extend}).
-
--record(category, {name, members}).
 
 -record(logonparameter,
 	{uid, nickname, phone, token, device, device_id,
@@ -106,12 +103,6 @@ encode_personsession(Record)
     when is_record(Record, personsession) ->
     encode(personsession, Record).
 
-encode_category(Records) when is_list(Records) ->
-    delimited_encode(Records);
-encode_category(Record)
-    when is_record(Record, category) ->
-    encode(category, Record).
-
 encode_logonparameter(Records) when is_list(Records) ->
     delimited_encode(Records);
 encode_logonparameter(Record)
@@ -150,10 +141,6 @@ encode(logonparameter, Records) when is_list(Records) ->
 encode(logonparameter, Record) ->
     [iolist(logonparameter, Record)
      | encode_extensions(Record)];
-encode(category, Records) when is_list(Records) ->
-    delimited_encode(Records);
-encode(category, Record) ->
-    [iolist(category, Record) | encode_extensions(Record)];
 encode(personsession, Records) when is_list(Records) ->
     delimited_encode(Records);
 encode(personsession, Record) ->
@@ -258,12 +245,6 @@ iolist(logonparameter, Record) ->
 	  []),
      pack(9, optional,
 	  with_default(Record#logonparameter.extend, none), bytes,
-	  [])];
-iolist(category, Record) ->
-    [pack(1, required,
-	  with_default(Record#category.name, none), bytes, []),
-     pack(2, optional,
-	  with_default(Record#category.members, none), bytes,
 	  [])];
 iolist(personsession, Record) ->
     [pack(1, required,
@@ -444,9 +425,6 @@ decode_personresearch(Bytes) when is_binary(Bytes) ->
 decode_personsession(Bytes) when is_binary(Bytes) ->
     decode(personsession, Bytes).
 
-decode_category(Bytes) when is_binary(Bytes) ->
-    decode(category, Bytes).
-
 decode_logonparameter(Bytes) when is_binary(Bytes) ->
     decode(logonparameter, Bytes).
 
@@ -470,9 +448,6 @@ delimited_decode_chat(Bytes) ->
 
 delimited_decode_logonparameter(Bytes) ->
     delimited_decode(logonparameter, Bytes).
-
-delimited_decode_category(Bytes) ->
-    delimited_decode(category, Bytes).
 
 delimited_decode_personsession(Bytes) ->
     delimited_decode(personsession, Bytes).
@@ -541,11 +516,6 @@ decode(logonparameter, Bytes) when is_binary(Bytes) ->
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
     to_record(logonparameter, Decoded);
-decode(category, Bytes) when is_binary(Bytes) ->
-    Types = [{2, members, bytes, []}, {1, name, bytes, []}],
-    Defaults = [],
-    Decoded = decode(Bytes, Types, Defaults),
-    to_record(category, Decoded);
 decode(personsession, Bytes) when is_binary(Bytes) ->
     Types = [{9, extend, bytes, []},
 	     {8, serverparameter, bytes, []}, {7, groups, bytes, []},
@@ -699,15 +669,6 @@ to_record(logonparameter, DecodedTuples) ->
 						   Record, Name, Val)
 			  end,
 			  #logonparameter{}, DecodedTuples),
-    Record1;
-to_record(category, DecodedTuples) ->
-    Record1 = lists:foldr(fun ({_FNum, Name, Val},
-			       Record) ->
-				  set_record_field(record_info(fields,
-							       category),
-						   Record, Name, Val)
-			  end,
-			  #category{}, DecodedTuples),
     Record1;
 to_record(personsession, DecodedTuples) ->
     Record1 = lists:foldr(fun ({_FNum, Name, Val},
