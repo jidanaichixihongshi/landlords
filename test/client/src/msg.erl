@@ -33,7 +33,7 @@ get_login(Uid) ->
 		mt = 102,
 		mid = produce_mid(Uid),
 		sig = 1,
-		router = term_to_binary(Router),
+		router = Router,
 		data = term_to_binary(Parameter),
 		timestamp = get_mstimestamp()
 	}.
@@ -44,7 +44,7 @@ produce_msg(Uid, To, Mt, Reply) ->
 		mt = Mt,
 		mid = produce_mid(Uid),
 		sig = 1,
-		router = term_to_binary(Router),
+		router = Router,
 		data = Reply,
 		timestamp = get_mstimestamp()
 	}.
@@ -59,7 +59,7 @@ get_heartbeat(Uid) ->
 		mt = 101,
 		mid = produce_mid(Uid),
 		sig = 1,
-		router = term_to_binary(Router),
+		router = Router,
 		data = <<"">>,
 		timestamp = get_mstimestamp()
 	}.

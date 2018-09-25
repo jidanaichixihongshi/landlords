@@ -60,7 +60,7 @@ produce_heartbeat(#proto{mid = Mid, router = Router}) ->
 		mt = ?MT_101,
 		mid = Mid,
 		sig = ?SIGN2,
-		router = lib_change:to_binary(NewRouter),
+		router = NewRouter,
 		data = <<"">>,
 		timestamp = lib_time:get_mstimestamp()
 	}.
@@ -76,7 +76,7 @@ produce_responselogon(Mt, Mid, Router, Reply) ->
 		mt = Mt,
 		mid = Mid,
 		sig = ?SIGN2,
-		router = lib_change:to_binary(NewRouter),
+		router = NewRouter,
 		data = lib_change:to_binary(Reply),
 		timestamp = lib_time:get_mstimestamp()
 	}.
@@ -87,7 +87,7 @@ produce_responsemsg(Mt, Mid, Sig, Router, Reply) ->
 		mt = Mt,
 		mid = Mid,
 		sig = Sig,
-		router = term_to_binary(NewRouter),
+		router = NewRouter,
 		data = lib_change:to_binary(Reply),
 		timestamp = lib_time:get_mstimestamp()
 	}.
