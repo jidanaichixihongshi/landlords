@@ -127,7 +127,7 @@ handle_msg(#proto{mt = Mt, sig = 2, data = Data} = Msg,
 					gen_tcp:close(Socket)
 			end;
 		103 ->
-			io:format("session success : ~p~n", [Data]),
+			io:format("session success : ~p~n", [binary_to_term(Data)]),
 			Reply = term_to_binary({login_success, 0}),
 			Response = msg:produce_msg(Uid, <<"">>, Mt, Reply),
 			tcp_send(Socket, Response);

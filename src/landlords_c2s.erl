@@ -205,8 +205,8 @@ code_change(_OldVsn, StateName, StateData, _Extra) ->
 	{ok, StateName, StateData}.
 
 tcp_send(Mod, Socket, Reply) ->
+	?INFO("send tcp msg :: ~p~n", [Reply]),
 	{ok, EReply} = mod_proto:packet(Reply),
-	?DEBUG("~p~n", [EReply]),
 	Mod:send(Socket, EReply).
 
 
