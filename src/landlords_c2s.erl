@@ -78,7 +78,7 @@ wait_for_auth(#proto{mt = ?MT_102, mid = Mid, sig = ?SIGN1, router = Router, dat
 		device = Device,
 		device_id = DeviceId,
 		version = Vsn,
-		app_id = AppId} = Data,
+		app_id = AppId} = binary_to_term(Data),
 	NotOverTime = mod_msg:check_msg_timestamp(Timestamp),
 	case NotOverTime of
 		true ->
