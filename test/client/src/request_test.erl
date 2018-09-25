@@ -23,18 +23,18 @@ chat(Uid, Msg) ->
 		c = term_to_binary(Msg)},
 	Data = term_to_binary(Chat),
 	SendMsg = msg:produce_msg(?UID, integer_to_binary(Uid), 107, Data),
-	[{state, State}] = ets:lookup(landlords_ets, state),
+	[{state, State}] = ets:lookup(landlords_client, state),
 	mod_landlords_client:tcp_send(State#state.socket, SendMsg).
 
 seekuser(Argument) when is_integer(Argument) ->
 	Data = term_to_binary({seekuser, {uid, Argument}}),
 	SendMsg = msg:produce_msg(?UID, <<"">>, 121, Data),
-	[{state, State}] = ets:lookup(landlords_ets, state),
+	[{state, State}] = ets:lookup(landlords_client, state),
 	mod_landlords_client:tcp_send(State#state.socket, SendMsg);
 seekuser(Argument) when is_list(Argument) ->
 	Data = term_to_binary({seekuser, {nickname, Argument}}),
 	SendMsg = msg:produce_msg(?UID, <<"">>, 121, Data),
-	[{state, State}] = ets:lookup(landlords_ets, state),
+	[{state, State}] = ets:lookup(landlords_client, state),
 	mod_landlords_client:tcp_send(State#state.socket, SendMsg);
 seekuser(_Argument) ->
 	error.
@@ -42,7 +42,7 @@ seekuser(_Argument) ->
 addfriend(Uid) ->
 	Data = term_to_binary([{rt, 1}, {c, "嘿，我看你还不错，不如我们做朋友吧！"}]),
 	SendMsg = msg:produce_msg(?UID, integer_to_binary(Uid), 104, Data),
-	[{state, State}] = ets:lookup(landlords_ets, state),
+	[{state, State}] = ets:lookup(landlords_client, state),
 	mod_landlords_client:tcp_send(State#state.socket, SendMsg).
 
 addroster(Response, Uid) ->
@@ -54,13 +54,13 @@ addroster(Response, Uid) ->
 				term_to_binary([{rt, 3}, {uid, [Uid]}, {c, "他拒绝了你的好友请求!"}])
 		end,
 	SendMsg = msg:produce_msg(?UID, <<"">>, 104, Data),
-	[{state, State}] = ets:lookup(landlords_ets, state),
+	[{state, State}] = ets:lookup(landlords_client, state),
 	mod_landlords_client:tcp_send(State#state.socket, SendMsg).
 
 delroster(Uid) ->
 	Data = term_to_binary([{rt, 4}, {uid, [?UID, Uid]}, {c, "你和 <> 解除了好友关系！"}]),
 	SendMsg = msg:produce_msg(?UID, <<"">>, 104, Data),
-	[{state, State}] = ets:lookup(landlords_ets, state),
+	[{state, State}] = ets:lookup(landlords_client, state),
 	mod_landlords_client:tcp_send(State#state.socket, SendMsg).
 
 

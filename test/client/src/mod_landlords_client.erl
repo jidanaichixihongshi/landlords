@@ -38,7 +38,7 @@ init(_Args) ->
 				port = Port,
 				socket = Socket,
 				status = connect},
-			ets:insert(landlords_ets, {state, State}),
+			ets:insert(landlords_client, {state, State}),
 			{ok, State};
 		{error, Reason} ->
 			io:format("-------------connect error~n", []),
