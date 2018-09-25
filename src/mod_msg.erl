@@ -18,8 +18,6 @@
 	produce_heartbeat/1,
 	produce_responselogon/4,
 	produce_responsemsg/5,
-	produce_responseseekuser/3,
-	produce_requestfriend/3,
 
 	check_msg_timestamp/1]).
 
