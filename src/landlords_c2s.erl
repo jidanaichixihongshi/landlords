@@ -160,11 +160,7 @@ wait_for_resume(Msg, StateData) ->
 	end;
 wait_for_resume(timeout, StateData) ->
 	?DEBUG("Timed out waiting for resumption", []),
-	{stop, normal, StateData};
-wait_for_resume(Event, StateData) ->
-	?DEBUG("Ignoring event while waiting for resumption: ~p", [Event]),
-	fsm_next_state(wait_for_resume, StateData).
-
+	{stop, normal, StateData}.
 
 
 handle_event(Event, StateName, StateData) ->
