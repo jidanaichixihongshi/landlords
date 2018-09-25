@@ -150,6 +150,9 @@ session_established(stop, StateData) ->
 	{stop, normal, StateData}.
 
 %% session success
+wait_for_resume(timeout, StateData) ->
+	?DEBUG("Timed out waiting for resumption", []),
+	{stop, normal, StateData};
 wait_for_resume(Msg, StateData) ->
 	try
 		mod_c2s_handle:handle_msg(Msg, StateData)
@@ -157,10 +160,7 @@ wait_for_resume(Msg, StateData) ->
 		Error ->
 			?ERROR("handle msg error : ~p~n reason : ~p~n", [Msg, Error]),
 			fsm_next_state(wait_for_resume, StateData)
-	end;
-wait_for_resume(timeout, StateData) ->
-	?DEBUG("Timed out waiting for resumption", []),
-	{stop, normal, StateData}.
+	end.
 
 
 handle_event(Event, StateName, StateData) ->
