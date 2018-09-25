@@ -103,6 +103,7 @@ code_change(_OldVsn, State, _Extra) ->
 
 
 tcp_send(Socket, Msg) ->
+	io:format("tcp send msg : ~p~n", [Msg]),
 	Packet = mod_msg:packet(Msg),
 	gen_tcp:send(Socket, Packet).
 
