@@ -39,7 +39,7 @@ get_login(Uid) ->
 	}.
 
 produce_msg(Uid, To, Mt, Reply) ->
-	Router = get_router(Uid, To)
+	Router = get_router(Uid, To),
 	#proto{
 		mt = Mt,
 		mid = produce_mid(Uid),

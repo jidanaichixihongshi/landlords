@@ -111,7 +111,7 @@ tcp_send(Socket, Msg) ->
 handle_msg(#proto{mt = 101, sig = 2} = Msg, _State) ->
 	io:format("recv heartbeat msg: ~p~n", [Msg]);
 handle_msg(#proto{mt = Mt, sig = 2, data = Data} = Msg,
-	#state{uid = Uid, socket = Socket} = State) ->   %% 登录结果
+	#state{uid = Uid, socket = Socket} = _State) ->   %% 登录结果
 	io:format("recv responselogon msg: ~p~n", [Msg]),
 	case Mt of
 		102 ->
