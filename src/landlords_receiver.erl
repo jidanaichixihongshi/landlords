@@ -126,7 +126,7 @@ process_msg(#proto{mt = ?MT_101, sig = ?SIGN1, timestamp = MTimestamp} = Msg,
 			landlords_c2s:tcp_send(Mod, Socket, AskMsg),
 			State#receiver_state{last_recv_time = MsTimestamp};
 		_ ->
-			?WARNING("recv overtime msg,~p~n ", [Msg#heartbeat.mid]),
+			?WARNING("recv overtime msg,~p~n ", [Msg]),
 			State#receiver_state{last_recv_time = MsTimestamp}
 	end;
 process_msg(Msg, #receiver_state{c2s_pid = C2SPid} = State) when is_pid(C2SPid) ->
