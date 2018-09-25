@@ -34,15 +34,14 @@ produce_mid(Uid) ->
 	lib_change:to_list(HashV) ++ "_" ++ lib_change:to_list(MsTimesstamp).
 
 produce_roster(From, FromDevice, FromServer) ->
-	Router = #router{
+	#router{
 		from = <<"">>,
 		from_server = <<"">>,
 		from_device = <<"">>,
 		to = From,
 		to_device = FromDevice,
 		to_server = FromServer
-	},
-	mod_proto:encode(Router).
+	}.
 
 %% -----------------------------------------------------------------------------------------
 %% 组装消息
