@@ -129,13 +129,18 @@ session_established(#proto{mt = ?MT_102, sig = ?SIGN1, data = Data},
 	case binary_to_term(Data) of
 		{login_success, ?ERROR_0} ->  %% 登陆成功
 			landlords_hooks:run(update_session, node(), StateData),
-			fsm_next_state(session_established, StateData);
-		{session_established, ?ERROR_0} ->    %% session success
 			NewStateData = StateData#client_state{
 				user_data = UserData#user_data{login_time = lib_time:get_mstimestamp()},
 				status = online
 			},
-			fsm_next_state(wait_for_resume, NewStateData);
+			fsm_next_state(session_established, NewStateData);
+		_ ->
+			fsm_next_state(session_established, StateData)
+	end;
+session_established(#proto{sig = ?SIGN1, data = Data}, StateData) ->
+	case binary_to_term(Data) of
+		{session_established, ?ERROR_0} ->    %% session success
+			fsm_next_state(wait_for_resume, StateData);
 		{session_established, request} ->    %% 更新增量
 			landlords_hooks:run(update_session, node(), StateData),
 			fsm_next_state(session_established, StateData);
