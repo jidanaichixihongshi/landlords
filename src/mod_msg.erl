@@ -84,7 +84,7 @@ produce_responselogon(Mt, Mid, Router, Reply) ->
 	}.
 
 produce_responsemsg(Mt, Mid, Sig, Router, Reply) ->
-	NewRouter = change_router(Router)
+	NewRouter = change_router(Router),
 	#proto{
 		mt = Mt,
 		mid = Mid,
