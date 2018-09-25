@@ -17,10 +17,15 @@
 	router/1
 ]).
 
+%% 消息标志位，控制消息走向
+-define(SIGN0, 0).					%% 节点消息
+-define(SIGN1, 1).					%% c2s消息
+-define(SIGN2, 2).					%% s2c消息
 
-router(#proto{router = Router} = Msg) ->
+router(#proto{router = Router} = OldMsg) ->
+	Msg = OldMsg#proto{sig = ?SIGN2},
 	#router{to = To, to_device = TDevice} = Router,
-	{_Node, ProxyPid} = mod_proxy:get_proxy(To),
+	{_Node, ProxyPid} = mod_proxy:get_proxy(binary_to_term(To)),
 	ClientList = mod_proxy:get_client_list(ProxyPid),
 	NeedOffline =
 		if
