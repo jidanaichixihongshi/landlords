@@ -65,7 +65,7 @@ handle_msg(Mt, _, StateData) ->
 %% 一些特殊消息的处理
 %% -------------------------------------------------------------------------
 %% hooks_api
-update_session({#client_state{uid = Uid, node = Node, socket = Socket, sockmod = SockMod, user_data = _UserData}}) ->
+update_session(#client_state{uid = Uid, node = Node, socket = Socket, sockmod = SockMod} = _StateData) ->
 	%#user_data{nickname = NickName, } = UserData,
 	Mid = mod_msg:produce_mid(Uid),
 	Router = #router{

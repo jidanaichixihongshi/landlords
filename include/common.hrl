@@ -30,6 +30,7 @@
 %% 钩子注册
 -define(HOOKS_LIST, [
 	{update_session, ?LOCALNODE, mod_c2s_handle, update_session, 50},
+
 	{seekuser, ?LOCALNODE, mod_c2s_handle, seekuser, 50},
 	{requestfriend, ?LOCALNODE, mod_c2s_handle, request_friend, 50},
 	{rsponserequestfriend, ?LOCALNODE, mod_c2s_handle, add_roster, 50},
