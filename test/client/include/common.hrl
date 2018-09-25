@@ -9,8 +9,6 @@
 -include("protobuf_pb.hrl").
 -define(PROTO_CONFIG, "../../config/protobuf.proto").
 
--define(UID, 1000000).
-
 -define(TCP_OPTIONS, [
 	binary,
 	{packet, 4},
@@ -22,6 +20,11 @@
 %% 客户端连接状态
 -record(state, {
 	uid,
+	nickname,
+	password,
+	phone,
+	version,
+	device,
 	ip,
 	port,
 	socket,

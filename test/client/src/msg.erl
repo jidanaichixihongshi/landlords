@@ -17,15 +17,15 @@
 %% -----------------------------------------------------------------------
 %% 登录功能测试
 %% -----------------------------------------------------------------------
-get_login(Uid) ->
+get_login(#state{uid = Uid, nickname = Nickname, phone = Phone, password = Token, device = Device, version = Vs} = _State) ->
 	Parameter = #logonparameter{
 		uid = Uid,
-		nickname = <<"晴天">>,
-		phone = <<"15175066700">>,
-		token = <<"testloginserver#2537996#15175066700">>,
-		device = 1,
+		nickname = Nickname,
+		phone = Phone,
+		token = Token,
+		device = Device,
 		device_id = <<"3565861">>,
-		version = <<"0.0.1">>,
+		version = Vs,
 		app_id = <<"32_1_3">>
 	},
 	Router = get_router(Uid, <<"">>),

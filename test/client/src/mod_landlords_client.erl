@@ -30,10 +30,21 @@ init(_Args) ->
 	{ok, {IP, Port}} = application:get_env(landlords_client, addrs),
 	case gen_tcp:connect(IP, Port, ?TCP_OPTIONS) of
 		{ok, Socket} ->
+			{ok, Uid} = application:get_env(landlords_client, uid),
+			{ok, Nickname} = application:get_env(landlords_client, nickname),
+			{ok, Password} = application:get_env(landlords_client, password),
+			{ok, Phone} = application:get_env(landlords_client, phone),
+			{ok, Version} = application:get_env(landlords_client, version),
+			{ok, Device} = application:get_env(landlords_client, device),
 			timer:send_interval(?HEART_BREAK_TIME, heartbeat),
 			erlang:send_after(2000, self(), start_logon),
 			State = #state{
-				uid = ?UID,
+				uid = Uid,
+				nickname = Nickname,
+				password = Password,
+				phone = Phone,
+				version = Version,
+				device = Device,
 				ip = IP,
 				port = Port,
 				socket = Socket,
@@ -54,7 +65,7 @@ handle_cast(Request, State) ->
 	{noreply, State}.
 
 handle_info(start_logon, State) ->
-	Msg = msg:get_login(State#state.uid),
+	Msg = msg:get_login(State),
 	tcp_send(State#state.socket, Msg),
 	{noreply, State};
 
