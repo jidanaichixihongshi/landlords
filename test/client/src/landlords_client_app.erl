@@ -9,14 +9,16 @@
 %% Application callbacks
 %% ===================================================================
 start(_StartType, _StartArgs) ->
-    io:format("--------------------------~n",[]),
-    landlords_client_sup:start_link().
+	create_ets(),
+	landlords_client_sup:start_link().
 
 stop(_State) ->
-    io:format("stop landlords server!~n", []),
-    ok.
+	io:format("stop landlords server!~n", []),
+	ok.
 
 
+create_ets() ->
+	ets:new(landlords_client, [named_table, public, set, {read_concurrency, true}, {write_concurrency, true}]).
 
 
 

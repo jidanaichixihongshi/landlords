@@ -42,24 +42,22 @@ handle_msg(?MT_103, Msg, StateData) ->
 			?WARNING("undefinde request : ~p~n", [Msg])
 	end,
 	fsm_next_state(session_established, StateData);
-handle_msg(?MT_104, Msg, #client_state{sockmod = SockMod, socket = Socket} = StateData) ->
+handle_msg(?MT_121, Msg, #client_state{sockmod = SockMod, socket = Socket} = StateData) ->
 	case binary_to_term(Msg#proto.data) of
-		{seekuser, UserData} ->
-			Reply = landlords_hooks:run(seekuser, node(), UserData),
-			SendMsg = mod_msg:produce_responsemsg(?MT_104, Msg#proto.mid, ?SIGN2, Msg#proto.router, Reply),
+		{seekuser, Information} ->
+			Reply = landlords_hooks:run(seekuser, node(), Information),
+			SendMsg = mod_msg:produce_responsemsg(?MT_121, Msg#proto.mid, ?SIGN2, Msg#proto.router, Reply),
 			landlords_c2s:tcp_send(SockMod, Socket, SendMsg);
 		_ ->
 			?WARNING("undefinde request : ~p~n", [Msg])
 	end,
 	fsm_next_state(session_established, StateData);
 
-
-
-
-
 handle_msg(Mt, _, StateData) ->
 	?WARNING("undefined mt type : ~p~n", [Mt]),
 	fsm_next_state(session_established, StateData).
+
+
 
 %% -------------------------------------------------------------------------
 %% 一些特殊消息的处理

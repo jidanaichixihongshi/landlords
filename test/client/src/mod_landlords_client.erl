@@ -16,6 +16,8 @@
 	terminate/2,
 	code_change/3]).
 
+-export([tcp_send/2]).
+
 %% API.
 start_link() ->
 	gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
@@ -31,11 +33,12 @@ init(_Args) ->
 			timer:send_interval(?HEART_BREAK_TIME, heartbeat),
 			erlang:send_after(2000, self(), start_logon),
 			State = #state{
-				uid = 1000000,
+				uid = ?UID,
 				ip = IP,
 				port = Port,
 				socket = Socket,
 				status = connect},
+			ets:insert(landlords_ets, {state, State}),
 			{ok, State};
 		{error, Reason} ->
 			io:format("-------------connect error~n", []),
@@ -92,6 +95,7 @@ handle_info(Info, State) ->
 	{noreply, State}.
 
 terminate(Reason, State) ->
+	ets:delete(landlords_ets, state),
 	Socket = State#state.socket,
 	io:format("socket ~p terminate, reason: ~p ~n", [Socket, Reason]),
 	gen_tcp:close(Socket),

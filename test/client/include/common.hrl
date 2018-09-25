@@ -9,13 +9,15 @@
 -include("protobuf_pb.hrl").
 -define(PROTO_CONFIG, "../../config/protobuf.proto").
 
--define(TCP_OPTIONS, [
-        binary,
-        {packet, 4},
-        {keepalive, true},
-        {active, once}]).
+-define(UID, 1000000).
 
--define(HEART_BREAK_TIME, 60000).	%% 心跳
+-define(TCP_OPTIONS, [
+	binary,
+	{packet, 4},
+	{keepalive, true},
+	{active, once}]).
+
+-define(HEART_BREAK_TIME, 60000).  %% 心跳
 
 %% 客户端连接状态
 -record(state, {
@@ -23,7 +25,7 @@
 	ip,
 	port,
 	socket,
-	status 			%% 连接状态
+	status      %% 连接状态
 }).
 
 

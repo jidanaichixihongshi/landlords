@@ -23,6 +23,8 @@
 -define(MT_104, 104).		%% roster相关
 -define(MT_107, 107).		%% 聊天消息
 
+-define(MT_121, 121).		%% 查询消息
+
 
 -define(MT_118, 118).		%% 群增量
 
@@ -30,8 +32,9 @@
 %% 钩子注册
 -define(HOOKS_LIST, [
 	{update_session, ?LOCALNODE, mod_c2s_handle, update_session, 50},
-
 	{seekuser, ?LOCALNODE, mod_c2s_handle, seekuser, 50},
+
+
 	{requestfriend, ?LOCALNODE, mod_c2s_handle, request_friend, 50},
 	{rsponserequestfriend, ?LOCALNODE, mod_c2s_handle, add_roster, 50},
 	{removefriend, ?LOCALNODE, mod_c2s_handle, del_roster, 50},
