@@ -76,7 +76,7 @@ produce_responselogon(Mt, Mid, Router, Reply) ->
 		mid = Mid,
 		sig = ?SIGN2,
 		router = NewRouter,
-		data = lib_change:to_binary(Reply),
+		data = term_to_binary(Reply),
 		timestamp = lib_time:get_mstimestamp()
 	}.
 
@@ -87,7 +87,7 @@ produce_responsemsg(Mt, Mid, Sig, Router, Reply) ->
 		mid = Mid,
 		sig = Sig,
 		router = NewRouter,
-		data = lib_change:to_binary(Reply),
+		data = term_to_binary(Reply),
 		timestamp = lib_time:get_mstimestamp()
 	}.
 

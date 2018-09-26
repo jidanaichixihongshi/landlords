@@ -21,14 +21,18 @@
 	seekuser/1]).
 
 %% c2s消息
-handle_msg(#proto{mt = Mt, sig = ?SIGN1, router = Router, timestamp = Timestamp} = Msg, StateName, StateData) ->
+handle_msg(#proto{mt = Mt, mid = Mid, sig = ?SIGN1, router = Router, timestamp = Timestamp} = Msg, StateName,
+	#client_state{socket = Socket, sockmod = SockMod} = StateData) ->
 	?DEBUG("handle msg: ~p~n", [Msg]),
 	(not mod_msg:check_msg_timestamp(Timestamp)) andalso throw(?ERROR_102),
 	if
 		Router#router.to == <<"">> ->  %% 发给自己的
 			handle_msg(Mt, Msg, StateName, StateData);
 		true ->  %% 启动消息路由
-			landlords_router:router(Msg)
+			landlords_router:router(Msg),
+			%% 回复消息
+			Reply = mod_msg:produce_responsemsg(?MT_107, Mid, ?SIGN2, Router, ?ERROR_0),
+			landlords_c2s:tcp_send(SockMod, Socket, Reply)
 	end,
 	fsm_next_state(StateName, StateData);
 %% s2s消息
