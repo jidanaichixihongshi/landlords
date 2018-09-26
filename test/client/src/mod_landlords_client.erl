@@ -146,6 +146,9 @@ handle_msg(#proto{mt = Mt, sig = 2, data = Data} = Msg,
 			Reply = term_to_binary({session_established, 0}),
 			Response = msg:produce_msg(Uid, <<"">>, Mt, Reply),
 			tcp_send(Socket, Response);
+		107 ->
+			#chat{from = From, c = C} = binary_to_term(Data),
+			io:format("======== chat ======= ~p ::: ~p~n", [binary_to_term(From), binary_to_term(C)]);
 		_ ->
 			io:format("undefined msg: ~p~n", [Msg])
 	end;

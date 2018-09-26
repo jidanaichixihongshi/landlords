@@ -158,7 +158,7 @@ session_established(stop, StateData) ->
 
 %% session success
 wait_for_resume(timeout, StateData) ->
-	?DEBUG("Timed out waiting for resumption", []),
+	?DEBUG("timed out for resume~n", []),
 	fsm_next_state(wait_for_resume, StateData);
 %% 客户端发过来的消息
 wait_for_resume(Msg, StateData) ->
