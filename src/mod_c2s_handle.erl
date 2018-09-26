@@ -60,11 +60,10 @@ handle_msg(?MT_103, Msg, _StateName, StateData) ->
 			?WARNING("undefinde request : ~p~n", [Msg])
 	end;
 handle_msg(?MT_121, Msg, _StateName, #client_state{sockmod = SockMod, socket = Socket} = _StateData) ->
-	case binary_to_term(Msg#proto.data) of
+	#proto{mid = Mid, router = Router, data = Data} = Msg,
+	case binary_to_term(Data) of
 		{seekuser, Information} ->
-			Reply = landlords_hooks:run(seekuser, node(), Information),
-			SendMsg = mod_msg:produce_responsemsg(?MT_121, Msg#proto.mid, ?SIGN2, Msg#proto.router, Reply),
-			landlords_c2s:tcp_send(SockMod, Socket, SendMsg);
+			landlords_hooks:run(seekuser, node(), {Mid, Router, Information, SockMod, Socket});
 		_ ->
 			?WARNING("undefinde request : ~p~n", [Msg])
 	end;
@@ -112,15 +111,18 @@ update_session(#client_state{uid = Uid, node = Node, socket = Socket, sockmod = 
 
 %% 查找用户
 %% hooks_api
-seekuser(UserData) ->
-	case UserData of
-		{uid, Uid} ->
-			#{uid => Uid, nickname => "小倩", age => 21, city => "北京", lv => 16, label => "天是蓝的，云是白的，脸是黑的 =_=!"};
-		{nickname, NickName} ->
-			[#{uid => 4698250, nickname => NickName, age => 45, city => "广州", lv => 16, label => "这个人很懒，什么都没有留下"},
-				#{uid => 7758991, nickname => NickName, age => 19, city => "南京", lv => 11, label => "没有什么可以阻挡，我对美食的向往"},
-				#{uid => 4365303, nickname => NickName, age => 32, city => "成都", lv => 26, label => "我是大神"}]
-	end.
+seekuser({Mid, Router, Information, SockMod, Socket}) ->
+	Reply =
+		case Information of
+			{uid, Uid} ->
+				#{uid => Uid, nickname => "小倩", age => 21, city => "北京", lv => 16, label => "天是蓝的，云是白的，脸是黑的 =_=!"};
+			{nickname, NickName} ->
+				[#{uid => 4698250, nickname => NickName, age => 45, city => "广州", lv => 16, label => "这个人很懒，什么都没有留下"},
+					#{uid => 7758991, nickname => NickName, age => 19, city => "南京", lv => 11, label => "没有什么可以阻挡，我对美食的向往"},
+					#{uid => 4365303, nickname => NickName, age => 32, city => "成都", lv => 26, label => "我是大神"}]
+		end,
+	SendMsg = mod_msg:produce_responsemsg(?MT_121, Mid, ?SIGN2, Router, Reply),
+	landlords_c2s:tcp_send(SockMod, Socket, SendMsg).
 
 
 %% fsm_next_state: Generate the next_state FSM tuple with different
