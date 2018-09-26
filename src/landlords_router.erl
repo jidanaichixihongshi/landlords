@@ -23,11 +23,11 @@
 -define(SIGN2, 2).					%% s2c消息
 
 router(#proto{router = Router} = OldMsg) ->
+	?DEBUG("router msg : ~p~n",[OldMsg]),
 	Msg = OldMsg#proto{sig = ?SIGN2},
 	#router{to = To, to_device = TDevice} = Router,
 	{_Node, ProxyPid} = mod_proxy:get_proxy(binary_to_term(To)),
 	ClientList = mod_proxy:get_client_list(ProxyPid),
-	?INFO("1 ==== ~p~n",[ClientList]),
 	NeedOffline =
 		if
 			TDevice == <<"">> ->
@@ -53,7 +53,6 @@ router(#proto{router = Router} = OldMsg) ->
 
 send(Pid, Msg) ->
 	try
-		?INFO("2 ==== ~p~n",[Pid]),
 		Pid ! Msg
 	catch
 		Error ->

@@ -133,10 +133,7 @@ process_msg(Msg, #receiver_state{c2s_pid = C2SPid} = State) when is_pid(C2SPid) 
 	?INFO("receive tcp msg ::: ~p~n", [Msg]),
 	MsTimestamp = lib_time:get_mstimestamp(),
 	catch
-		begin
-			R = gen_fsm:send_event(C2SPid, Msg),
-			?INFO("RRRRRRRRRRRRRRR : ~p~n",[R])
-		end,
+		gen_fsm:send_event(C2SPid, Msg),
 	State#receiver_state{last_recv_time = MsTimestamp};
 process_msg(Msg, State) ->
 	MsTimestamp = lib_time:get_mstimestamp(),

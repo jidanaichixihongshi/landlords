@@ -20,11 +20,11 @@ chat(TUid, Msg) ->
 	[{state, State}] = ets:lookup(landlords_client, state),
 	#state{uid = Uid, socket = Socket} = State,
 	Chat = #chat{
-		from = integer_to_binary(Uid),
+		from = term_to_binary(Uid),
 		device = <<"1">>,
 		c = term_to_binary(Msg)},
 	Data = term_to_binary(Chat),
-	SendMsg = msg:produce_msg(Uid, integer_to_binary(TUid), 107, Data),
+	SendMsg = msg:produce_msg(Uid, term_to_binary(TUid), 107, Data),
 	mod_landlords_client:tcp_send(Socket, SendMsg).
 
 seekuser(Argument) when is_integer(Argument) ->
@@ -46,7 +46,7 @@ addfriend(TUid) ->
 	[{state, State}] = ets:lookup(landlords_client, state),
 	#state{uid = Uid, socket = Socket} = State,
 	Data = term_to_binary([{rt, 1}, {c, "嘿，我看你还不错，不如我们做朋友吧！"}]),
-	SendMsg = msg:produce_msg(Uid, integer_to_binary(TUid), 104, Data),
+	SendMsg = msg:produce_msg(Uid, term_to_binary(TUid), 104, Data),
 	mod_landlords_client:tcp_send(Socket, SendMsg).
 
 addroster(Response, TUid) ->

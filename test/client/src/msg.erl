@@ -80,7 +80,7 @@ produce_mid(Uid) ->
 
 get_router(Uid, To) ->
 	#router{
-		from = integer_to_binary(Uid),
+		from = term_to_binary(Uid),
 		from_device = <<"1">>,
 		from_server = <<"">>,
 		to = To,

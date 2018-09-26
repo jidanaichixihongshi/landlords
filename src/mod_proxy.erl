@@ -31,7 +31,7 @@ register_client(ProxyPid, _Uid, Device, Token) ->
 	gen_server:cast(ProxyPid, {register_client, #proxy_client{pid = self(), device = Device, token = Token}}).
 
 get_proxy(Uid) when is_binary(Uid) ->
-	get_proxy(binary_to_integer(Uid));
+	get_proxy(binary_to_term(Uid));
 get_proxy(Uid) ->
 	case select_proxy(Uid) of
 		{ok, Pid} ->
