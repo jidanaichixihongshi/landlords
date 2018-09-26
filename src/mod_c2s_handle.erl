@@ -22,12 +22,12 @@
 
 
 handle_msg(#proto{mt = Mt, sig = ?SIGN1, router = Router, timestamp = Timestamp} = Msg, StateData) ->
-	?DEBUG("handle msg: ~p~n",[Msg]),
+	?DEBUG("handle msg: ~p~n", [Msg]),
 	(not mod_msg:check_msg_timestamp(Timestamp)) andalso throw(?ERROR_102),
 	if
 		Router#router.to == <<"">> ->  %% 发给自己的
 			handle_msg(Mt, Msg, StateData);
-		true ->	%% 启动消息路由
+		true ->  %% 启动消息路由
 			landlords_router:router(Msg)
 	end,
 	fsm_next_state(wait_for_resume, StateData).
@@ -35,10 +35,10 @@ handle_msg(#proto{mt = Mt, sig = ?SIGN1, router = Router, timestamp = Timestamp}
 
 handle_msg(?MT_103, Msg, StateData) ->
 	case binary_to_term(Msg#proto.data) of
-		{sesson, all} ->
+		{session, all} ->
 			landlords_hooks:run(update_session, node(), StateData);
-		{session,?ERROR_0} ->
-			?DEBUG("session success : ~p~n",[Msg]);
+		{session, ?ERROR_0} ->
+			?DEBUG("session success : ~p~n", [Msg]);
 		_ ->
 			?WARNING("undefinde request : ~p~n", [Msg])
 	end;
@@ -54,7 +54,6 @@ handle_msg(?MT_121, Msg, #client_state{sockmod = SockMod, socket = Socket} = _St
 
 handle_msg(Mt, _, _StateData) ->
 	?WARNING("undefined mt type : ~p~n", [Mt]).
-
 
 
 %% -------------------------------------------------------------------------
@@ -106,7 +105,6 @@ seekuser(UserData) ->
 				#{uid => 7758991, nickname => NickName, age => 19, city => "南京", lv => 11, label => "没有什么可以阻挡，我对美食的向往"},
 				#{uid => 4365303, nickname => NickName, age => 32, city => "成都", lv => 26, label => "我是大神"}]
 	end.
-
 
 
 %% fsm_next_state: Generate the next_state FSM tuple with different
