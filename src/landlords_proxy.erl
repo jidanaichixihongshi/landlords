@@ -69,6 +69,11 @@ handle_cast(Msg, State) ->
 	?WARNING("Unknown Msg:~p", [Msg]),
 	{noreply, State, ?HIBERNATE_TIMEOUT}.
 
+
+handle_info({unregister_client, Uid, Pid}, State) ->
+	NewState = unregister_client(Uid, Pid, State),
+	?DEBUG("user ~p unregister client Pid ~p~n", [Uid, Pid]),
+	{noreply, NewState, ?HIBERNATE_TIMEOUT};
 handle_info(timeout, State) ->
 	%proc_lib:hibernate(gen_server, enter_loop, [?MODULE, [], State]),
 	{noreply, State, ?HIBERNATE_TIMEOUT};
@@ -166,9 +171,11 @@ get_client_list(State) ->
 		fun(Client, Acc) when is_pid(Client#proxy_client.pid) ->
 			case mod_proc:is_proc_alive(Client#proxy_client.pid) of
 				true ->
-					[Client#proxy_client.pid | Acc];
+					[Client | Acc];
 				false ->
-					erlang:send_after(3000, self(), {client_update, Client#proxy_client{pid = undefined}}),
+					%gen_server:cast(ProxyPid, {unregister_client, Uid, self()}),
+					erlang:send_after(1000, self(), {unregister_client, State#proxy_state.uid, Client#proxy_client.pid}),
+					%erlang:send_after(1000, self(), {client_update, Client#proxy_client{pid = undefined}}),
 					Acc
 			end;
 			(_, Acc) ->

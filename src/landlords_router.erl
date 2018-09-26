@@ -33,6 +33,7 @@ router(#proto{router = Router} = OldMsg) ->
 			TDevice == <<"">> ->
 				lists:foldl(
 					fun(Client, Acc) ->
+						?INFO("Client : ~p~n",[Client]),
 						case Client#proxy_client.device == ?DEVICE_4 of
 							true ->
 								send(Client#proxy_client.pid, Msg),
