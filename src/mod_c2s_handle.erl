@@ -28,9 +28,9 @@ handle_msg(#proto{mt = Mt, sig = ?SIGN1, router = Router, timestamp = Timestamp}
 		Router#router.to == <<"">> ->  %% 发给自己的
 			handle_msg(Mt, Msg, StateData);
 		true ->	%% 启动消息路由
-			landlords_router:router(Msg),
-			fsm_next_state(session_established, StateData)
-	end.
+			landlords_router:router(Msg)
+	end,
+	fsm_next_state(wait_for_resume, StateData).
 
 
 handle_msg(?MT_103, Msg, StateData) ->
@@ -41,9 +41,8 @@ handle_msg(?MT_103, Msg, StateData) ->
 			?DEBUG("session success : ~p~n",[Msg]);
 		_ ->
 			?WARNING("undefinde request : ~p~n", [Msg])
-	end,
-	fsm_next_state(session_established, StateData);
-handle_msg(?MT_121, Msg, #client_state{sockmod = SockMod, socket = Socket} = StateData) ->
+	end;
+handle_msg(?MT_121, Msg, #client_state{sockmod = SockMod, socket = Socket} = _StateData) ->
 	case binary_to_term(Msg#proto.data) of
 		{seekuser, Information} ->
 			Reply = landlords_hooks:run(seekuser, node(), Information),
@@ -51,12 +50,10 @@ handle_msg(?MT_121, Msg, #client_state{sockmod = SockMod, socket = Socket} = Sta
 			landlords_c2s:tcp_send(SockMod, Socket, SendMsg);
 		_ ->
 			?WARNING("undefinde request : ~p~n", [Msg])
-	end,
-	fsm_next_state(session_established, StateData);
+	end;
 
-handle_msg(Mt, _, StateData) ->
-	?WARNING("undefined mt type : ~p~n", [Mt]),
-	fsm_next_state(session_established, StateData).
+handle_msg(Mt, _, _StateData) ->
+	?WARNING("undefined mt type : ~p~n", [Mt]).
 
 
 
