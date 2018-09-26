@@ -148,10 +148,13 @@ session_established(#proto{sig = ?SIGN1, data = Data}, StateData) ->
 			fsm_next_state(session_established, StateData)
 	end;
 session_established(timeout, StateData) ->
+	?DEBUG("151 : ~n",[]),
 	fsm_next_state(session_established, StateData);
 session_established(closed, StateData) ->
+	?DEBUG("154 : ~n",[]),
 	{stop, normal, StateData};
 session_established(stop, StateData) ->
+	?DEBUG("157 : ~n",[]),
 	{stop, normal, StateData}.
 
 %% session success
@@ -159,6 +162,7 @@ wait_for_resume(timeout, StateData) ->
 	?DEBUG("Timed out waiting for resumption", []),
 	{stop, normal, StateData};
 wait_for_resume(Msg, StateData) ->
+	?DEBUG("162 : ~p~n",[Msg]),
 	try
 		mod_c2s_handle:handle_msg(Msg, StateData)
 	catch
@@ -176,6 +180,7 @@ handle_sync_event(_Event, _From, StateName, StateData) ->
 	fsm_reply(ok, StateName, StateData).
 
 handle_info(receive_ack, StateName, StateData) ->
+	?DEBUG("183 ~n",[]),
 	fsm_next_state(StateName, StateData);
 handle_info({fsm_next_state, NewStateName}, _StateName, StateData) ->
 	fsm_next_state(NewStateName, StateData);
