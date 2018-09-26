@@ -84,7 +84,9 @@ wait_for_auth(#proto{mt = ?MT_102, mid = Mid, sig = ?SIGN1, router = Router, dat
 		true ->
 			case mod_proxy:get_proxy(Uid) of
 				{_Node, ProxyPid} when is_pid(ProxyPid) ->
+					?INFO("--------------------~n",[]),
 					mod_proxy:register_client(ProxyPid, Uid, Device, Token),
+					?INFO("--------------------~n",[]),
 					UserData = #user_data{
 						uid = Uid,
 						nickname = <<"晴天">>,
