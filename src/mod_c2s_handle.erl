@@ -14,26 +14,39 @@
 -include_lib("protobuf_pb.hrl").
 
 -export([
-	handle_msg/2]).
+	handle_msg/3]).
 
 %% hooks api
 -export([update_session/1,
 	seekuser/1]).
 
-
-handle_msg(#proto{mt = Mt, sig = ?SIGN1, router = Router, timestamp = Timestamp} = Msg, StateData) ->
+%% c2s消息
+handle_msg(#proto{mt = Mt, sig = ?SIGN1, router = Router, timestamp = Timestamp} = Msg, StateName, StateData) ->
 	?DEBUG("handle msg: ~p~n", [Msg]),
 	(not mod_msg:check_msg_timestamp(Timestamp)) andalso throw(?ERROR_102),
 	if
 		Router#router.to == <<"">> ->  %% 发给自己的
-			handle_msg(Mt, Msg, StateData);
+			handle_msg(Mt, Msg, StateName, StateData);
 		true ->  %% 启动消息路由
 			landlords_router:router(Msg)
 	end,
-	fsm_next_state(wait_for_resume, StateData).
+	fsm_next_state(StateName, StateData);
+%% s2s消息
+handle_msg(#proto{sig = ?SIGN0, router = Router, timestamp = Timestamp} = Msg, StateName,
+	#client_state{socket = Socket, sockmod = SockMod} = StateData) ->
+	?DEBUG("handle msg: ~p~n", [Msg]),
+	(not mod_msg:check_msg_timestamp(Timestamp)) andalso throw(?ERROR_102),
+	if
+		Router#router.to == <<"">> ->   %% 需要服务器处理的消息
+			ok;
+		true ->    %% 需要客户端处理的消息
+			NewMsg = Msg#proto{sig = ?SIGN2},
+			landlords_c2s:tcp_send(SockMod, Socket, NewMsg)
+	end,
+	fsm_next_state(StateName, StateData).
 
 
-handle_msg(?MT_103, Msg, StateData) ->
+handle_msg(?MT_103, Msg, _StateName, StateData) ->
 	case binary_to_term(Msg#proto.data) of
 		{session, all} ->
 			landlords_hooks:run(update_session, node(), StateData);
@@ -42,7 +55,7 @@ handle_msg(?MT_103, Msg, StateData) ->
 		_ ->
 			?WARNING("undefinde request : ~p~n", [Msg])
 	end;
-handle_msg(?MT_121, Msg, #client_state{sockmod = SockMod, socket = Socket} = _StateData) ->
+handle_msg(?MT_121, Msg, _StateName, #client_state{sockmod = SockMod, socket = Socket} = _StateData) ->
 	case binary_to_term(Msg#proto.data) of
 		{seekuser, Information} ->
 			Reply = landlords_hooks:run(seekuser, node(), Information),
@@ -51,8 +64,7 @@ handle_msg(?MT_121, Msg, #client_state{sockmod = SockMod, socket = Socket} = _St
 		_ ->
 			?WARNING("undefinde request : ~p~n", [Msg])
 	end;
-
-handle_msg(Mt, _, _StateData) ->
+handle_msg(Mt, _, _, _StateData) ->
 	?WARNING("undefined mt type : ~p~n", [Mt]).
 
 

@@ -158,9 +158,10 @@ session_established(stop, StateData) ->
 wait_for_resume(timeout, StateData) ->
 	?DEBUG("Timed out waiting for resumption", []),
 	{stop, normal, StateData};
+%% 客户端发过来的消息
 wait_for_resume(Msg, StateData) ->
 	try
-		mod_c2s_handle:handle_msg(Msg, StateData)
+		mod_c2s_handle:handle_msg(Msg, wait_for_resume, StateData)
 	catch
 		Error ->
 			?ERROR("handle msg error : ~p~n reason : ~p~n", [Msg, Error]),
@@ -175,6 +176,16 @@ handle_event(Event, StateName, StateData) ->
 handle_sync_event(_Event, _From, StateName, StateData) ->
 	fsm_reply(ok, StateName, StateData).
 
+
+%% 服务器发过来的消息
+handle_info(Msg, StateName, StateData) when is_record(Msg, proto) ->
+	try
+		mod_c2s_handle:handle_msg(Msg, StateName, StateData)
+	catch
+		Error ->
+			?ERROR("handle msg error : ~p~n reason : ~p~n", [Msg, Error]),
+			fsm_next_state(StateName, StateData)
+	end;
 handle_info(receive_ack, StateName, StateData) ->
 	fsm_next_state(StateName, StateData);
 handle_info({fsm_next_state, NewStateName}, _StateName, StateData) ->

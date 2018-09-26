@@ -24,7 +24,7 @@
 
 router(#proto{router = Router} = OldMsg) ->
 	?DEBUG("router msg : ~p~n",[OldMsg]),
-	Msg = OldMsg#proto{sig = ?SIGN2},
+	Msg = OldMsg#proto{sig = ?SIGN0},
 	#router{to = To, to_device = TDevice} = Router,
 	{_Node, ProxyPid} = mod_proxy:get_proxy(binary_to_term(To)),
 	ClientList = mod_proxy:get_client_list(ProxyPid),
@@ -33,7 +33,6 @@ router(#proto{router = Router} = OldMsg) ->
 			TDevice == <<"">> ->
 				lists:foldl(
 					fun(Client, Acc) ->
-						?INFO("Client : ~p~n",[Client]),
 						case Client#proxy_client.device == ?DEVICE_4 of
 							true ->
 								send(Client#proxy_client.pid, Msg),
