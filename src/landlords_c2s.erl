@@ -71,6 +71,7 @@ init([{SockMod, Socket, _SockPid}]) ->
 
 wait_for_auth(#proto{mt = ?MT_102, mid = Mid, sig = ?SIGN1, router = Router, data = Data, timestamp = Timestamp},
 	#client_state{sockmod = SockMod, socket = Socket} = StateData) ->
+	?WARNING("undefined event ~n", []),
 	#logonparameter{
 		uid = Uid,
 		phone = Phone,
@@ -117,15 +118,19 @@ wait_for_auth(#proto{mt = ?MT_102, mid = Mid, sig = ?SIGN1, router = Router, dat
 			fsm_next_state(wait_for_auth, StateData)
 	end;
 wait_for_auth(timeout, StateData) ->
+	?WARNING("undefined event ~n", []),
 	{stop, normal, StateData};
 wait_for_auth(closed, StateData) ->
+	?WARNING("undefined event ~n", []),
 	{stop, normal, StateData};
 wait_for_auth(stop, StateData) ->
+	?WARNING("undefined event ~n", []),
 	{stop, normal, StateData}.
 
 
 session_established(#proto{mt = ?MT_102, sig = ?SIGN1, data = Data},
 	#client_state{user_data = UserData} = StateData) ->
+	?WARNING("undefined event ~n", []),
 	case binary_to_term(Data) of
 		{login_success, ?ERROR_0} ->  %% 登陆成功
 			landlords_hooks:run(update_session, node(), StateData),
@@ -138,6 +143,7 @@ session_established(#proto{mt = ?MT_102, sig = ?SIGN1, data = Data},
 			fsm_next_state(session_established, StateData)
 	end;
 session_established(#proto{sig = ?SIGN1, data = Data}, StateData) ->
+	?WARNING("undefined event ~n", []),
 	case binary_to_term(Data) of
 		{session_established, ?ERROR_0} ->    %% session success
 			fsm_next_state(wait_for_resume, StateData);
@@ -148,10 +154,13 @@ session_established(#proto{sig = ?SIGN1, data = Data}, StateData) ->
 			fsm_next_state(session_established, StateData)
 	end;
 session_established(timeout, StateData) ->
+	?WARNING("undefined event ~n", []),
 	fsm_next_state(session_established, StateData);
 session_established(closed, StateData) ->
+	?WARNING("undefined event ~n", []),
 	{stop, normal, StateData};
 session_established(stop, StateData) ->
+	?WARNING("undefined event ~n", []),
 	{stop, normal, StateData}.
 
 %% session success
@@ -160,6 +169,7 @@ wait_for_resume(timeout, StateData) ->
 	{stop, normal, StateData};
 wait_for_resume(Msg, StateData) ->
 	try
+		?WARNING("undefined event ~n", []),
 		mod_c2s_handle:handle_msg(Msg, StateData)
 	catch
 		Error ->
@@ -173,11 +183,14 @@ handle_event(Event, StateName, StateData) ->
 	fsm_next_state(StateName, StateData).
 
 handle_sync_event(_Event, _From, StateName, StateData) ->
+	?WARNING("undefined event ~n", []),
 	fsm_reply(ok, StateName, StateData).
 
 handle_info(receive_ack, StateName, StateData) ->
+	?WARNING("undefined event ~n", []),
 	fsm_next_state(StateName, StateData);
 handle_info({fsm_next_state, NewStateName}, _StateName, StateData) ->
+	?WARNING("undefined event ~n", []),
 	fsm_next_state(NewStateName, StateData);
 handle_info(Event, StateName, StateData) ->
 	?WARNING("undefined event : ~p~n", [Event]),

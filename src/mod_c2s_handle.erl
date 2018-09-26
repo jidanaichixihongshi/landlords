@@ -22,6 +22,7 @@
 
 
 handle_msg(#proto{mt = Mt, sig = ?SIGN1, router = Router, timestamp = Timestamp} = Msg, StateData) ->
+	?DEBUG("handle msg: ~p~n",[Msg]),
 	(not mod_msg:check_msg_timestamp(Timestamp)) andalso throw(?ERROR_102),
 	if
 		Router#router.to == <<"">> ->  %% 发给自己的
