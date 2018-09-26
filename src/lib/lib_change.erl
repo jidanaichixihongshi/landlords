@@ -53,7 +53,7 @@ to_binary(Msg) when is_map(Msg) ->
 	term_to_binary(LMsg);
 %%atom_to_binary(Msg, utf8);
 to_binary(Msg) when is_list(Msg) ->
-	list_to_binary(Msg);
+	term_to_binary(Msg);
 to_binary(Msg) when is_integer(Msg) ->
 	list_to_binary(integer_to_list(Msg));
 to_binary(Msg) when is_float(Msg) ->

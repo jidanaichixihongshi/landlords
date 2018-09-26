@@ -155,7 +155,7 @@ handle_msg(#proto{mt = Mt, sig = 2, data = Data} = Msg,
 					io:format("======== chat ======= ~p ::: ~p~n", [binary_to_term(From), binary_to_term(C)])
 			end;
 		_ ->
-			io:format("undefined msg: ~p~n", [Msg])
+			io:format("undefined msg: ~p~n", [binary_to_term(Msg#proto.data)])
 	end;
 handle_msg(Msg, _State) ->
 	io:format("recv unused msg: ~p~n", [Msg]).
