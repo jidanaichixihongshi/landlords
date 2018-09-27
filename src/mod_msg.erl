@@ -40,10 +40,6 @@
 
 	check_msg_timestamp/1]).
 
-%% 消息标志位，控制消息走向
--define(SIGN0, 0).          %% 节点消息
--define(SIGN1, 1).          %% c2s消息
--define(SIGN2, 2).          %% s2c消息
 -define(TimestampOverTime, 3000).                                  %% 消息延时
 
 %% "hash(Uid)_mstimestamp()"

@@ -55,7 +55,7 @@ start_child(Node, Args) when is_record(Args, proxy_state) ->
 	end.
 
 init([]) ->
-	?DEBUG("init proxy ... ...~n",[]),
+	?DEBUG("init group ... ...~n",[]),
 	{ok, {{simple_one_for_one, 10000, 1}, [?CHILD(landlords_proxy, worker)]}}.
 
 
