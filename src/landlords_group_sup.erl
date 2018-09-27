@@ -23,9 +23,9 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 29. 六月 2018 16:32
+%%% Created : 27. 九月 2018 9:42
 %%%-------------------------------------------------------------------
--module(landlords_proxy_sup).
+-module(landlords_group_sup).
 -auth("cw").
 
 -behaviour(supervisor).

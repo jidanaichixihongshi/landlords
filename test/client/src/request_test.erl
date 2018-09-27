@@ -1,4 +1,23 @@
 %%%-------------------------------------------------------------------
+%%% * ━━━━━━神兽出没━━━━━━
+%%% * 　　　┏┓　　　┏┓
+%%% * 　　┏┛┻━━━┛┻┓
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　━　　　┃
+%%% * 　　┃　┳┛　┗┳　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　┻　　　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┗━┓　　　┏━┛
+%%% * 　　　　┃　　　┃ 神兽保佑
+%%% * 　　　　┃　　　┃ 代码无bug　　
+%%% * 　　　　┃　　　┗━━━┓
+%%% * 　　　　┃　　　　　　　┣┓
+%%% * 　　　　┃　　　　　　　┏┛
+%%% * 　　　　┗┓┓┏━┳┓┏┛
+%%% * 　　　　　┃┫┫　┃┫┫
+%%% * 　　　　　┗┻┛　┗┻┛
+%%% * ━━━━━━感觉萌萌哒━━━━━━
 %%% @author Administrator
 %%% @copyright (C) 2018, <COMPANY>
 %%% @doc
@@ -55,9 +74,9 @@ addroster(Response, TUid) ->
 	Data =
 		case Response of
 			0 ->
-				term_to_binary([{rt, 2}, {uid, [Uid, TUid]}, {c, "他同意了你的好友请求，现在你们已经是朋友了！"}]);
+				term_to_binary([{rt, 2}, {uid, [Uid, TUid]}]);
 			_ ->
-				term_to_binary([{rt, 3}, {uid, [TUid]}, {c, "他拒绝了你的好友请求!"}])
+				term_to_binary([{rt, 4}, {uid, TUid}])
 		end,
 	SendMsg = msg:produce_msg(Uid, <<"">>, 104, Data),
 	mod_landlords_client:tcp_send(Socket, SendMsg).
@@ -65,7 +84,7 @@ addroster(Response, TUid) ->
 delroster(TUid) ->
 	[{state, State}] = ets:lookup(landlords_client, state),
 	#state{uid = Uid, socket = Socket} = State,
-	Data = term_to_binary([{rt, 4}, {uid, [Uid, TUid]}, {c, "你和 <> 解除了好友关系！"}]),
+	Data = term_to_binary([{rt, 5}, {uid, [Uid, TUid]}]),
 	SendMsg = msg:produce_msg(Uid, <<"">>, 104, Data),
 	mod_landlords_client:tcp_send(Socket, SendMsg).
 

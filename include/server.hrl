@@ -29,11 +29,6 @@
 -define(AUTH_TIMEOUT, 12000).																	%% 登录超时
 -define(FSM_TIMEOUT, 60000).
 
-%% 消息标志位，控制消息走向
--define(SIGN0, 0).					%% 节点消息
--define(SIGN1, 1).					%% c2s消息
--define(SIGN2, 2).					%% s2c消息
-
 
 -define(PUBLIC_STORAGE_ETS, public_storage_ets).              %% 公共临时存储ETS
 -define(PROXY_STATE_ETS, proxy_state_ets).                    %% 代理进程存储ETS
@@ -66,6 +61,7 @@
 -record(user_data, {
 	uid,                      %% 用户id（唯一性）
 	nickname :: <<>>,        	%% 昵称
+	avatar,										%% 头像
 	level,                    %% 用户等级
 	version :: <<>>,        	%% 客户端版本
 	device,			        			%% 客户端类型

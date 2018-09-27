@@ -1,4 +1,23 @@
 %%%-------------------------------------------------------------------
+%%% * ━━━━━━神兽出没━━━━━━
+%%% * 　　　┏┓　　　┏┓
+%%% * 　　┏┛┻━━━┛┻┓
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　━　　　┃
+%%% * 　　┃　┳┛　┗┳　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　┻　　　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┗━┓　　　┏━┛
+%%% * 　　　　┃　　　┃ 神兽保佑
+%%% * 　　　　┃　　　┃ 代码无bug　　
+%%% * 　　　　┃　　　┗━━━┓
+%%% * 　　　　┃　　　　　　　┣┓
+%%% * 　　　　┃　　　　　　　┏┛
+%%% * 　　　　┗┓┓┏━┳┓┏┛
+%%% * 　　　　　┃┫┫　┃┫┫
+%%% * 　　　　　┗┻┛　┗┻┛
+%%% * ━━━━━━感觉萌萌哒━━━━━━
 %%% @author Administrator
 %%% @copyright (C) 2018, <COMPANY>
 %%% @doc
@@ -42,6 +61,7 @@ init([Port, ListenNum]) ->
 	{ok, {{one_for_one, 5, 10}, [
 		ranch:child_spec(landlords_receiver, ListenNum, ranch_tcp, [{port, Port}], landlords_receiver, []),
 		?CHILD(landlords_proxy_sup, supervisor),
+		?CHILD(landlords_group_sup, supervisor),
 		?CHILD(landlords_hooks, worker),
 		?CHILD(mod_system_monitor, worker),
 		?CHILD(mod_reloader, worker)

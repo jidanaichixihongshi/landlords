@@ -1,4 +1,23 @@
 %%%-------------------------------------------------------------------
+%%% * ━━━━━━神兽出没━━━━━━
+%%% * 　　　┏┓　　　┏┓
+%%% * 　　┏┛┻━━━┛┻┓
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　━　　　┃
+%%% * 　　┃　┳┛　┗┳　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　┻　　　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┗━┓　　　┏━┛
+%%% * 　　　　┃　　　┃ 神兽保佑
+%%% * 　　　　┃　　　┃ 代码无bug　　
+%%% * 　　　　┃　　　┗━━━┓
+%%% * 　　　　┃　　　　　　　┣┓
+%%% * 　　　　┃　　　　　　　┏┛
+%%% * 　　　　┗┓┓┏━┳┓┏┛
+%%% * 　　　　　┃┫┫　┃┫┫
+%%% * 　　　　　┗┻┛　┗┻┛
+%%% * ━━━━━━感觉萌萌哒━━━━━━
 %%% @author Administrator
 %%% @copyright (C) 2018, <COMPANY>
 %%% @doc
@@ -17,8 +36,9 @@
 	handle_msg/3]).
 
 %% hooks api
--export([update_session/1,
-	seekuser/1]).
+-export([
+	update_session/1,
+	seek_user/1]).
 
 %% c2s消息
 handle_msg(#proto{mt = Mt, mid = Mid, sig = ?SIGN1, router = Router, timestamp = Timestamp} = Msg, StateName,
@@ -59,6 +79,26 @@ handle_msg(?MT_103, Msg, _StateName, StateData) ->
 		_ ->
 			?WARNING("undefinde request : ~p~n", [Msg])
 	end;
+handle_msg(?MT_104, #proto{router = Router} = Msg, _StateName, #client_state{socket = Socket, sockmod = SockMod} = _StateData) ->
+	case binary_to_term(Msg#proto.data) of
+		Request when is_list(Request) ->
+			{rt, RT} = lists:keyfind(rt, 1, Request),
+			{uid, Uid} = lists:keyfind(uid, 1, Request),
+			if
+				RT == 2 ->
+					%% 触发钩子
+					landlords_hooks:run(addroster, node(), Uid);
+				RT == 4 ->
+					Reply = Msg#proto{sig = ?SIGN2, router = Router#router{to = term_to_binary(Uid)}},
+					landlords_c2s:tcp_send(SockMod, Socket, Reply);
+				RT == 5 ->
+					landlords_hooks:run(delroster, node(), Uid);
+				true ->
+					?WARNING("undefinde request : ~p~n", [Msg])
+			end;
+		_ ->
+			?WARNING("undefinde request : ~p~n", [Msg])
+	end;
 handle_msg(?MT_121, Msg, _StateName, #client_state{sockmod = SockMod, socket = Socket} = _StateData) ->
 	#proto{mid = Mid, router = Router, data = Data} = Msg,
 	case binary_to_term(Data) of
@@ -69,6 +109,9 @@ handle_msg(?MT_121, Msg, _StateName, #client_state{sockmod = SockMod, socket = S
 	end;
 handle_msg(Mt, _, _, _StateData) ->
 	?WARNING("undefined mt type : ~p~n", [Mt]).
+
+
+
 
 
 %% -------------------------------------------------------------------------
@@ -111,7 +154,7 @@ update_session(#client_state{uid = Uid, node = Node, socket = Socket, sockmod = 
 
 %% 查找用户
 %% hooks_api
-seekuser({Mid, Router, Information, SockMod, Socket}) ->
+seek_user({Mid, Router, Information, SockMod, Socket}) ->
 	Reply =
 		case Information of
 			{uid, Uid} ->

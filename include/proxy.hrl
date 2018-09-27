@@ -24,6 +24,7 @@
 	uid,                      %% 用户id
 	node,											%% proxy 节点
 	pid,											%% proxy 进程
+	room,											%% room列表
 	client = []               %% 代理进程的client集合 #client_state
 }).
 
