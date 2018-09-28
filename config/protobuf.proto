@@ -96,8 +96,8 @@ message PersonResearch {
 %% 群增量消息
 message GroupSession {
   required int32 gid = 1;              %% gid
-  required bytes gnickname = 2;
-  required bytes gportrait = 3;        %% 群头像
+  required bytes groupname = 2;
+  required bytes portrait = 3;        %% 群头像
   required bytes setting = 4;           %% 群设置
   required bytes admin = 5;            %% 管理员
   required bytes numbers = 6;           %% 群成员
@@ -109,8 +109,8 @@ message GroupSession {
 %% 群查找
 message GroupResearch {
   required int32 gid = 1;               %% gid
-  required bytes gnickname = 2;
-  required bytes gportrait = 3;          %% 头像
+  required bytes groupname = 2;
+  required bytes portrait = 3;          %% 头像
   required bytes announcement = 4;       %% 公告
   optional bytes extend = 5;            %% 扩展信息
 }

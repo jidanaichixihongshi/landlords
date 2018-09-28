@@ -29,13 +29,19 @@
 -auth("cw").
 
 -include("proxy.hrl").
+-include("group.hrl").
 
 -export([
 	set_proxy/1,
 	lookup_proxy/1,
 	lookup_element_proxy/2,
 	update_proxy/2,
-	del_proxy/1]).
+	del_proxy/1,
+	set_group/1,
+	lookup_group/1,
+	lookup_element_group/2,
+	update_group/2,
+	del_group/1]).
 
 %% -------------------------------------------------------------------------------------
 %% proxy 相关
@@ -76,6 +82,29 @@ update_proxy(Uid, Parameter) ->
 
 del_proxy(Uid) ->
 	ets:delete(?PROXY_STATE, Uid).
+
+
+%% -------------------------------------------------------------------------------------
+%% group 相关
+%% -------------------------------------------------------------------------------------
+set_group(State) ->
+	ets:insert(?GROUP_STATE, State),
+	{ok, State}.
+
+-spec lookup_group(integer()) -> #group_state{}.
+lookup_group(Gid) ->
+	ets:lookup(?GROUP_STATE, Gid).
+
+lookup_element_group(Gid, Pos) ->
+	ets:lookup_element(?GROUP_STATE, Gid, Pos).
+
+-spec update_group(integer(), tuple()) -> boolean().
+update_group(Gid, Parameter) ->
+	ets:update_element(?GROUP_STATE, Gid, Parameter).
+
+del_group(Gid) ->
+	ets:delete(?GROUP_STATE, Gid).
+
 
 %% -----------------------------------------------------------------------------
 %% internal function

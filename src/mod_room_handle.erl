@@ -23,18 +23,19 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 26. 九月 2018 18:47
+%%% Created : 28. 九月 2018 下午 20:15
 %%%-------------------------------------------------------------------
+-module(mod_room_handle).
+-author("cw").
+
+%% API
+-export([]).
 
 
--record(room_state,{
-	rid,
-	setting,					%% 设置
-	creator,
-	members,
-	grade,						%% 战绩 #{}
-	create_time
-}).
+
+
+
+
 
 
 

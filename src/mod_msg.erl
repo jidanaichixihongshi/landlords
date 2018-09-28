@@ -36,6 +36,8 @@
 	produce_mid/1,
 	produce_heartbeat/1,
 	produce_responselogon/4,
+
+	produce_responsemsg/4,
 	produce_responsemsg/5,
 
 	check_msg_timestamp/1]).
@@ -94,7 +96,15 @@ produce_responselogon(Mt, Mid, Router, Reply) ->
 		data = lib_change:to_binary(Reply),
 		timestamp = lib_time:get_mstimestamp()
 	}.
-
+produce_responsemsg(Mt, Mid, Sig, Reply) ->
+	#proto{
+		mt = Mt,
+		mid = Mid,
+		sig = Sig,
+		router = #router{},
+		data = lib_change:to_binary(Reply),
+		timestamp = lib_time:get_mstimestamp()
+	}.
 produce_responsemsg(Mt, Mid, Sig, Router, Reply) ->
 	NewRouter = change_router(Router),
 	#proto{

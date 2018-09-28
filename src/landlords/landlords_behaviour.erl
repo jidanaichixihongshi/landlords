@@ -23,18 +23,10 @@
 %%% @doc
 %%%
 %%% @end
-%%% Created : 26. 九月 2018 18:47
+%%% Created : 28. 九月 2018 下午 20:20
 %%%-------------------------------------------------------------------
+-module(landlords_behaviour).
+-author("cw").
 
-
--record(room_state,{
-	rid,
-	setting,					%% 设置
-	creator,
-	members,
-	grade,						%% 战绩 #{}
-	create_time
-}).
-
-
-
+%% API
+-export([]).

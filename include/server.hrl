@@ -1,4 +1,23 @@
 %%%-------------------------------------------------------------------
+%%% * ━━━━━━神兽出没━━━━━━
+%%% * 　　　┏┓　　　┏┓
+%%% * 　　┏┛┻━━━┛┻┓
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　━　　　┃
+%%% * 　　┃　┳┛　┗┳　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　┻　　　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┗━┓　　　┏━┛
+%%% * 　　　　┃　　　┃ 神兽保佑
+%%% * 　　　　┃　　　┃ 代码无bug　　
+%%% * 　　　　┃　　　┗━━━┓
+%%% * 　　　　┃　　　　　　　┣┓
+%%% * 　　　　┃　　　　　　　┏┛
+%%% * 　　　　┗┓┓┏━┳┓┏┛
+%%% * 　　　　　┃┫┫　┃┫┫
+%%% * 　　　　　┗┻┛　┗┻┛
+%%% * ━━━━━━感觉萌萌哒━━━━━━
 %%% @author Administrator
 %%% @copyright (C) 2018, <COMPANY>
 %%% @doc
@@ -8,6 +27,8 @@
 %%%-------------------------------------------------------------------
 
 -include("proxy.hrl").
+-include("group.hrl").
+-include("room.hrl").
 -include("common.hrl").
 -include("error.hrl").
 
@@ -41,7 +62,9 @@
 	{public_storage_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY]},
 
 	%% proxy存储表
-	{proxy_state_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY, {keypos, #proxy_state.uid}]}
+	{proxy_state_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY, {keypos, #proxy_state.uid}]},
+	{group_state_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY, {keypos, #group_state.gid}]},
+	{room_state_ets, [set, public, named_table, ?ETS_READ_CONCURRENCY, ?ETS_WRITE_CONCURRENCY, {keypos, #room_state.rid}]}
 ]).
 
 

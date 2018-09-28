@@ -1,4 +1,23 @@
 %%%-------------------------------------------------------------------
+%%% * ━━━━━━神兽出没━━━━━━
+%%% * 　　　┏┓　　　┏┓
+%%% * 　　┏┛┻━━━┛┻┓
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　━　　　┃
+%%% * 　　┃　┳┛　┗┳　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┃　　　┻　　　┃
+%%% * 　　┃　　　　　　　┃
+%%% * 　　┗━┓　　　┏━┛
+%%% * 　　　　┃　　　┃ 神兽保佑
+%%% * 　　　　┃　　　┃ 代码无bug　　
+%%% * 　　　　┃　　　┗━━━┓
+%%% * 　　　　┃　　　　　　　┣┓
+%%% * 　　　　┃　　　　　　　┏┛
+%%% * 　　　　┗┓┓┏━┳┓┏┛
+%%% * 　　　　　┃┫┫　┃┫┫
+%%% * 　　　　　┗┻┛　┗┻┛
+%%% * ━━━━━━感觉萌萌哒━━━━━━
 %%% @author Administrator
 %%% @copyright (C) 2018, <COMPANY>
 %%% @doc
@@ -29,25 +48,31 @@
 -define(MT_104, 104).		%% roster相关
 -define(MT_107, 107).		%% 聊天消息
 
--define(MT_121, 121).		%% 查询消息
-
-
+-define(MT_117, 117).		%% 群操作相关
 -define(MT_118, 118).		%% 群增量
+
+-define(MT_121, 121).		%% 查询消息
 
 
 %% 钩子注册
 -define(HOOKS_LIST, [
+	%% 其他操作
 	{update_session, ?LOCALNODE, mod_c2s_handle, update_session, 50},
 	{seekuser, ?LOCALNODE, mod_c2s_handle, seek_user, 50},
-
+	%% roster操作
 	{addroster, ?LOCALNODE, mod_roster, add_roster, 50},
 	{delroster, ?LOCALNODE, mod_roster, del_roster, 50},
-
-
-	{removefriend, ?LOCALNODE, mod_c2s_handle, del_roster, 50},
-	{creategroup, ?LOCALNODE, mod_c2s_handle, create_group, 50},
-	{responsecreategroup, ?LOCALNODE, landlords_group, response_create_group, 50},
-	{groupsession, ?LOCALNODE, mod_c2s_handle, group_session, 50}
+	%% 群操作
+	{creategroup, ?LOCALNODE, mod_group, create_group, 50},
+	{setgroup, ?LOCALNODE, mod_group, set_group, 50},
+	{addgroup, ?LOCALNODE, mod_group, add_group, 50},
+	{leavegroup, ?LOCALNODE, mod_group, leave_group, 50},
+	{groupsession, ?LOCALNODE, mod_group, group_session, 50},
+	%% 房间操作
+	{createroom, ?LOCALNODE, landlords_room, create_room, 50},
+	{addroom, ?LOCALNODE, landlords_room, add_room, 50},
+	{leaveroom, ?LOCALNODE, landlords_room, leave_room, 50},
+	{roomsession, ?LOCALNODE, landlords_room, room_session, 50}
 ]).
 
 

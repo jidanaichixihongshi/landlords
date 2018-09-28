@@ -65,7 +65,9 @@ add({Hook, Node, Function, Seq}) when is_function(Function) ->
 add({Hook, Module, Function, Seq}) ->
 	add({Hook, global, Module, Function, Seq});
 add({Hook, Node, Module, Function, Seq}) ->
-	gen_server:call(landlords_hooks, {add, Hook, Node, Module, Function, Seq}).
+	gen_server:call(landlords_hooks, {add, Hook, Node, Module, Function, Seq});
+add({Hook, Node, Node, Module, Function, Seq}) ->
+	gen_server:call(landlords_hooks, {add, Hook, Node, Node, Module, Function, Seq}).
 
 
 %% @doc See del/4.
@@ -76,7 +78,9 @@ delete({Hook, Node, Function, Seq}) when is_function(Function) ->
 delete({Hook, Module, Function, Seq}) ->
 	delete({Hook, global, Module, Function, Seq});
 delete({Hook, Node, Module, Function, Seq}) ->
-	gen_server:call(landlords_hooks, {delete, Hook, Node, Module, Function, Seq}).
+	gen_server:call(landlords_hooks, {delete, Hook, Node, Module, Function, Seq});
+delete({Hook, Node, Node, Module, Function, Seq}) ->
+	gen_server:call(landlords_hooks, {delete, Hook, Node, Node, Module, Function, Seq}).
 
 
 -spec delete_all_hooks() -> true.
@@ -199,7 +203,7 @@ safe_apply(Hook, Module, Function, Args) ->
 		apply(Function, Args);
 				true ->
 					Module:Function(Args)
-					%apply(Module, Function, Args)
+	%apply(Module, Function, Args)
 			end
 	catch E:R when E /= exit; R /= normal ->
 		?ERROR("Hook ~p crashed when running ~p:~p/~p:~n"

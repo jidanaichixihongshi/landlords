@@ -30,8 +30,8 @@
 
 -behaviour(supervisor).
 
+-include("group.hrl").
 -include("logger.hrl").
--include("proxy.hrl").
 
 -export([
 	init/1,
@@ -44,7 +44,7 @@ start_link() ->
 	supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 
-start_child(Node, Args) when is_record(Args, proxy_state) ->
+start_child(Node, Args) when is_record(Args, group_state) ->
 	case supervisor:start_child({?MODULE, Node}, [Args]) of
 		{ok, Pid} ->
 			{ok, Pid};
@@ -56,7 +56,7 @@ start_child(Node, Args) when is_record(Args, proxy_state) ->
 
 init([]) ->
 	?DEBUG("init group ... ...~n",[]),
-	{ok, {{simple_one_for_one, 10000, 1}, [?CHILD(landlords_proxy, worker)]}}.
+	{ok, {{simple_one_for_one, 10000, 1}, [?CHILD(landlords_group, worker)]}}.
 
 
 

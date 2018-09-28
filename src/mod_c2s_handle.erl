@@ -99,6 +99,25 @@ handle_msg(?MT_104, #proto{router = Router} = Msg, _StateName, #client_state{soc
 		_ ->
 			?WARNING("undefinde request : ~p~n", [Msg])
 	end;
+handle_msg(?MT_117, Msg, _StateName, _StateData) ->
+	case binary_to_term(Msg#proto.data) of
+		Request when is_list(Request) ->
+			{rt, RT} = lists:keyfind(rt, 1, Request),
+			if
+				RT == 1 ->
+					landlords_hooks:run(creategroup, node(), {Msg#proto.router, Request});
+				RT == 3 ->
+					landlords_hooks:run(setgroup, node(), {Msg#proto.router, Request});
+				RT == 5 ->
+					landlords_hooks:run(addgroup, node(), {Msg#proto.router, Request});
+				RT == 7 ->
+					landlords_hooks:run(leavegroup, node(), Request);
+				true ->
+					?WARNING("undefined group request: ~p~n", [Msg])
+			end;
+		_ ->
+			?WARNING("undefined group request: ~p~n", [Msg])
+	end;
 handle_msg(?MT_121, Msg, _StateName, #client_state{sockmod = SockMod, socket = Socket} = _StateData) ->
 	#proto{mid = Mid, router = Router, data = Data} = Msg,
 	case binary_to_term(Data) of
@@ -109,9 +128,6 @@ handle_msg(?MT_121, Msg, _StateName, #client_state{sockmod = SockMod, socket = S
 	end;
 handle_msg(Mt, _, _, _StateData) ->
 	?WARNING("undefined mt type : ~p~n", [Mt]).
-
-
-
 
 
 %% -------------------------------------------------------------------------

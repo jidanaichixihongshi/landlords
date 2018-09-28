@@ -35,13 +35,13 @@
 %% 去掉字符串空格
 -spec remove_string_black(L :: string()) -> string().
 remove_string_black(L) ->
-	lists:reverse(remove_string_loop(L,[])).
+	lists:reverse(remove_string_loop(L, [])).
 
-remove_string_loop([],L) -> L;
-remove_string_loop([I|L],LS) ->
+remove_string_loop([], L) -> L;
+remove_string_loop([I | L], LS) ->
 	case I of
-		32 -> remove_string_loop(L,LS);
-		_ -> remove_string_loop(L,[I|LS])
+		32 -> remove_string_loop(L, LS);
+		_ -> remove_string_loop(L, [I | LS])
 	end.
 
 
@@ -62,10 +62,10 @@ list_duplicate(L) ->
 	list_duplicate(L, []).
 list_duplicate([], L1) ->
 	L1;
-list_duplicate([H|L], L1) ->
+list_duplicate([H | L], L1) ->
 	case lists:member(H, L1) of
 		true -> list_duplicate(L, L1);
-		false -> list_duplicate(L, [H|L1])
+		false -> list_duplicate(L, [H | L1])
 	end.
 
 %%替换列表指定位置的元素
@@ -81,13 +81,13 @@ replace(List, Key, NewElem) ->
 	end.
 replace_elem(0, List, _OldList, _Key, _NewElem) ->
 	List;
-replace_elem(Num, List, [Elem|OldList], Key, NewElem) ->
+replace_elem(Num, List, [Elem | OldList], Key, NewElem) ->
 	NewList =
 		case Num =:= Key of
-			true -> [NewElem|List];
-			false -> [Elem|List]
+			true -> [NewElem | List];
+			false -> [Elem | List]
 		end,
-	replace_elem(Num-1, NewList, OldList, Key, NewElem).
+	replace_elem(Num - 1, NewList, OldList, Key, NewElem).
 
 %% -----------------------------------------------------------------------------
 %% 存储操作
@@ -99,25 +99,25 @@ get_val(Key, Table) ->
 		_ -> ?UNDEFINED
 	end.
 set_val(Key, Val, Table) ->
-	ets:insert(Table, {Key,Val}).
+	ets:insert(Table, {Key, Val}).
 del_val(Key, Table) ->
 	ets:delete(Table, Key).
 
 %% 内存数据操作
-get_mem(Module,Key) ->
-	case erlang:get({Module,Key}) of
+get_mem(Module, Key) ->
+	case erlang:get({Module, Key}) of
 		Val when is_list(Val) ->
 			Val;
 		_ ->
 			[]
 	end.
-set_mem(Module,Key,Val) ->
-	OldMem = get_mem(Module,Key),
-	erlang:put({Module,Key},[Val|OldMem]).
-replace_mem(Module,Key,Val) ->
-	erlang:put({Module,Key},[Val]).
-del_mem(Module,Key) ->
-	erlang:erase({Module,Key}).
+set_mem(Module, Key, Val) ->
+	OldMem = get_mem(Module, Key),
+	erlang:put({Module, Key}, [Val | OldMem]).
+replace_mem(Module, Key, Val) ->
+	erlang:put({Module, Key}, [Val]).
+del_mem(Module, Key) ->
+	erlang:erase({Module, Key}).
 
 %% -----------------------------------------------------------------------------
 %% map操作

@@ -30,8 +30,8 @@
 
 -behaviour(supervisor).
 
--include("logger.hrl").
 -include("proxy.hrl").
+-include("logger.hrl").
 
 -export([
 	init/1,
