@@ -19,7 +19,7 @@ message proto {
   required int32 sig = 2;               %% 消息标志位
   required router router = 3;
   optional bytes data = 4;
-  required int64 timestamp = 5;         %% 时间戳，消息产生的时间
+  required int64 ts = 5;                %% 时间戳，消息产生的时间
 }
 
 message data {
