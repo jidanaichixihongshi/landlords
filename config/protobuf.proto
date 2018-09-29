@@ -19,131 +19,65 @@
 %% 202  -   游戏操作
 %% 203  -   room聊天消息
 
+
+%% ================================================================================
+%% 消息体
+%% ================================================================================
 message proto {
-  required int32 mt = 1;              %% 消息类型编号
-  required string mid = 2;             %% 消息id
-  required int32 sig = 3;               %% 消息标志位
-  required Router router = 4;
-  optional bytes data = 5;
-  required int64 timestamp = 6;         %% 时间戳，消息产生的时间
+  required int32 mt = 1;                %% 消息类型编号
+  required int32 sig = 2;               %% 消息标志位
+  required Router router = 3;
+  optional bytes data = 4;
+  required int64 timestamp = 5;         %% 时间戳，消息产生的时间
 }
+
+message data {
+  required init32 dt = 1;               %% 内容类型
+  required string mid = 2;              %% 消息id
+  required bytes children = 3;          %% 具体请求
+  optional bytes extend = 4;
+}
+
+%% 消息体end
+%% ================================================================================
+
+
 %% ================================================================================
 %% 消息路由
 %% ================================================================================
-message Router {
+message router {
   required bytes from = 1;              %% uid/gid
-  optional bytes from_device = 2;       %% 设备类型编号
-  optional bytes from_server = 3;       %% 服务器地址
+  optional bytes fdevice = 2;           %% 设备类型编号
+  optional bytes fserver = 3;           %% 服务器地址
   optional bytes to = 4;                %% uid/gid
-  optional bytes to_device = 5;         %% 设备类型编号
-  optional bytes to_server = 6;         %% 服务器地址
+  optional bytes tdevice = 5;           %% 设备类型编号
+  optional bytes tserver = 6;           %% 服务器地址
 }
-
-message Chat {
-  required bytes from = 1;              %% uid/gid
-  required bytes device = 2;            %% 设备类型编号
-  required bytes c = 3;                 %% 内容
-}
-
 %% 消息路由end
 %% ==================================================================================
 
 %% ==================================================================================
-%% 个人操作相关
+%% 具体消息参数
 %% ==================================================================================
-%% 登录请求参数
-message LogonParameter {
-  optional int32 uid = 1;              %% uid，使用uid登录可填
-  optional bytes nickname = 2;         %% none/用户昵称
-  optional bytes phone = 3;             %% none/手机号，使用手机号登陆可填
-  required bytes token = 4;
-  required int32 device = 5;            %% 登录方式，1-安卓/2-ios/3-web
-  optional bytes device_id = 6;         %% 设备id
-  optional bytes version = 7;          %% 客户端版本
-  optional bytes app_id = 8;           %% 程序软件编号
-  optional bytes extend = 9;            %% 扩展信息
+%% 聊天消息
+message chat {
+  required bytes from = 1;              %% uid/gid
+  required bytes device = 2;            %% 设备类型编号
+  required bytes ct = 3;                %% 消息类型
+  required bytes c = 4;                 %% 内容
 }
 
-
-%% 个人增量消息
-message PersonSession {
-  required int32 uid = 1;               %% uid
-  required bytes nickname = 2;
-  required bytes portrait = 3;          %% 头像
-  required bytes personlabel = 4;       %% 个人标签
-  optional bytes setting = 5;           %% 个人设置
-  optional bytes rosters = 6;           %% 通讯录
-  optional bytes groups = 7;            %% 加入的群
-  required bytes serverparameter = 8;   %% 服务器参数
-  optional bytes extend = 9;            %% 扩展信息
-}
-
-%% 人员查找
-message PersonResearch {
-  required int32 uid = 1;               %% uid
-  required bytes nickname = 2;
-  required bytes portrait = 3;          %% 头像
-  required bytes personlabel = 4;       %% 个人标签
-  optional bytes extend = 5;            %% 扩展信息
+%% 请求消息
+message request {
+  required bytes from = 1;              %% uid/gid
+  required bytes device = 2;            %% 设备类型编号
+  required bytes rt = 3;                %% 请求类型
+  required bytes rm = 4;                %% 请求参数
+  optional bytes extend = 5;            %% 扩展
 }
 
 
 %% ==================================================================================
-
-%% ==========================================================================
-%% 群操作相关
-%% ==========================================================================
-%% 群增量消息
-message GroupSession {
-  required int32 gid = 1;              %% gid
-  required bytes groupname = 2;
-  required bytes portrait = 3;        %% 群头像
-  required bytes setting = 4;           %% 群设置
-  required bytes admin = 5;            %% 管理员
-  required bytes numbers = 6;           %% 群成员
-  required bytes announcement = 7;     %% 公告
-  optional bytes extend = 8;           %% 扩展信息
-}
-
-
-%% 群查找
-message GroupResearch {
-  required int32 gid = 1;               %% gid
-  required bytes groupname = 2;
-  required bytes portrait = 3;          %% 头像
-  required bytes announcement = 4;       %% 公告
-  optional bytes extend = 5;            %% 扩展信息
-}
-
-
-%% 群操作相关end
-%% ===============================================================================
-
-
-%% ==============================================================================
-%% 游戏房间
-%% ===============================================================================
-%% 房间增量消息
-message RoomSession {
-  required int32 rid = 1;              %% 房间编号
-  required bytes type = 2;             %% 房间类型编号
-  required bytes setting = 3;          %% 设置参数
-  required int32 creator = 4;          %% 创建者
-  required bytes numbers = 5;          %% 成员信息
-  optional bytes extend = 6;           %% 扩展信息
-}
-
-%% 房间查找
-message RoomResearch {
-  required int32 rid = 1;               %% gid
-  required bytes type = 2;             %% 房间类型编号
-  required int32 creator = 3;          %% 创建者
-  required bytes numbers = 4;          %% 成员信息
-  optional bytes extend = 5;            %% 扩展信息
-}
-
-%% 房间相关end
-%% ================================================================================
 
 
 %% 其他消息

@@ -30,7 +30,7 @@
 
 -behaviour(gen_fsm).
 
--include("server.hrl").
+-include("room.hrl").
 -include("logger.hrl").
 -include("protobuf_pb.hrl").
 
@@ -159,12 +159,7 @@ code_change(_OldVsn, StateName, StateData, _Extra) ->
 %% ----------------------------------------------------------------
 %% fsm_next_state: Generate the next_state FSM tuple with different
 %% timeout, depending on the future state
-fsm_next_state(session_established, StateData) ->
-	{next_state, session_established, StateData, ?AUTH_TIMEOUT};
-fsm_next_state(wait_for_auth, #client_state{retry_times = TetryTimes} = StateData) when TetryTimes >= 1 ->
-	{stop, normal, StateData};
-fsm_next_state(wait_for_auth, #client_state{retry_times = TetryTimes} = StateData) ->
-	{next_state, wait_for_auth, StateData#client_state{retry_times = TetryTimes + 1}, ?AUTH_TIMEOUT};
+
 
 fsm_next_state(StateName, StateData) ->
 	{next_state, StateName, StateData, ?ROOM_TICK_TIME}.
@@ -172,9 +167,9 @@ fsm_next_state(StateName, StateData) ->
 %% fsm_reply: Generate the reply FSM tuple with different timeout,
 %% depending on the future state
 fsm_reply(Reply, session_established, StateData) ->
-	{reply, Reply, session_established, StateData, ?TIMEOUT};
+	{reply, Reply, session_established, StateData, ?ROOM_TICK_TIME};
 fsm_reply(Reply, StateName, StateData) ->
-	{reply, Reply, StateName, StateData, ?TIMEOUT}.
+	{reply, Reply, StateName, StateData, ?ROOM_TICK_TIME}.
 
 
 

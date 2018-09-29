@@ -109,14 +109,22 @@ handle_msg(?MT_117, Msg, _StateName, _StateData) ->
 				RT == 3 ->
 					landlords_hooks:run(setgroup, node(), {Msg#proto.router, Request});
 				RT == 5 ->
-					landlords_hooks:run(addgroup, node(), {Msg#proto.router, Request});
+					landlords_hooks:run(joingroup, node(), {Msg#proto.router, Request});
 				RT == 7 ->
-					landlords_hooks:run(leavegroup, node(), Request);
+					landlords_hooks:run(exitgroup, node(), Request);
 				true ->
 					?WARNING("undefined group request: ~p~n", [Msg])
 			end;
 		_ ->
 			?WARNING("undefined group request: ~p~n", [Msg])
+	end;
+handle_msg(?MT_121, Msg, _StateName, #client_state{sockmod = SockMod, socket = Socket} = _StateData) ->
+	#proto{mid = Mid, router = Router, data = Data} = Msg,
+	case binary_to_term(Data) of
+		{seekuser, Information} ->
+			landlords_hooks:run(seekuser, node(), {Mid, Router, Information, SockMod, Socket});
+		_ ->
+			?WARNING("undefinde request : ~p~n", [Msg])
 	end;
 handle_msg(?MT_121, Msg, _StateName, #client_state{sockmod = SockMod, socket = Socket} = _StateData) ->
 	#proto{mid = Mid, router = Router, data = Data} = Msg,

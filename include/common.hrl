@@ -65,14 +65,16 @@
 	%% 群操作
 	{creategroup, ?LOCALNODE, mod_group, create_group, 50},
 	{setgroup, ?LOCALNODE, mod_group, set_group, 50},
-	{addgroup, ?LOCALNODE, mod_group, add_group, 50},
-	{leavegroup, ?LOCALNODE, mod_group, leave_group, 50},
+	{joingroup, ?LOCALNODE, mod_group, join_group, 50},
+	{exitgroup, ?LOCALNODE, mod_group, exit_group, 50},
 	{groupsession, ?LOCALNODE, mod_group, group_session, 50},
 	%% 房间操作
-	{createroom, ?LOCALNODE, landlords_room, create_room, 50},
-	{addroom, ?LOCALNODE, landlords_room, add_room, 50},
-	{leaveroom, ?LOCALNODE, landlords_room, leave_room, 50},
-	{roomsession, ?LOCALNODE, landlords_room, room_session, 50}
+	{createroom, ?LOCALNODE, mod_room, create_room, 50},
+
+
+	{addroom, ?LOCALNODE, mod_room, join_room, 50},
+	{leaveroom, ?LOCALNODE, mod_room, leave_room, 50},
+	{roomsession, ?LOCALNODE, mod_room, room_session, 50}
 ]).
 
 

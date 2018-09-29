@@ -38,8 +38,8 @@
 -export([
 	create_group/1,
 	set_group/1,
-	add_group/1,
-	leave_group/1,
+	join_group/1,
+	exit_group/1,
 	group_session/1,
 	get_group/1,
 	get_group_members/1
@@ -90,14 +90,14 @@ set_group({_Router, Information}) ->
 	Set = lists:keyfind(set, 1, Information),
 	Gid = lib_normal:get_v_by_k(gid, Information),
 	group_request(Gid, Set).
-add_group({_Router, Information}) ->
+join_group({_Router, Information}) ->
 	Uid = lib_normal:get_v_by_k(uid, Information),
 	Gid = lib_normal:get_v_by_k(gid, Information),
-	group_request(Gid, {add_group, Uid}).
-leave_group(Information) ->
+	group_request(Gid, {join_group, Uid}).
+exit_group(Information) ->
 	Uid = lib_normal:get_v_by_k(uid, Information),
 	Gid = lib_normal:get_v_by_k(gid, Information),
-	group_request(Gid, {leave_group, Uid}).
+	group_request(Gid, {exit_group, Uid}).
 group_session(Information) ->
 	Gid = lib_normal:get_v_by_k(gid, Information),
 	Request =

@@ -62,6 +62,7 @@ init([Port, ListenNum]) ->
 		ranch:child_spec(landlords_receiver, ListenNum, ranch_tcp, [{port, Port}], landlords_receiver, []),
 		?CHILD(landlords_proxy_sup, supervisor),
 		?CHILD(landlords_group_sup, supervisor),
+		?CHILD(landlords_room_sup, supervisor),
 		?CHILD(landlords_hooks, worker),
 		?CHILD(mod_system_monitor, worker),
 		?CHILD(mod_reloader, worker)
