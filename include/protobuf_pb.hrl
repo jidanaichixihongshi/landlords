@@ -52,3 +52,12 @@
 }).
 -endif.
 
+-ifndef(PUSH_PB_H).
+-define(PUSH_PB_H, true).
+-record(push, {
+    pt = erlang:error({required, pt}),
+    pm = erlang:error({required, pm}),
+    extend
+}).
+-endif.
+

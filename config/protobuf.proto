@@ -67,7 +67,12 @@ message request {
   optional bytes extend = 5;            %% 扩展
 }
 
-
+%% 推送消息
+message push {
+  required bytes pt = 1;                
+  required bytes pm = 2;               
+  optional bytes extend = 3; 
+}
 
 %% ==================================================================================
 
