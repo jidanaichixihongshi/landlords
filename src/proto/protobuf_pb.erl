@@ -118,7 +118,7 @@ iolist(proto, Record) ->
      pack(5, required, with_default(Record#proto.ts, none),
 	  int64, [])];
 iolist(data, Record) ->
-    [pack(1, required, with_default(Record#data.dt, none),
+    [pack(1, optional, with_default(Record#data.dt, none),
 	  int32, []),
      pack(2, required, with_default(Record#data.mid, none),
 	  string, []),
@@ -140,18 +140,18 @@ iolist(router, Record) ->
      pack(6, optional,
 	  with_default(Record#router.tserver, none), bytes, [])];
 iolist(chat, Record) ->
-    [pack(1, required, with_default(Record#chat.from, none),
+    [pack(1, optional, with_default(Record#chat.from, none),
 	  bytes, []),
-     pack(2, required,
+     pack(2, optional,
 	  with_default(Record#chat.device, none), bytes, []),
      pack(3, required, with_default(Record#chat.ct, none),
 	  bytes, []),
      pack(4, required, with_default(Record#chat.c, none),
 	  bytes, [])];
 iolist(request, Record) ->
-    [pack(1, required,
+    [pack(1, optional,
 	  with_default(Record#request.from, none), bytes, []),
-     pack(2, required,
+     pack(2, optional,
 	  with_default(Record#request.device, none), bytes, []),
      pack(3, required, with_default(Record#request.rt, none),
 	  bytes, []),

@@ -2,12 +2,13 @@
 
 -module(protobuf_pb).
 
--export([encode_request/1, decode_request/1,
-	 delimited_decode_request/1, encode_chat/1,
-	 decode_chat/1, delimited_decode_chat/1, encode_router/1,
-	 decode_router/1, delimited_decode_router/1,
-	 encode_data/1, decode_data/1, delimited_decode_data/1,
-	 encode_proto/1, decode_proto/1,
+-export([encode_push/1, decode_push/1,
+	 delimited_decode_push/1, encode_request/1,
+	 decode_request/1, delimited_decode_request/1,
+	 encode_chat/1, decode_chat/1, delimited_decode_chat/1,
+	 encode_router/1, decode_router/1,
+	 delimited_decode_router/1, encode_data/1, decode_data/1,
+	 delimited_decode_data/1, encode_proto/1, decode_proto/1,
 	 delimited_decode_proto/1]).
 
 -export([has_extension/2, extension_size/1,
@@ -18,6 +19,8 @@
 -export([encode/1, decode/2, delimited_decode/2]).
 
 -export([int_to_enum/2, enum_to_int/2]).
+
+-record(push, {pt, pm, extend}).
 
 -record(request, {from, device, rt, rm, extend}).
 
@@ -36,6 +39,11 @@ encode([]) -> [];
 encode(Records) when is_list(Records) ->
     delimited_encode(Records);
 encode(Record) -> encode(element(1, Record), Record).
+
+encode_push(Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode_push(Record) when is_record(Record, push) ->
+    encode(push, Record).
 
 encode_request(Records) when is_list(Records) ->
     delimited_encode(Records);
@@ -82,7 +90,11 @@ encode(chat, Record) ->
 encode(request, Records) when is_list(Records) ->
     delimited_encode(Records);
 encode(request, Record) ->
-    [iolist(request, Record) | encode_extensions(Record)].
+    [iolist(request, Record) | encode_extensions(Record)];
+encode(push, Records) when is_list(Records) ->
+    delimited_encode(Records);
+encode(push, Record) ->
+    [iolist(push, Record) | encode_extensions(Record)].
 
 encode_extensions(_) -> [].
 
@@ -106,7 +118,7 @@ iolist(proto, Record) ->
      pack(5, required, with_default(Record#proto.ts, none),
 	  int64, [])];
 iolist(data, Record) ->
-    [pack(1, required, with_default(Record#data.dt, none),
+    [pack(1, optional, with_default(Record#data.dt, none),
 	  int32, []),
      pack(2, required, with_default(Record#data.mid, none),
 	  string, []),
@@ -128,25 +140,32 @@ iolist(router, Record) ->
      pack(6, optional,
 	  with_default(Record#router.tserver, none), bytes, [])];
 iolist(chat, Record) ->
-    [pack(1, required, with_default(Record#chat.from, none),
+    [pack(1, optional, with_default(Record#chat.from, none),
 	  bytes, []),
-     pack(2, required,
+     pack(2, optional,
 	  with_default(Record#chat.device, none), bytes, []),
      pack(3, required, with_default(Record#chat.ct, none),
 	  bytes, []),
      pack(4, required, with_default(Record#chat.c, none),
 	  bytes, [])];
 iolist(request, Record) ->
-    [pack(1, required,
+    [pack(1, optional,
 	  with_default(Record#request.from, none), bytes, []),
-     pack(2, required,
+     pack(2, optional,
 	  with_default(Record#request.device, none), bytes, []),
      pack(3, required, with_default(Record#request.rt, none),
 	  bytes, []),
      pack(4, required, with_default(Record#request.rm, none),
 	  bytes, []),
      pack(5, optional,
-	  with_default(Record#request.extend, none), bytes, [])].
+	  with_default(Record#request.extend, none), bytes, [])];
+iolist(push, Record) ->
+    [pack(1, required, with_default(Record#push.pt, none),
+	  bytes, []),
+     pack(2, required, with_default(Record#push.pm, none),
+	  bytes, []),
+     pack(3, optional,
+	  with_default(Record#push.extend, none), bytes, [])].
 
 with_default(Default, Default) -> undefined;
 with_default(Val, _) -> Val.
@@ -191,6 +210,9 @@ enum_to_int(pikachu, value) -> 1.
 
 int_to_enum(_, Val) -> Val.
 
+decode_push(Bytes) when is_binary(Bytes) ->
+    decode(push, Bytes).
+
 decode_request(Bytes) when is_binary(Bytes) ->
     decode(request, Bytes).
 
@@ -220,6 +242,9 @@ delimited_decode_chat(Bytes) ->
 
 delimited_decode_request(Bytes) ->
     delimited_decode(request, Bytes).
+
+delimited_decode_push(Bytes) ->
+    delimited_decode(push, Bytes).
 
 delimited_decode(Type, Bytes) when is_binary(Bytes) ->
     delimited_decode(Type, Bytes, []).
@@ -273,7 +298,13 @@ decode(request, Bytes) when is_binary(Bytes) ->
 	     {1, from, bytes, []}],
     Defaults = [],
     Decoded = decode(Bytes, Types, Defaults),
-    to_record(request, Decoded).
+    to_record(request, Decoded);
+decode(push, Bytes) when is_binary(Bytes) ->
+    Types = [{3, extend, bytes, []}, {2, pm, bytes, []},
+	     {1, pt, bytes, []}],
+    Defaults = [],
+    Decoded = decode(Bytes, Types, Defaults),
+    to_record(push, Decoded).
 
 decode(<<>>, Types, Acc) ->
     reverse_repeated_fields(Acc, Types);
@@ -387,6 +418,14 @@ to_record(request, DecodedTuples) ->
 						   Record, Name, Val)
 			  end,
 			  #request{}, DecodedTuples),
+    Record1;
+to_record(push, DecodedTuples) ->
+    Record1 = lists:foldr(fun ({_FNum, Name, Val},
+			       Record) ->
+				  set_record_field(record_info(fields, push),
+						   Record, Name, Val)
+			  end,
+			  #push{}, DecodedTuples),
     Record1.
 
 decode_extensions(Record) -> Record.

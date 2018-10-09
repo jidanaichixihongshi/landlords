@@ -12,7 +12,7 @@
 -ifndef(DATA_PB_H).
 -define(DATA_PB_H, true).
 -record(data, {
-    dt = erlang:error({required, dt}),
+    dt,
     mid = erlang:error({required, mid}),
     children = erlang:error({required, children}),
     extend
@@ -34,8 +34,8 @@
 -ifndef(CHAT_PB_H).
 -define(CHAT_PB_H, true).
 -record(chat, {
-    from = erlang:error({required, from}),
-    device = erlang:error({required, device}),
+    from,
+    device,
     ct = erlang:error({required, ct}),
     c = erlang:error({required, c})
 }).
@@ -44,8 +44,8 @@
 -ifndef(REQUEST_PB_H).
 -define(REQUEST_PB_H, true).
 -record(request, {
-    from = erlang:error({required, from}),
-    device = erlang:error({required, device}),
+    from,
+    device,
     rt = erlang:error({required, rt}),
     rm = erlang:error({required, rm}),
     extend
