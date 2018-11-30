@@ -34,11 +34,11 @@
 
 -export([
 	produce_mid/1,
+	produce_roster/3,
+	produce_data/4,
 	produce_heartbeat/1,
-	produce_responselogon/4,
-
-	produce_responsemsg/4,
-	produce_responsemsg/5,
+	produce_proto/3,
+	produce_proto/4,
 
 	check_msg_timestamp/1]).
 
@@ -50,72 +50,60 @@ produce_mid(Uid) ->
 	MsTimesstamp = lib_time:get_mstimestamp(),
 	lib_change:to_list(HashV) ++ "_" ++ lib_change:to_list(MsTimesstamp).
 
-produce_roster(From, FromDevice, FromServer) ->
+produce_roster(From, FDevice, FServer) ->
 	#router{
 		from = <<"">>,
-		from_server = <<"">>,
-		from_device = <<"">>,
+		fserver = <<"">>,
+		fdevice = <<"">>,
 		to = From,
-		to_device = FromDevice,
-		to_server = FromServer
+		tdevice = FDevice,
+		tserver = FServer
 	}.
+
+produce_data(Dt, Mid, Child, Extend) ->
+	#data{
+		dt = term_to_binary(Dt),
+		mid = term_to_binary(Mid),
+		children = term_to_binary(Child),
+		extend = term_to_binary(Extend)}.
 
 %% -----------------------------------------------------------------------------------------
 %% 组装消息
 %% -----------------------------------------------------------------------------------------
 
 %% 应答消息
-produce_heartbeat(#proto{mid = Mid, router = Router}) ->
+produce_heartbeat(#proto{router = Router}) ->
 	#router{
 		from = From,
-		from_device = FDevice,
-		from_server = FServer
+		fdevice = FDevice,
+		fserver = FServer
 	} = Router,
 	NewRouter = produce_roster(From, FDevice, FServer),
 	#proto{
 		mt = ?MT_101,
-		mid = Mid,
 		sig = ?SIGN2,
 		router = NewRouter,
 		data = <<"">>,
-		timestamp = lib_time:get_mstimestamp()
+		ts = lib_time:get_mstimestamp()
 	}.
 
-produce_responselogon(Mt, Mid, Router, Reply) ->
-	#router{
-		from = From,
-		from_device = FDevice,
-		from_server = FServer
-	} = Router,
-	NewRouter = produce_roster(From, FDevice, FServer),
+produce_proto(Mt, Sig, Reply) ->
 	#proto{
 		mt = Mt,
-		mid = Mid,
-		sig = ?SIGN2,
-		router = NewRouter,
-		data = lib_change:to_binary(Reply),
-		timestamp = lib_time:get_mstimestamp()
-	}.
-produce_responsemsg(Mt, Mid, Sig, Reply) ->
-	#proto{
-		mt = Mt,
-		mid = Mid,
 		sig = Sig,
 		router = #router{},
 		data = lib_change:to_binary(Reply),
-		timestamp = lib_time:get_mstimestamp()
+		ts = lib_time:get_mstimestamp()
 	}.
-produce_responsemsg(Mt, Mid, Sig, Router, Reply) ->
+produce_proto(Mt, Sig, Router, Reply) ->
 	NewRouter = change_router(Router),
 	#proto{
 		mt = Mt,
-		mid = Mid,
 		sig = Sig,
 		router = NewRouter,
-		data = lib_change:to_binary(Reply),
-		timestamp = lib_time:get_mstimestamp()
+		data = term_to_binary(Reply),
+		ts = lib_time:get_mstimestamp()
 	}.
-
 
 
 check_msg_timestamp(Timestamp) ->
@@ -128,19 +116,19 @@ check_msg_timestamp(Timestamp) ->
 change_router(Router) ->
 	#router{
 		from = From,
-		from_device = FDevice,
-		from_server = FServer,
+		fdevice = FDevice,
+		fserver = FServer,
 		to = To,
-		to_device = TDevice,
-		to_server = TServer
+		tdevice = TDevice,
+		tserver = TServer
 	} = Router,
 	#router{
 		from = To,
-		from_device = TDevice,
-		from_server = TServer,
+		fdevice = TDevice,
+		fserver = TServer,
 		to = From,
-		to_device = FDevice,
-		to_server = FServer
+		tdevice = FDevice,
+		tserver = FServer
 	}.
 
 

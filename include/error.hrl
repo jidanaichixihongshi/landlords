@@ -30,8 +30,10 @@
 
 -define(ERROR_100, 100).					%% 未知错误
 -define(ERROR_101, 101).					%% 数据格式错误
--define(ERROR_102, 102).					%% 数据超时
--define(ERROR_103, 103).					%%
+-define(ERROR_102, 102).					%% 数据包类型未定义
+-define(ERROR_103, 103).					%% 数据长度不合法
+
+-define(ERROR_113, 113).					%% 数据超时
 
 
 -define(ERROR_201, 201).					%% 参数错误

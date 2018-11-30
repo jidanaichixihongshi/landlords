@@ -37,14 +37,14 @@
 ]).
 
 %% 消息标志位，控制消息走向
--define(SIGN0, 0).					%% 节点消息
--define(SIGN1, 1).					%% c2s消息
--define(SIGN2, 2).					%% s2c消息
+-define(SIGN0, 0).          %% 节点消息
+-define(SIGN1, 1).          %% c2s消息
+-define(SIGN2, 2).          %% s2c消息
 
 router(#proto{router = Router} = OldMsg) ->
-	?DEBUG("router msg : ~p~n",[OldMsg]),
+	?DEBUG("router msg : ~p~n", [OldMsg]),
 	Msg = OldMsg#proto{sig = ?SIGN0},
-	#router{to = To, to_device = TDevice} = Router,
+	#router{to = To, tdevice = TDevice} = Router,
 	{_Node, ProxyPid} = mod_proxy:get_proxy(binary_to_term(To)),
 	ClientList = mod_proxy:get_client_list(ProxyPid),
 	NeedOffline =

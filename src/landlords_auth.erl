@@ -25,7 +25,7 @@
 %%% @end
 %%% Created : 23. 六月 2018 11:56
 %%%-------------------------------------------------------------------
--module(landlords_c2s).
+-module(landlords_auth).
 -auth("cw").
 
 -behaviour(gen_fsm).

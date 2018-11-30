@@ -106,7 +106,6 @@ to_tuple(_D) ->
 	throw(other_value).
 
 
-
 %% Any to boolean
 -spec to_bool(D :: any()) -> boolean().
 to_bool(D) when is_integer(D) ->
@@ -122,12 +121,16 @@ to_bool(_D) ->
 
 %% Any to float
 -spec to_float(Msg :: any()) -> float().
-to_float(Msg)->
+to_float(Msg) ->
 	Msg2 = to_list(Msg),
 	list_to_float(Msg2).
 
-
-
+%% 元组列表转换成maps
+to_maps(L) when is_list(L) ->
+	lists:foldl(
+		fun({K, V}, Acc) -> Acc#{K => V} end, #{}, L);
+to_maps(_) ->
+	#{}.
 
 
 %% -----------------------------------------------------------------------------
@@ -141,14 +144,14 @@ f2s(F) when is_float(F) ->
 	A.
 
 list_to_atom2(List) when is_list(List) ->
-	case catch(list_to_existing_atom(List)) of
+	case catch (list_to_existing_atom(List)) of
 		{'EXIT', _} -> erlang:list_to_atom(List);
 		Atom when is_atom(Atom) -> Atom
 	end.
 
 %% String to term
 list_to_term(String) ->
-	{ok, T, _} = erl_scan:string(String++"."),
+	{ok, T, _} = erl_scan:string(String ++ "."),
 	case erl_parse:parse_term(T) of
 		{ok, Term} ->
 			Term;

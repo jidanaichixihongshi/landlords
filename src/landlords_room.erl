@@ -34,7 +34,6 @@
 -include("logger.hrl").
 -include("protobuf_pb.hrl").
 
--define(FSMOPTS, [{debug, [trace]}]).
 
 -export([
 	start_link/1,

@@ -51,7 +51,8 @@
 	socket :: inet:socket(),
 	transport,
 	opts,
-	last_recv_time
+	last_recv_time,
+	attack                  %% 数据格式错误超过一定次数被视为恶意攻击
 }).
 
 
@@ -68,7 +69,7 @@ init([Ref, Socket, Transport, Opts]) ->
 	ok = proc_lib:init_ack({ok, self()}),
 	ok = ranch:accept_ack(Ref),
 	ok = Transport:setopts(Socket, [{active, once}, {packet, 4}]),
-	{ok, Pid} = landlords_c2s:start_link({ranch_tcp, Socket, self()}, []),
+	{ok, Pid} = landlords_auth:start_link({ranch_tcp, Socket, self()}, []),
 	?INFO("landlords_c2s init, socket: ~p~n", [Socket]),
 	State = #receiver_state{
 		ref = Ref,
@@ -77,11 +78,11 @@ init([Ref, Socket, Transport, Opts]) ->
 		transport = Transport,
 		opts = Opts
 	},
-	gen_server:enter_loop(?MODULE, [], State, ?HIBERNATE_TIMEOUT).
+	gen_server:enter_loop(?MODULE, [], State, ?RECEIVER_HIBERNATE_TIMEOUT).
 
 handle_call(_Request, _From, State) ->
 	?DEBUG("handle_call message ~p ~n", [_Request]),
-	{reply, ok, State, ?HIBERNATE_TIMEOUT}.
+	{reply, ok, State, ?RECEIVER_HIBERNATE_TIMEOUT}.
 
 handle_cast({send, Msg}, #receiver_state{socket = Socket, transport = Transport} = State) ->
 	?INFO("send tcp msg ::: ~p~n", [Msg]),
@@ -92,7 +93,7 @@ handle_cast({send, Msg}, #receiver_state{socket = Socket, transport = Transport}
 		Reason ->
 			?WARNING("packet msg error : ~p~n", [Reason])
 	end,
-	{noreply, State, ?HIBERNATE_TIMEOUT}.
+	{noreply, State, ?RECEIVER_HIBERNATE_TIMEOUT}.
 
 
 %% handle socket data
@@ -100,33 +101,38 @@ handle_info({tcp, Socket, Data}, State) ->
 	Transport = State#receiver_state.transport,
 	Transport:setopts(Socket, [{active, once}]),
 	%% 要不要把消息存进内存呢？
-	Msg = mod_proto:unpacket(Data),
-	NewState = process_msg(Msg, State),
-	{noreply, NewState, ?HIBERNATE_TIMEOUT};
+	case mod_proto:unpacket(Data) of
+		{ok, Msg} ->
+			NewState = process_msg(Msg, State),
+			{noreply, NewState#receiver_state{attack = 0}, ?RECEIVER_HIBERNATE_TIMEOUT};
+		{error, Reason} ->
+			Attack = State#receiver_state.attack,
+			?DEBUG("unpacket msg ~p faile, reason : ~p，attack : ~p~n", [Reason, Attack]),
+			Attack >= ?ATTACK_HEAD_COUNT andalso erlang:send_after(500, self(), stop),
+			{noreply, State#receiver_state{attack = Attack + 1}, ?RECEIVER_HIBERNATE_TIMEOUT}
+	end;
 
 %% timout function
+handle_info(stop, State) ->
+	{stop, normal, State};
 handle_info(timeout, State) ->
-	{stop, normal, State};
-handle_info({'EXIT', _, _Reason}, State) ->
-	{stop, normal, State};
+	{stop, timeout, State};
+handle_info({'EXIT', _, Reason}, State) ->
+	{stop, {'EXIT', Reason}, State};
 handle_info({tcp_closed, _Socket}, State) ->
-	{stop, normal, State};
+	{stop, tcp_closed, State};
 handle_info({tcp_error, _, Reason}, State) ->
-	{stop, Reason, State};
+	{stop, {tcp_error, Reason}, State};
 handle_info(Info, State) ->
 	?WARNING("unused info : ~p~n", [Info]),
-	{noreply, State, ?HIBERNATE_TIMEOUT}.
+	{noreply, State, ?RECEIVER_HIBERNATE_TIMEOUT}.
 
 terminate(Reason, State) ->
 	#receiver_state{c2s_pid = C2SPid, socket = Socket} = State,
 	?INFO("socket ~p terminate, reason: ~p~n", [Socket, Reason]),
 	%% 清除连接
 	IsAlive = mod_proc:is_proc_alive(C2SPid),
-	if
-		IsAlive ->
-			gen_fsm:send_event(C2SPid, closed);
-		true -> ok
-	end,
+	IsAlive andalso gen_fsm:send_event(C2SPid, closed),
 	gen_tcp:close(Socket),
 	ok.
 
@@ -135,7 +141,7 @@ code_change(_OldVsn, State, _Extra) ->
 	{ok, State}.
 
 %% ACK
-process_msg(#proto{mt = ?MT_101, sig = ?SIGN1, timestamp = MTimestamp} = Msg,
+process_msg(#proto{mt = ?MT_101, sig = ?SIGN1, ts = MTimestamp} = Msg,
 	#receiver_state{transport = Mod, socket = Socket} = State) ->
 	MsTimestamp = lib_time:get_mstimestamp(),
 	case MTimestamp + ?DATA_OVERTIME > MsTimestamp of

@@ -37,6 +37,7 @@
 	encode/1,
 	decode/2]).
 
+-define(ZIP_SIZE, 1024).
 
 %% ------------------------------------------------------------------------------------------
 %% 消息包编解码
@@ -49,7 +50,14 @@ packet(Msg) ->
 
 packet_msg(Msg) ->
 	EMsg = list_to_binary(encode(Msg)),
-	{ok, <<0:16, EMsg/binary>>}.
+	Size = size(EMsg),
+	T =
+		case Size < ?ZIP_SIZE of
+			true -> 0;
+			_ -> 1
+		end,
+	{ok, <<T:16, Size:16, EMsg/binary>>}.
+
 
 %% 编码
 encode(Msg) when is_tuple(Msg) ->
@@ -59,11 +67,31 @@ encode(_Msg) ->
 
 
 %% 解包客户端消息
+%% <<消息是否经过压缩（包头）/16字节,消息包大小（未压缩前）/16字节,消息包（二进制）>>
 unpacket(Data) when is_binary(Data) ->
-	<<0:16, BinMsg/binary>> = Data,
-	protobuf_pb:decode(proto, BinMsg);
+	<<H:16, Size:16, BinMsg/binary>> = Data,
+	UZBinMsg =
+		if
+			H == 0 ->
+				BinMsg;
+			H == 1 ->
+				zip:unzip(BinMsg);
+			true ->
+				{error, ?ERROR_102}
+		end,
+	case UZBinMsg of
+		{error, _} ->
+			UZBinMsg;
+		_ ->
+			case check_length(Size, UZBinMsg) of
+				true ->
+					decode(proto, UZBinMsg);
+				_ ->
+					{error, ?ERROR_103}
+			end
+	end;
 unpacket(_Data) ->
-	throw({error, ?ERROR_101}).
+	{error, ?ERROR_101}.
 
 %% 解码
 decode(T, BinMsg) when is_binary(BinMsg) ->
@@ -72,7 +100,9 @@ decode(_T, _Msg) ->
 	throw({error, ?ERROR_101}).
 
 
-
+%% internal api
+check_length(Size, BinMsg) ->
+	Size == size(BinMsg).
 
 
 
